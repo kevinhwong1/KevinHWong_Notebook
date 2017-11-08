@@ -3,15 +3,8 @@ layout: page
 title: About
 permalink: /about/
 ---
+I am a Ph.D. student at the University of Rhode Island in the Putnam Laboratory. My research encapsulates the mechanisms behind intra-generational and trans-generational acclimatization of reef-building corals in response to environmental change. I believe that an open-source approach to integrative research will increase productivity and progress in the scientific field. If you have questions about my research or have suggestions for improvement, please contact me at [kevinhwong1@gmail.com](mailto:kevinhwong1@gmail.com).
 
-I am an integrative marine eco-physiologist. I strive to understand how the immediate abiotic environment and biotic interactions drive organism phenotype,  ecological patterning, and evolutionary processess through the interaction of symbiosis, genetics, and epigenetics. 
+If you would like to find more information about the Putnam Laboratory at the University of Rhode Island, please visit wwww.hollieputnam.com. 
 
-I am dedicated to open, rigorous, and reproducible experiments and analyses.
 
-### More Information
-
-wwww.hollieputnam.com
-
-### Contact me
-
-[hollieputnam@gmail.com](mailto:hollieputnam@gmail.com)
