@@ -6,7 +6,7 @@ categories: Goals
 tags: [Goals]
 ---
 
-#November Monthly Goals
+# November Monthly Goals
 
 1. Finish larval *Symbiodinium* density and total protein quantifications for TGA 2017 experiment  
 2. Finish results for TGA 2017 experiment  
