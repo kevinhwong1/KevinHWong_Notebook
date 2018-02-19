@@ -10,6 +10,7 @@ If you would like to find more information about the Putnam Laboratory at the Un
 # Curriculum Vitae
 
 ### EDUCATION
+
 Date | Degree | School | Advisors
 -- | -- | -- | --
 2017 - Present | PhD. in Biological and Environmental Sciences | University of Rhode Island (Kingston, USA) | Dr. Hollie Putnam
@@ -17,7 +18,7 @@ Date | Degree | School | Advisors
 
 ### POSITIONS HELD
 
-Date | Position | Institution 
+Date | Position | Institution
 -- | -- | -- | --
 2017 - 2018	| Graduate Research Assistant | University of Rhode Island
 2017	| Graduate Research Intern | Bermuda Institute of Ocean Sciences
