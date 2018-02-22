@@ -9,6 +9,11 @@ If you would like to find more information about the Putnam Laboratory at the Un
 
 # Curriculum Vitae
 
+## <center>KEVIN H. WONG</center>
+<center>Department of Biological Sciences</center>
+<center>University of Rhode Island</center>
+<center>[kevinhwong1@gmail.com](mailto:kevinhwong1@gmail.com)</center>
+
 ### EDUCATION
 
 Date | Degree | School | Advisors
