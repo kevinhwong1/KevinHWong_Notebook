@@ -79,7 +79,7 @@ Date | Position | Institution
 
 ## MENTORING
 
-Erin Chille, University of Rhode Island undergraduate (2017-Present); Erin Bowman, University of Rhode Island undergraduate (2017-Present); Andrew Petlock, University of Rhode Island undergraduate (2017-Present); Maxwell Zavell, University of Rhode Island undergraduate (2017-Present); Valeria Schmidt, Princeton University undergraduate (2017); Yingqi Zhang, Colgate University undergraduate (2017); Jamie Mitrovic, New York University undergraduate (2017); Keegan Glennon, University of Rhode Island undergraduate (2016); Danielle Becker, Eckerd University undergraduate (2016)
+Erin Chille, University of Rhode Island undergraduate (2017-Present); Erin Bowman, University of Rhode Island undergraduate (2017-Present); Andrew Petlock, University of Rhode Island undergraduate (2017-Present); Max Zavell, University of Rhode Island undergraduate (2017-Present); Valeria Schmidt, Princeton University undergraduate (2017); Yingqi Zhang, Colgate University undergraduate (2017); Jamie Mitrovic, New York University undergraduate (2017); Keegan Glennon, University of Rhode Island undergraduate (2016); Danielle Becker, Eckerd University undergraduate (2016)
 
 ## PROFESSIONAL ASSOCIATIONS
 
