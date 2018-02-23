@@ -12,7 +12,6 @@ If you would like to find more information about the Putnam Laboratory at the Un
 ## <center>KEVIN H. WONG</center>
 <center>Department of Biological Sciences</center>
 <center>University of Rhode Island</center>
-<center> [kevinhwong1@gmail.com](mailto:kevinhwong1@gmail.com) </center>
 
 ### EDUCATION
 
@@ -36,35 +35,34 @@ Date | Position | Institution
 
 ### PUBLICATIONS
 
-1. Goodbody-Gringley, G., **Wong, K.H.**, Becker, D., Glennon, K.. & de Putron, S.J. (In Review). Recruitment potential of the brooding coral, Porites astreoides, increases from shallow to mesophotic zones. Coral Reefs.
+1. Goodbody-Gringley, G., **Wong, K.H.**, Becker, D., Glennon, K.. & de Putron, S.J. (Accepted). Reproductive ecology and early life history traits of the brooding coral, *Porites astreoides*, from shallow to mesophotic zones. *Coral Reefs*.
 
 ## GRANTS AND AWARDS
 
-**2017**	National Geographic Young Explorers Grant #CP-078ER-17
+2017	National Geographic Young Explorers Grant #CP-078ER-17
 
-**2017**	BIOS Grant-In-Aid Award
+2017	BIOS Grant-In-Aid Award
 
-**2016**	PADI Foundation Grant #21893
+2016	PADI Foundation Grant #21893
 
-**2016**	1st Place for Environmental Science at the Carleton University Undergraduate Poster Day
+2016	1st Place for Environmental Science at the Carleton University Undergraduate Poster Day
 
-**2016**	BIOS Grant-In-Aid Award
+2016	BIOS Grant-In-Aid Award
 
-**2016**	Alfred and Isabel Bader Undergraduate Student Travel Award (2x)
+2016	Alfred and Isabel Bader Undergraduate Student Travel Award (2x)
 
-**2015**	BIOS Grant-In-Aid Award
+2015	BIOS Grant-In-Aid Award
 
-**2014**	BC Hydro President’s Scholarship
+2014	BC Hydro President’s Scholarship
 
-**2014**	CABIOS (Canadian Associates of BIOS) Scholarship
-
-
+2014	CABIOS (Canadian Associates of BIOS) Scholarship
 
 ## ORAL PRESENTATIONS
 
 *Bold indicates presenter*
 
 2017  **Wong, K.H.**, Mitrovic, J., Zhang, Y.Z.,  Goodbody-Gringley, G., de Putron, S.J., & Putnam, H.M. Intra and trans-generational acclimation of the tropical coral Porites astreoides to thermal  disturbance. European Coral Reef Symposium, Oxford, United Kingdom.
+
 
 
 ## POSTER PRESENTATIONS
@@ -81,15 +79,7 @@ Date | Position | Institution
 
 ## MENTORING
 
-2017	Valeria Schmidt, Princeton University
-
-2017	Yingqi Zhang, Colgate University
-
-2017	Jamie Mitrovic, New York University
-
-2016	Keegan Glennon, University of Rhode Island
-
-2016	Danielle Becker, Eckerd University
+Erin Chille, University of Rhode Island undergraduate (2017-Present); Erin Bowman, University of Rhode Island undergraduate (2017-Present); Andrew Petlock, University of Rhode Island undergraduate (2017-Present); Maxwell Zavell, University of Rhode Island undergraduate (2017-Present); Valeria Schmidt, Princeton University undergraduate (2017); Yingqi Zhang, Colgate University undergraduate (2017); Jamie Mitrovic, New York University undergraduate (2017); Keegan Glennon, University of Rhode Island undergraduate (2016); Danielle Becker, Eckerd University undergraduate (2016)
 
 ## PROFESSIONAL ASSOCIATIONS
 
