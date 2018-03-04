@@ -35,7 +35,7 @@ Date | Position | Institution
 
 ### PUBLICATIONS
 
-1. Goodbody-Gringley, G., **Wong, K.H.**, Becker, D., Glennon, K.. & de Putron, S.J. (Accepted). Reproductive ecology and early life history traits of the brooding coral, *Porites astreoides*, from shallow to mesophotic zones. *Coral Reefs*.
+1. Goodbody-Gringley, G., **Wong, K.H.**, Becker, D., Glennon, K.. & de Putron, S.J. (2018). Reproductive ecology and early life history traits of the brooding coral, *Porites astreoides*, from shallow to mesophotic zones. *Coral Reefs*. https://doi.org/10.1007/s00338-018-1673-2
 
 ## GRANTS AND AWARDS
 
