@@ -1,55 +1,132 @@
-## RNA Prep
+# ZYMO Quick-DNA/RNA Miniprep Plus Kit Troubleshooting
 
-### Extract RNA from individuals to be used for probes
-*Refer to manual during procedure (steps below are for notes and comments)*
-### Using slightly modified Zymo Duet DNA/RNA extraction protocol [LINK](https://www.zymoresearch.com/media/amasty/amfile/attach/_D7003_ZR-Duet_DNA-RNA_MiniPrep_Plus_ver_1.0.1.pdf) which will extract both DNA and RNA at the same time (Below are summary steps)
+## Goal
+* To determine if both DNA and RNA extracts can be obtained from an adult coral homogenate (see [airbrushing protocol](https://hputnam.github.io/Putnam_Lab_Notebook/Coral_Tissue_Removal_protocol/)) and a biopsy of adult tissue and skeleton. The coral used for this test is *Porites astreoides* collected from Bermuda.
+
+## Experimental design
+
+| Sample # | Sample Type | Coral ID/Vial# | Volume/Size of Sample |
+|:--------:|:-----------:|:--------------:|:---------------------:|
+|     1    |  Homogenate |       951      |         500 mL        |
+|     2    |  Homogenate |       954      |         500 mL        |
+|     3    |   Fragment  |      R20-A     |     ~10 mm diameter   |
+|     4    |   Fragment  |      R20-A     |     ~10 mm diameter   |
+
+#### Overall workflow
+1. Prepare samples
+2. Extract and prep DNA with column (elute RNA and Protein)
+3. Extract and prep RNA with column (elute Protein)
+4. Quantify DNA, RNA, and protein extracts
+
+## Protocol preparation
+
+* Using slightly modified [Zymo Duet DNA/RNA extraction protocol](https://www.zymoresearch.com/media/amasty/amfile/attach/_D7003_ZR-Duet_DNA-RNA_MiniPrep_Plus_ver_1.0.1.pdf) which will extract both DNA and RNA at the same time (Below are summary steps)
 
 #### Reagents and supplies
 * RNase-free Water
 * 100% ethanol, ACS grade or better
 * 10mM Tris HCl pH 8.0 made with RNase-free water
+* ZR BBashing lysis tubes with 0.1mm and 0.5mm beads
 
 #### Equipment
 * Rocking oven that can be set to 55°C
 * RNase away and a designated RNase free space
 * Tabletop and larger centrifuges for 1.5mL and 50mL tubes capable of 12,000 x g
 
-**Notes before starting**
+#### Clipper Sterilization
+* Rub down clippers with:
+  1. 10% Bleach solution
+  2. DI water
+  3. 90% ethanol
+  4. RNAse free water
+
+#### Notes before starting
 * Wipe down benchtop with RNase away and have the spray bottle and kimwipes on-hand to use frequently
 
-#### Procedure
-* Set up 8 50mL conical tubes, labeled A, B, C, D, E, F, G, H. In each add 1mL of DNA/RNA shield
-* Wipe down scalpel handle with RNase away and a kimwipe (do this before cutting each filter) and attach new blade and keep inside foil until ready to use
-* Take a whirl pak out of the -80 freezer and unwrap the filter. Briefly look at the filter to determine roughly if there is some, few, or none present of visible larvae. Save the whirl pak
-* Fit the filter over the openning to the first conical tube. Using the scalpel slice a cross in the center of the filter, then following the edge of the filter slice out the filter so that 4 triangles of filter fall into the tube and into the DNA/RNA sheild. 
-* Record the information from the whirl pak in notebook correseponding to the labeled tube
-* Repeat above steps for each filter
-* Add 100μL PK digestion buffer to each conical tube
-* Add 50μL Proteinase K to each conical tube and votex. Make sure the filter triangles stay submerged
-* Place in incubator genie for 3 hours at 55°C rocking at 35 speed. Vortex every 30 minutes
-* Prepare tubes for next steps. Set up sixteen 5mL tubes labeled with letters and 8 for DNA, and the other 8 for RNA, 8 1.5mL tubes for DNA, and 8 each of collection tubes and spin columns. Green are for RNA and yellow are for DNA
-* Once the digestion has completed, centrifuge the 50mL conical tubes for 2 minutes at maximum RCF in a large centrifuge
-* Transfer all liquid (~1150μL) from 50mL tubes to the corresponding 1.5mL tubes labeled DNA. Try not to transfer any small filter bits, _dab at the filter on the sides of the tube to push out liquid_.
-* Centrifuge 1.5mL tubes in benchtop centrifuge for 2 minutes at 20,000 RCF
-* Remove supernatent from each tube and put in corresponding 5mL tube. Save the tube with the pellet for imaging
-* **In the hood** Add 1mL (roughly equal parts) DNA/RNA lysis buffer to each 5mL tube. Finger flick tubes to mix
-* **Rest not in hood**. Transfer 700μL of this liquid to the corresponding **yellow** spin column. Centrifuge at 16,000 RCF for 30 seconds
-* **Transfer flow-through to the corresponding 5mL tubes labeled for RNA**
-* Repeat the previous 2 steps until all liquid has gone through the yellow DNA columns
-* Add 400μL DNA/RNA Prep Buffer to each DNA column and centrifuge at 16,000 RCF for 30 seconds. Discard flow-through
-* Add 700μL DNA/RNA Wash Buffer to each DNA column and centrifuge at 16,000 RCF for 30 seconds. Discard flow-through
-* Add 400μL DNA/RNA Wash Buffer to each DNA column and centrifuge at 16,000 RCF for **2 minutes**. Discard flow-through
-* Transfer columns to new 1.5mL tubes and add 50μL warm (70°C, you can warm in the incubator genie) 10mM Tris HCl pH 8.0 directly to the filter in each column. Incubate at room temp for 5 minutes. Centrifuge at 16,000 RCF for 30 seconds. Keep flow-through in tube
-* Repeat previous step. Once done, you have eluted 100μL extracted DNA for each filter. Label tubes approprately and store in 4°C if using within 1 week, if not put in -20°C
-* _Return to the 5mL tubes labeled RNA. Alternatively you can perform both column centrifugation at the same time if you keep track of what step you are on for the two extractions_ Add 2mL (~equal volume) of 100% EtOH to each 5mL tube and votex to mix
-* Transfer 700μL of this liquid to the corresponding **green** spin column. Centrifuge at 16,000 RCF for 30 seconds
-* Discard flow-through
-* Repeat previous two steps until all liquid has gone through the columns
-* Add 400μL DNA/RNA Wash Buffer to each DNA column and centrifuge at 16,000 RCF for 30 seconds. Discard flow-through
-* Make DNase I master mix: [75μL DNA digestion buffer and 5μL DNase] X n (sample #)
-* Add 80μL of DNase I master mix directly to the filter of each column. Incubate at room temperature for ~15 minutes
-* Add 400μL DNA/RNA Prep Buffer to each DNA column and centrifuge at 16,000 RCF for 30 seconds. Discard flow-through
-* Add 700μL DNA/RNA Wash Buffer to each DNA column and centrifuge at 16,000 RCF for 30 seconds. Discard flow-through
-* Add 400μL DNA/RNA Wash Buffer to each DNA column and centrifuge at 16,000 RCF for **2 minutes**. Discard flow-through
-* Transfer columns to new 1.5mL tubes and add 50μL warm (70°C, you can warm in the incubator genie) RNase-free water directly to the filter in each column. Incubate at room temp for 5 minutes. Centrifuge at 16,000 RCF for 30 seconds. Keep flow-through in tube
-* Repeat previous step. Once done, you have eluted 100μL extracted RNA for each filter. Label tubes approprately and keep on ice if moving directly to quant, or aliqiot out ~4μL for Qubit and Tape Station into separtate strip tubes to avoid freeze-thaw of stock, which is kept in -80°C
+## Sample preparation
+
+#### Homogenate preparation
+* Immediately after taking sample out of the -80&deg;C freezer, add 500&mu;L of DNA/RNA shield
+* Add 100 &mu;L of Protenase K digestion buffer
+  * Derived from volume of homogenate and 300/30 ratio from Zymo Protocol
+* Add 50 &mu;L of Protenase K
+  * Derived from volume of homogenate and 300/15 ratio from Zymo Protocol
+* Incubate on Thermomixer at 56&deg;C at 600 rpm for 30 minutes
+* Remove all liquid (1150 &mu;L) and transfer in 15 mL tubes
+
+#### Fragment preparation
+* Sterilize clippers (as outlined above)
+* Clip off ~10mm in diameter of tissue and skeleton and place into ZR BBashing lysis tube
+* Add 1000 &mu;L of DNA/RNA shield (may be too much)
+* Vortex for ~1 minute
+* Remove 500 &mu;L of supernatant and transfer into 15mL tube
+  * Large mucus chunks made this step difficult --> potential source of error
+
+## DNA Extraction
+1. Add equal volumes of DNA lysis buffer as sample volume to the 15 mL tube with sample
+  * 1150 &mu;L for the homogenate samples
+  * 500 &mu;L for the fragment samples
+  * Vortex to mix
+2. Transfer 700 &mu;L into DNA filter column (yellow)
+  * Centrifuge at 16,000 rcf for 30 seconds
+  * Remove flow through liquid and transfer into a new 15 mL tube labeled for RNA
+3. Repeat steps 2 until all liquid is gone
+4. Add 400 &mu;L of DNA/RNA prep buffer to column
+  * Centrifuge at 16,000 rcf for 30 seconds
+  * Remove the flow through and transfer to waste
+5. Add 700 &mu;L of DNA/RNA wash buffer
+  * Centrifuge at 16,000 rcf for 30 seconds
+  * Remove the flow through and transfer to waste
+6. Add 400 &mu;L of DNA/RNA wash buffer
+  * Centrifuge at 16,000 rcf for 2 minutes
+  * Remove the flow through and transfer to waste
+7. Removed column and place into a new sterile 1.5 mL tube
+8. Add 50 &mu;L of 10 mM Tris HCL (warmed to 55&deg;C) directly to filter
+  * Incubate at room temperature for 5 minutes
+  * Centrifuge at 16,000 rcf for 30 seconds
+  * Keep flow through in tube
+9. Add another 50 &mu;L of 10 mM Tris HCL (warmed to 55&deg;C) directly to filter
+  * Incubate at room temperature for 5 minutes
+  * Centrifuge at 16,000 rcf for 30 seconds
+  * Discard column and keep flow through in tube
+10. Aliquot into appropriate tubes for storage at -20&deg;C
+
+## RNA Extraction
+11. Add equal volumes of 100% Ethanol as sample volume to the 15 mL tube with sample
+  * 1150 &mu;L for the homogenate samples
+  * 500 &mu;L for the fragment samples
+  * Vortex to mix
+12. Transfer 700 &mu;L into RNA filter column (green)
+  * Centrifuge at 16,000 rcf for 30 seconds
+  * Remove flow through liquid and transfer into a new 15 mL tube labeled for Protein
+13. Repeat steps 12 until all liquid is gone
+14. Add 400 &mu;L of DNA/RNA wash buffer to column
+  * Centrifuge at 16,000 rcf for 30 seconds
+  * Remove the flow through and transfer to waste
+15. Make DNase I master mix: [75μL DNA digestion buffer and 5μL DNase] X n (sample #)
+16. Add 80μL of DNase I master mix directly to the filter of each column. Incubate at room temperature for ~15 minutes
+17. Add 400 &mu;L of DNA/RNA prep buffer to column
+  * Centrifuge at 16,000 rcf for 30 seconds
+  * Remove the flow through and transfer to waste
+18. Add 700 &mu;L of DNA/RNA wash buffer
+  * Centrifuge at 16,000 rcf for 30 seconds
+  * Remove the flow through and transfer to waste
+19. Add 400 &mu;L of DNA/RNA wash buffer
+  * Centrifuge at 16,000 rcf for 2 minutes
+  * Remove the flow through and transfer to waste
+20. Removed column and place into a new sterile 1.5 mL tube
+21. Add 50 &mu;L of RNAase-free water (warmed to 55&deg;C) directly to filter
+  * Incubate at room temperature for 5 minutes
+  * Centrifuge at 16,000 rcf for 30 seconds
+  * Keep flow through in tube
+22. Add another 50 &mu;L of RNAase-free water (warmed to 55&deg;C) directly to filter
+  * Incubate at room temperature for 5 minutes
+  * Centrifuge at 16,000 rcf for 30 seconds
+  * Discard column and keep flow through in tube
+23. Aliquot into appropriate tubes for storage at -80&deg;C
+
+## Quantification
+
+### Qubit
+
+### Tapestation
