@@ -140,7 +140,7 @@ Table 2: Qubit readings for the extracted DNA and RNA samples.
 | DNA |   205.05   |   22675.65  |    16.70   |    13.00   |    8.24    |    3.03    |
 | DNA |     NA     |      NA     |    16.10   |    13.00   |    8.10    |    2.98    |
 | RNA |   393.14   |   11692.94  |    10.20   |    11.80   |    12.60   |   Too low  |
-| DNA |     NA     |      NA     |    10.00   |    11.60   |    12.40   |   Too low  |
+| RNA |     NA     |      NA     |    10.00   |    11.60   |    12.40   |   Too low  |
 
 ### Tapestation
 * Only RNA samples were run on the tape station
