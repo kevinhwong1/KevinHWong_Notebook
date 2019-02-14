@@ -148,11 +148,11 @@ Table 2: Qubit readings for the extracted DNA and RNA samples.
 
 #### Tapestation results
 
-![Sample1](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20190213_SAMPLE1.jpeg)
+![Sample1](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20190213_SAMPLE1.jpg)
 
-![Sample2](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20190213_SAMPLE2.jpeg)
+![Sample2](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20190213_SAMPLE2.jpg)
 
-![Sample3](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20190213_SAMPLE3.jpeg)
+![Sample3](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20190213_SAMPLE3.jpg)
 
 ## Conclusions
 * Homogenates from airbrushed coral tissue can only be used for DNA, RNA is too degraded
