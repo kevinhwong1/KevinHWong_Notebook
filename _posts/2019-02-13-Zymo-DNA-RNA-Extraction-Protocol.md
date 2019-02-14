@@ -148,12 +148,15 @@ Table 2: Qubit readings for the extracted DNA and RNA samples.
 
 #### Tapestation results
 Sample 1:
+
 ![Sample1](20190213_SAMPLE1.jpg)
 
 Sample 2:
+
 ![Sample2](20190213_SAMPLE2.jpg)
 
 Sample 3:
+
 ![Sample3](20190213_SAMPLE3.jpg)
 
 ## Conclusions
