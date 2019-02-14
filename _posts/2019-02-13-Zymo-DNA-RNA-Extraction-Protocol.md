@@ -1,9 +1,10 @@
 # ZYMO Quick-DNA/RNA Miniprep Plus Kit Troubleshooting
 
 ## Goal
-* To determine if both DNA and RNA extracts can be obtained from an adult coral homogenate (see [airbrushing protocol](https://hputnam.github.io/Putnam_Lab_Notebook/Coral_Tissue_Removal_protocol/)) and a biopsy of adult tissue and skeleton. The coral used for this test is *Porites astreoides* collected from Bermuda.
+* To determine if both DNA and RNA extracts can be obtained from an adult coral homogenate (see [airbrushing protocol](https://hputnam.github.io/Putnam_Lab_Notebook/Coral_Tissue_Removal_protocol/)) and a biopsy of adult tissue and skeleton. The coral used for this test was *Porites astreoides* collected from Bermuda.
 
 ## Experimental design
+Table 1: Experimental Design to test DNA/RNA extraction methods on 2 types of coral tissues.
 
 | Sample # | Sample Type | Coral ID/Vial# | Volume/Size of Sample |
 |:--------:|:-----------:|:--------------:|:---------------------:|
@@ -129,4 +130,18 @@
 
 ### Qubit
 
+* For the Qubit readings, 10 &mu;L of each standard were used and 1 &mu;L of each sample were used.
+
+Table 2: Qubit readings for the extracted DNA and RNA samples.
+
+|     | Standard 1 (RFV) | Standard 2 (RFV) | #1 (ng/uL) | #2 (ng/uL) | #3 (ng/uL) |  #4 (ng/uL)  |
+|:---:|:----------------:|:----------------:|:----------:|:----------:|:----------:|:----------:|
+| DNA |      205.05      |     22675.65     | 16.70, 16.10 | 13.00, 13.00 |  8.24, 8.10 | 3.02, 2.98 |
+| RNA |      393.14      |     11692.94     | 10.20, 10.00 | 11.80, 11.60 | 12.60, 12.40 |   Too low  |
+
+
 ### Tapestation
+* Only RNA samples were run on the tape station
+* Due to the low sample reading from sample #4, it was not run on the tapestation
+
+![Sample1](https://github.com/kevinhwong1/KevinHWong_Notebook/images/20190213_SAMPLE1.png)
