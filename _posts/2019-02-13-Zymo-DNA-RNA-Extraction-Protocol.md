@@ -135,11 +135,12 @@ Table 1: Experimental Design to test DNA/RNA extraction methods on 2 types of co
 Table 2: Qubit readings for the extracted DNA and RNA samples.
 
 
-|     | Standard 1 (RFV) | Standard 2 (RFV) |  #1 (ng/uL)  |  #2 (ng/uL)  |  #3 (ng/uL)  | #4 (ng/uL) |
-|:---:|:----------------:|:----------------:|:------------:|:------------:|:------------:|:----------:|
-| DNA |      205.05      |     22675.65     | 16.70, 16.10 | 13.00, 13.00 |  8.24, 8.10  | 3.02, 2.98 |
-| RNA |      393.14      |     11692.94     | 10.20, 10.00 | 11.80, 11.60 | 12.60, 12.40 |   Too low  |
-
+|     | Standard 1 | Standard 2  | #1 (ng/uL) | #2 (ng/uL) | #3 (ng/uL) | #4 (ng/uL) |
+|:---:|:----------:|:-----------:|:----------:|:----------:|:----------:|:----------:|
+| DNA |   205.05   |   22675.65  |    16.70   |    13.00   |    8.24    |    3.03    |
+| DNA |     NA     |      NA     |    16.10   |    13.00   |    8.10    |    2.98    |
+| RNA |   393.14   |   11692.94  |    10.20   |    11.80   |    12.60   |   Too low  |
+| DNA |     NA     |      NA     |    10.00   |    11.60   |    12.40   |   Too low  |
 
 ### Tapestation
 * Only RNA samples were run on the tape station
@@ -147,11 +148,11 @@ Table 2: Qubit readings for the extracted DNA and RNA samples.
 
 #### Tapestation results
 
-![Sample1](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20190213_SAMPLE1.png)
+![Sample1](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20190213_SAMPLE1.jpeg)
 
-![Sample2](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20190213_SAMPLE2.png)
+![Sample2](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20190213_SAMPLE2.jpeg)
 
-![Sample3](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20190213_SAMPLE3.png)
+![Sample3](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20190213_SAMPLE3.jpeg)
 
 ## Conclusions
 * Homogenates from airbrushed coral tissue can only be used for DNA, RNA is too degraded
