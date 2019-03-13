@@ -21,7 +21,7 @@ Table 1: Experimental Design to test DNA/RNA extraction methods on 2 types of co
 
 ## Protocol preparation
 
-* Using slightly modified [Zymo Duet DNA/RNA extraction protocol](https://www.zymoresearch.com/media/amasty/amfile/attach/_D7003_ZR-Duet_DNA-RNA_MiniPrep_Plus_ver_1.0.1.pdf) which will extract both DNA and RNA at the same time (Below are summary steps)
+* Using slightly modified [Zymo Duet DNA/RNA extraction protocol](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/Zymo_quick-dna-rna_miniprep_plus_kit.pdf)which will extract both DNA and RNA at the same time (Below are summary steps)
 
 #### Reagents and supplies
 * RNase-free Water
