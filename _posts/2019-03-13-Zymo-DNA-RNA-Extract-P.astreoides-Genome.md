@@ -59,7 +59,7 @@ Table 1: Sample descriptions for this extraction
 #### Fragment preparation
 * Sterilize clippers (as outlined above)
 * Clip off ~10mm in diameter of tissue and skeleton and place into ZR BBashing lysis tube
-* Add 5000 &mu;L of DNA/RNA shield (may be too much)
+* Add 500 &mu;L of DNA/RNA shield 
 * Vortex for ~1 minute
 * Remove supernatant and transfer into 1.5mL tube
   * I was able to remove ~450&mu;L
@@ -152,4 +152,4 @@ Sample #2:
 
 ## Conclusions
 * Samples are good for the Illumina RNA-Seq workshop
-* Changes in Ethanol addition in RNA extraction step potentially produced higher concentrations of RNA 
+* Changes in Ethanol addition in RNA extraction step potentially produced higher concentrations of RNA
