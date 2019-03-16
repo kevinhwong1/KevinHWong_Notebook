@@ -6,7 +6,7 @@ categories: Protocols, Processing
 tags: citrate synthase
 ---
 
-# Troubleshooting Citrate Synthase Protocol
+Troubleshooting Citrate Synthase Protocol
 
 ## Goal
 * To create a protocol to quantify citrate synthase activities in *Astrangia poculata*

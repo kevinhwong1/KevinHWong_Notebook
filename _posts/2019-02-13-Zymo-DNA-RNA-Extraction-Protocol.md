@@ -1,4 +1,4 @@
-# ZYMO Quick-DNA/RNA Miniprep Plus Kit Troubleshooting
+ ZYMO Quick-DNA/RNA Miniprep Plus Kit Troubleshooting
 
 ## Goal
 * To determine if both DNA and RNA extracts can be obtained from an adult coral homogenate (see [airbrushing protocol](https://hputnam.github.io/Putnam_Lab_Notebook/Coral_Tissue_Removal_protocol/)) and a biopsy of adult tissue and skeleton. The coral used for this test was *Porites astreoides* collected from Bermuda.

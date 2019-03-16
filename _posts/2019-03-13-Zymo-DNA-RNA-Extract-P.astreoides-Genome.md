@@ -6,7 +6,7 @@ categories: Processing, Protocols
 tags: P.asteroides
 ---
 
-# RNA/DNA extractions for P. astreoides genome samples
+ RNA/DNA extractions for P. astreoides genome samples
 
 Kit: ZYMO Quick-DNA/RNA Miniprep Plus Kit
 
@@ -59,7 +59,7 @@ Table 1: Sample descriptions for this extraction
 #### Fragment preparation
 * Sterilize clippers (as outlined above)
 * Clip off ~10mm in diameter of tissue and skeleton and place into ZR BBashing lysis tube
-* Add 500 &mu;L of DNA/RNA shield 
+* Add 500 &mu;L of DNA/RNA shield
 * Vortex for ~1 minute
 * Remove supernatant and transfer into 1.5mL tube
   * I was able to remove ~450&mu;L
