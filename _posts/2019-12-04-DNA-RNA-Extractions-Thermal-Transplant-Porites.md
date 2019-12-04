@@ -6,7 +6,7 @@ categories: Processing, Protocols
 tags: Porites, DNA RNA Extractions, Thermal Transplant
 ---
 
-# DNA/RNA extractions for Porties Thermal Transplant Trial #1 - ADULTS
+DNA/RNA extractions for Porties Thermal Transplant Trial #1 - ADULTS
 
 ### Goal
 To stream line the protocol for DNA/RNA extractions for *Porites astreoides* for the Thermal Transplant 2018 experiment
