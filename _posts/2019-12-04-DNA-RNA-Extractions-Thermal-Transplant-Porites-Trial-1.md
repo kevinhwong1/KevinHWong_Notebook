@@ -1,6 +1,6 @@
 ---
 layout: post
-title: DNA RNA Extractions Thermal Transplant Porites
+title: DNA RNA Extractions Thermal Transplant Porites Trial 1
 date: '2019-12-03'
 categories: Processing, Protocols
 tags: Porites, DNA RNA Extractions, Thermal Transplant
@@ -206,10 +206,3 @@ Sample #25:
 # Nest steps
 
 * Tomorrow I will try a heating step with the remainder of the  bead-bashed supernatant to determine if this will increase the yield of DNA and RNA.
----
-layout: post
-title: DNA RNA Extractions Thermal Transplant Porites
-date: '2019-12-04'
-categories: Processing, Protocols
-tags: DNA RNA Extractions, Porites, Thermal Transplant
----
