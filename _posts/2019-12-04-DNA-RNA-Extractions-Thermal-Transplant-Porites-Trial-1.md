@@ -1,6 +1,6 @@
 ---
 layout: post
-title: DNA RNA Extractions Thermal Transplant Porites
+title: DNA RNA Extractions Thermal Transplant Porites Trial 1
 date: '2019-12-04'
 categories: Processing, Protocols
 tags: Porites, DNA RNA Extractions, Thermal Transplant
@@ -174,7 +174,7 @@ General workflow of an extraction:
 * The first row indicates the DNA qubit results using the DNA broad range standards with black writing on the cap. The standards were very low, therefore I repeated the qubit results with the DNA broad range standards with red writing on the cap.
 
 |                                           |   S1   |    S2    |  23  |  33  |  25  |  49  |  29  |
-|:-----------------------------------------:|:------:|:--------:|:----:|:----:|:----:|:----:|:----:|
+|-------------------------------------------|--------|----------|------|------|------|------|------|
 | DNA (Standard with  black writing on cap) | 104.98 |  9261.30 | 3.18 |  2.8 |  Low |  Low | 5.18 |
 |  DNA (Standard with  red writing on cap)  |  162.7 | 21982.36 |  3.9 | 3.08 | 2.18 | 2.08 | 5.38 |
 |                    RNA                    | 382.72 | 10541.49 | 15.6 | 12.2 | 13.4 | 11.6 | 25.8 |
@@ -205,4 +205,4 @@ Sample #25:
 
 # Nest steps
 
-* Tomorrow I will try a heating step with the remainder of the  bead-bashed supernatant to determine if this will increase the yield of DNA and RNA. 
+* Tomorrow I will try a heating step with the remainder of the  bead-bashed supernatant to determine if this will increase the yield of DNA and RNA.
