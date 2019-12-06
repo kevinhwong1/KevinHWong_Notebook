@@ -156,7 +156,7 @@ General workflow of an extraction:
 
 # Quantify Results
 
-* Today, I did the 2 adult and [3 larval samples](https://kevinhwong1.github.io/KevinHWong_Notebook/DNA-RNA-Extractions-Thermal-Transplant-Porites-LARVAE-Trial-1/) at the same time, therefore I quantified all of the results together.
+* Today, I did the 3 larval and [2 adult samples](https://kevinhwong1.github.io/KevinHWong_Notebook/DNA-RNA-Extractions-Thermal-Transplant-Porites-Trial-3/) at the same time, therefore I quantified all of the results together.
 
 ### Qubit
 
@@ -172,11 +172,10 @@ General workflow of an extraction:
 199 µl Buffer x 8 = 1592 µl Buffer
 1 µl Reagent x 8 = 8 µl Reagent
 
-
-|     | S1     | S2       | 21 (ADULT) | 51 (ADULT) | 713 (LARVAE) | 505 (LARVAE) | 546 (LARVAE) |
-|-----|--------|----------|------------|------------|--------------|--------------|--------------|
-| DNA | 141.20 | 19031.85 | 33.6       | 44.4       | 42.4         | 23.2         | 13.4         |
-| RNA | 391.67 | 10282.37 | 52.2       | 40.4       | 29.0         | 20.6         | 33.8         |
+|       |  S1      |  S2        |  21 (ADULT)  |  51 (ADULT)  |  713 (LARVAE)  |  505 (LARVAE)  |  546 (LARVAE)  |
+| ----- | -------- | ---------- | ------------ | ------------ | -------------- | -------------- | -------------- |
+|  DNA  |  141.20  |  19031.85  |  33.6        |  44.4        |  42.4          |  23.2          |  13.4          |
+|  RNA  |  391.67  |  10282.37  |  52.2        |  40.4        |  29.0          |  20.6          |  33.8          |
 
 
 ### TapeStation
