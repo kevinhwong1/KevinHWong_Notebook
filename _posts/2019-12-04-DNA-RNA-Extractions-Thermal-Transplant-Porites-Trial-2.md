@@ -5,7 +5,7 @@ date: '2019-12-04'
 categories: Processing, Protocols
 tags: Thermal Transplant, DNA RNA Extractions, Porites
 ---
-DNA/RNA extractions for Porties Thermal Transplant Trial #2 - ADULTS
+DNA/RNA extractions for Porites Thermal Transplant Trial #2 - ADULTS
 
 ### Goal
 To stream line the protocol for DNA/RNA extractions for *Porites astreoides* for the Thermal Transplant 2018 experiment by adding a heating incubation step to digest sample more.
@@ -152,7 +152,7 @@ General workflow of an extraction:
 3. Separation of cellular proteins and other cellular components out of the nucleic acid  
 4. Precipitation and dissolving the nucleic acid  
 
-# Quanitity Results
+# Quanitify Results
 
 ### Qubit
 
@@ -198,8 +198,8 @@ Sample #25:
 
 # Summary of results
 
-* Overall, the incubation step did not increase the yield of DNA or RNA that much. The RNA quality was much worse when incubated. Additionally, it was noted that the final RNA elution was green in tint and the RNA filter in the column was green. This could be the source of error in the tape station results and also contribute to the slight increase in RNA qubit values. 
+* Overall, the incubation step did not increase the yield of DNA or RNA that much. The RNA quality was much worse when incubated. Additionally, it was noted that the final RNA elution was green in tint and the RNA filter in the column was green. This could be the source of error in the tape station results and also contribute to the slight increase in RNA qubit values.
 
-# Nest steps
+# Next steps
 
 * Tomorrow, I will test 2 samples with no heating incubation step. Additionally, I will beat beat for 3-4 minutes and input the entire volume of DNA/RNA shield (~800-900 uL) into the column. Hopefully, this will increase the sample input in the column, therefore increasing the yield and maintaining the RNA quality with no heating step.

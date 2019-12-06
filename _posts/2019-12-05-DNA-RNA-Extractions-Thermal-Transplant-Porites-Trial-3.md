@@ -1,23 +1,23 @@
 ---
 layout: post
-title: DNA RNA Extractions Thermal Transplant Porites Trial 1
-date: '2019-12-03'
+title: DNA RNA Extractions Thermal Transplant Porites Trial 3
+date: '2019-12-05'
 categories: Processing, Protocols
-tags: Porites, DNA RNA Extractions, Thermal Transplant
+tags: Porites, Thermal Transplant, DNA RNA Extractions
 ---
 
-DNA/RNA extractions for Porites Thermal Transplant Trial #1 - ADULTS
+DNA/RNA extractions for Porites Thermal Transplant Trial #3 - ADULTS
 
 ### Goal
-To stream line the protocol for DNA/RNA extractions for *Porites astreoides* for the Thermal Transplant 2018 experiment
+To stream line the protocol for DNA/RNA extractions for *Porites astreoides* for the Thermal Transplant 2018 experiment by increasing the sample volume to increase DNA and RNA yield.
 
 ### Samples
-To start, I am using 5 adult *P. astreoides* samples that were already chipped (~0.5mm diameter) and placed in 500 uL of DNA/RNA Shield.
+Today I am using 2 adult *P. astreoides* samples that were already chipped (~0.5mm diameter) and placed in 500 uL of DNA/RNA Shield.
 
-**Sample Numbers: 29, 25, 33, 49, 23**
+**Sample Numbers: 21 and 51**
 
 ### Protocol description
-I used a modified version of [this protocol](https://emmastrand.github.io/EmmaStrand_Notebook/Soft-and-Hard-Homogenization-Protocol/) written by [E. Strand](https://emmastrand.github.io/EmmaStrand_Notebook/). I only did the soft homogenization protocol because I am only interested in extraction coral DNA/RNA.
+I used a modified version of [this protocol](https://kevinhwong1.github.io/KevinHWong_Notebook/DNA-RNA-Extractions-Thermal-Transplant-Porites-Trial-1/) from 20191203 extraction.
 
 ### Protocol Preparation
 
@@ -51,13 +51,16 @@ I used a modified version of [this protocol](https://emmastrand.github.io/EmmaSt
 ### Soft Homogenization
 1. Thaw samples from -80 &deg;C.
 2. Add 500 μl of RNA/DNA shield to make the total volume 1 mL
-3. Add ~0.25 μl of 0.5mm glass beads to each sample
-4. Vortex for 2 minutes. Leave the settings on and on max power.
-5. Remove supernatant from the bead tube and place in a new 1.5 microcentrifuge tube labeled on the side with the extraction sample number and today's date. Label the cap of the microcentrifuge tube with the sample number. This supernatant will become the sample for "soft homogenization".  
-6. Add 300 μl of sample, 30 μl of Proteinase K digestion buffer (10:1 ratio of sample:digestion buffer), and 15 μl of Proteinase K (2:1 ratio of digestion buffer:Proteinase K) to a new 1.5 mL microcentrifuge tube.  
-7. Vortex and spin down all tubes.   
-8. Place bead tubes and leftover supernatant tubes (~300 μl) in -80 &deg;C freezer.  
-
+3. Add ~0.25 ml of 0.5mm glass beads to each sample
+4. Vortex for 3 minutes. Leave the settings on and on max power.
+5. Remove 700 μl of  the supernatant from the bead tube and place in a new 1.5 microcentrifuge tube labeled on the side with the extraction sample number and today's date. Label the cap of the microcentrifuge tube with the sample number. This supernatant will become the sample for "soft homogenization".  
+6. Add another 500 μl of RNA/DNA shield to the bead tube.
+7. Vortex on max for 1 minute.
+8. Remove 400 μl of  the supernatant from the bead tube and transfer to the remainder of the supernatant.
+9. Centrifuge at 16,000 rcf for 30 seconds to remove debris.
+10. Transfer 1000 μl of the supernatant to a new, labelled 5 ml centrifuge tube.
+11. Add 100 μl of Proteinase K digestion buffer (10:1 ratio of sample:digestion buffer), and 50 μl of Proteinase K (2:1 ratio of digestion buffer:Proteinase K) to the 5 mL centrifuge tube. **Total Volume = 1100 μl**
+12. Vortex and spin down all tubes.   
 
 ## Zymo Duet RNA DNA Extractions
 
@@ -66,11 +69,12 @@ Modified from the [Zymo protocol](https://github.com/kevinhwong1/KevinHWong_Note
 **DNA Extraction**  
 1. Set up yellow DNA spin columns and collection tubes, label appropriately  
 2. Warm elution liquids to 70 &deg;C (10mM Tris HCl pH. 8.0 and RNase free water)  
-3. Add equal volume (to supernatant; 345 µl) DNA/RNA lysis buffer to each sample tube  
+3. Add equal volume (to supernatant; **1100 µl**) DNA/RNA lysis buffer to each sample tube  
 4. Finger flick to mix tubes  
 5. Add 700 µl (total volume) of sample gently to the yellow DNA spin column  
 6. Centrifuge at 16,000 rcf (g) for 30 seconds  
 7. **Important** Save the flow through from this step: transfer to a new 1.5mL tube labeled for RNA  
+    * Repeat steps 5-7 until the sample is gone.
 8. Add 400 µl DNA/RNA Prep Buffer gently to the yellow DNA spin columns  
 9. Centrifuge at 16,000 rcf (g) for 30 seconds  
 10. Discard flow through (Zymo kit waste)  
@@ -92,41 +96,39 @@ Modified from the [Zymo protocol](https://github.com/kevinhwong1/KevinHWong_Note
 
 **RNA Extraction**
 *Can do concurrently with DNA Extraction after DNA Extraction Step 7*  
-1. Add equal volume (700 µl) 100% EtOH to the 1.5 mL tubes labeled for RNA containing the original yellow column flow through  
+1. Add equal volume (**2300 µl**) 100% EtOH to the 1.5 mL tubes labeled for RNA containing the original yellow column flow through  
 2. Vortex and spin down to mix  
 3. Add 700 µl of that liquid to the green RNA spin columns  
 4. Centrifuge at 16,000 rcf (g) for 30 seconds  
 5. Discard flow through (Zymo kit waste)  
-6. Add 700 µl to the green RNA spin columns (the rest from the 1.5mL RNA tubes)  
-7. Centrifuge at 16,000 rcf (g) for 30 seconds
+    * Repeat step 3 - 5 until the sample is gone.
     - Get DNase I from freezer  
+6. Add 400 µl DNA/RNA Wash Buffer gently to each green RNA column  
+7. Centrifuge at 16,000 rcf (g) for 30 seconds  
 8. Discard flow through (Zymo kit waste)  
-9. Add 400 µl DNA/RNA Wash Buffer gently to each green RNA column  
-10. Centrifuge at 16,000 rcf (g) for 30 seconds  
-11. Discard flow through (Zymo kit waste)  
-12. Make DNase I treatment master mix:
+9. Make DNase I treatment master mix:
     - 75µl DNA Digestion buffer x # of samples
     - 5µl DNase I x # of samples  
-> Today I had 5 samples, therefore: 375 µl of DNA Digestion buffer and 25 µl of DNase I  
+> Today I had 2 samples, therefore: 150 µl of DNA Digestion buffer and 10 µl of DNase I  
 
-13. Add 80 µl DNase I treatment master mix directly to the filter of the green RNA columns  
-14. Incubate at room temp for 15 minutes  
-15. Add 400 µl DNA/RNA Prep Buffer gently to each column  
+10. Add 80 µl DNase I treatment master mix directly to the filter of the green RNA columns  
+11. Incubate at room temp for 15 minutes  
+12. Add 400 µl DNA/RNA Prep Buffer gently to each column  
+13. Centrifuge at 16,000 rcf (g) for 30 seconds  
+14. Discard flow through (Zymo kit waste)  
+15. Add 700 µl DNA/RNA Wash Buffer gently to the green RNA spin columns  
 16. Centrifuge at 16,000 rcf (g) for 30 seconds  
 17. Discard flow through (Zymo kit waste)  
-18. Add 700 µl DNA/RNA Wash Buffer gently to the green RNA spin columns  
-19. Centrifuge at 16,000 rcf (g) for 30 seconds  
+18. Add 400 µl DNA/RNA Wash Buffer genetly to the green RNA spin columns  
+19. Centrifuge at 16,000 rcf (g) for **2 minutes**  
 20. Discard flow through (Zymo kit waste)  
-21. Add 400 µl DNA/RNA Wash Buffer genetly to the green RNA spin columns  
-22. Centrifuge at 16,000 rcf (g) for **2 minutes**  
-23. Discard flow through (Zymo kit waste)  
-24. Transfer green columns to new 1.5 mL microcentrifuge tubes  
-25. Add 50 µl warmed DNase/RNase free water to each green RNA column by dripping slowly directly on the filter  
-26. Incubate at room temp for 5 minutes  
-27. Centrifuge at 16,000 rcf (g) for 30 seconds  
-28. Repeat steps 25-27 for a final elution volume of 100 µl  
-29. Aliquot 5 µl of the final elution to 0.5 mL PCR tubes for Qubit and TapeStation analysis.    
-30. Store all tubes in the -80 &deg;C freezer.
+21. Transfer green columns to new 1.5 mL microcentrifuge tubes  
+22. Add 50 µl warmed DNase/RNase free water to each green RNA column by dripping slowly directly on the filter  
+23. Incubate at room temp for 5 minutes  
+24. Centrifuge at 16,000 rcf (g) for 30 seconds  
+25. Repeat steps 25-27 for a final elution volume of 100 µl  
+26. Aliquot 5 µl of the final elution to 0.5 mL PCR tubes for Qubit and TapeStation analysis.    
+27. Store all tubes in the -80 &deg;C freezer.
 
 ## Clean-up
 1. Place tissue and liquid in the waste container labeled Zymo extraction waste.  
@@ -157,6 +159,8 @@ General workflow of an extraction:
 
 # Quantify Results
 
+* Today, I did the 2 adult and [3 larval samples](https://kevinhwong1.github.io/KevinHWong_Notebook/DNA-RNA-Extractions-Thermal-Transplant-Porites-LARVAE-Trial-1/) at the same time, therefore I quantified all of the results together.
+
 ### Qubit
 
 5 samples + 2 standards + 1 error = 8
@@ -171,38 +175,27 @@ General workflow of an extraction:
 199 µl Buffer x 8 = 1592 µl Buffer
 1 µl Reagent x 8 = 8 µl Reagent
 
-* The first row indicates the DNA qubit results using the DNA broad range standards with black writing on the cap. The standards were very low, therefore I repeated the qubit results with the DNA broad range standards with red writing on the cap.
 
-|                                           |   S1   |    S2    |  23  |  33  |  25  |  49  |  29  |
-|-------------------------------------------|--------|----------|------|------|------|------|------|
-| DNA (Standard with  black writing on cap) | 104.98 |  9261.30 | 3.18 |  2.8 |  Low |  Low | 5.18 |
-|  DNA (Standard with  red writing on cap)  |  162.7 | 21982.36 |  3.9 | 3.08 | 2.18 | 2.08 | 5.38 |
-|                    RNA                    | 382.72 | 10541.49 | 15.6 | 12.2 | 13.4 | 11.6 | 25.8 |
+|     | S1     | S2       | 21 (ADULT) | 51 (ADULT) | 713 (LARVAE) | 505 (LARVAE) | 546 (LARVAE) |
+|-----|--------|----------|------------|------------|--------------|--------------|--------------|
+| DNA | 141.20 | 19031.85 | 33.6       | 44.4       | 42.4         | 23.2         | 13.4         |
+| RNA | 391.67 | 10282.37 | 52.2       | 40.4       | 29.0         | 20.6         | 33.8         |
+
 
 ### TapeStation
 
-* I did not tape sample 49 because there were the open tape only had 5 spots (4 samples + ladder). I will tape this sample at a future date if necessary
+Sample #21:
+![Sample#21]({{ site.baseurl}}/images/20191205_Sample21.png "Sample#21")
 
-Overall Summary:
-![Overall]({{ site.baseurl}}/images/20191203_Overall.png "Overall")
+Sample #51:
+![Sample#51]({{ site.baseurl}}/images/20191205_Sample51.png "Sample#51")
 
-Sample #29:
-![Sample#29]({{ site.baseurl}}/images/20191203_Sample29.png "Sample#29")
+### Gel
 
-Sample #33:
-![Sample#33]({{ site.baseurl}}/images/20191203_Sample33.png "Sample#33")
-
-Sample #23:
-![Sample#29]({{ site.baseurl}}/images/20191203_Sample23.png "Sample#23")
-
-Sample #25:
-![Sample#25]({{ site.baseurl}}/images/20191203_Sample25.png "Sample#25")
+![Gel]({{ site.baseurl}}/images/20191205_Gel.png "Gel")
 
 # Summary of results
 
-* Overall, there were very low concentrations of DNA and RNA, however the quality of the RNA is relatively good for 2 samples (Sample 23 and 29).
-* I did not do a heating digestion step according to this modified protocol from E. Strand. *P. astreoides* has lots of mucus, therefore a heating digestion step with the Proteinase K might be necessary
-
-# Next steps
-
-* Tomorrow I will try a heating step with the remainder of the  bead-bashed supernatant to determine if this will increase the yield of DNA and RNA.
+* Bead bashing for longer seemed to reduce the mucus in the initial sample.
+* The increase of sample input was generally very good. It increased the DNA and RNA yield and the quality of the DNA was good.
+* The quality of the RNA was bad with this method though.
