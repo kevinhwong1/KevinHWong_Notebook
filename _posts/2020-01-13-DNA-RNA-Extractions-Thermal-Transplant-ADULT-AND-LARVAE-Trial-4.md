@@ -77,13 +77,13 @@ Sample #9:
 ![Sample#9]({{ site.baseurl}}/images/20200113_Sample9.png "Sample#9")
 
 Sample #61:
-![Sample#61]({{ site.baseurl}}/images/20200113_Sample61 "Sample#61")
+![Sample#61]({{ site.baseurl}}/images/20200113_Sample61.png "Sample#61")
 
 Sample #871:
-![Sample#871]({{ site.baseurl}}/images/20200113_Sample871 "Sample#871")
+![Sample#871]({{ site.baseurl}}/images/20200113_Sample871.png "Sample#871")
 
 Sample #1087:
-![Sample#1087]({{ site.baseurl}}/images/20200113_Sample1087 "Sample#1087")
+![Sample#1087]({{ site.baseurl}}/images/20200113_Sample1087.png "Sample#1087")
 
 
 ### Gel
