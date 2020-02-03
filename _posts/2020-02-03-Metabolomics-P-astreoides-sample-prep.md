@@ -40,9 +40,9 @@ Goal: Metabolomic sample prep for Porites astreoides samples (adult and larvae)
 * Store at 4&deg;C in a non-flammable fridge
 
 # Samples
-* For this test, I am using multiple concentrations of larvae (8 samples) and adult tissue biopsies (4 samples). ALl samples were previously snap frozen and stored at -80&deg;C
+* For this test, I am using multiple concentrations of larvae (8 samples) and adult tissue biopsies (4 samples). All samples were previously snap frozen and stored at -80&deg;C.
   * Larvae are from a thermal stress experiment in 2017. All larvae were from the ambient treatment and from the patch reef.
-  * Adults were from a histology experiment in 2018 and from 2 reef zones
+  * Adults were from a histology experiment in 2018 and from 2 reef zones.
 
 Table 1: Larval samples
 
