@@ -8,18 +8,18 @@ tags: Porites, Thermal Transplant, DNA RNA extraction
 
 
 ### Goal
-To test the protocol for DNA/RNA extractions for *Porites astreoides* for the Thermal Transplant 2017/2018 experiment on airbrushed homogenates.
+To test the protocol for DNA/RNA extractions for airbrushed homogenates of *Porites astreoides* for the Thermal Transplant 2017/2018 experiment.
 
 ### Samples
-I am used 6 adult *P. astreoides* samples that were snap frozen, then airbrushed with filtered seawater, 0.5 mL of the homogenate was aliquoted then re-frozen at -80 &deg;C. I used 3 corals from two different time points of the experiment, post treatment (2017) and post-transplant (2018)
+I used 6 adult *P. astreoides* samples that were snap frozen, then airbrushed with filtered seawater. 0.5 mL of the homogenate was aliquoted then re-frozen at -80 &deg;C. I used 3 corals from two different time points of the experiment, post treatment (2017) and post-transplant (2018)
 
 **Sample Numbers**
 - 17-26
-  - Coral: P12-T2 (2017: Patch + High Treatment)
+  - P12-T2 (2017: Patch + High Treatment)
 - 17-295
-  - Coral: R7-T2 (2017: Rim + Ambient Treatment)
+  - R7-T2 (2017: Rim + Ambient Treatment)
 - 17-682
-  - Coral: R19-T2 (2017: Rim + High Treatment)
+  - R19-T2 (2017: Rim + High Treatment)
 - 18-19
   - R7-B (2018: Rim + Ambient Treatment + Rim Transplant)
 - 18-31
