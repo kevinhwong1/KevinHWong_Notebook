@@ -24,6 +24,7 @@ I used 3 adult *P. astreoides* samples that were snap frozen, then airbrushed wi
   - Homogenate
 - 17-530
   - Adult, P6-T2 (2017: Patch + Ambient Treatment)
+  - Homogenate
 - L-534
   - Larvae, R11-A (2018: Rim + High Treatment + Patch Transplant)
 - L-939
@@ -41,7 +42,7 @@ I used 3 adult *P. astreoides* samples that were snap frozen, then airbrushed wi
   - Fragment
 
 ### Protocol description
-I used a modified version of [this protocol](https://kevinhwong1.github.io/KevinHWong_Notebook/DNA-RNA-Extraxtion-Thermal-Transplant-Porites-Homogenates/)for homogenates, [this protocol](https://kevinhwong1.github.io/KevinHWong_Notebook/DNA-RNA-Extractions-Thermal-Transplant-ADULT-AND-LARVAE-Trial-4/)for larvae, and [this protocol](https://kevinhwong1.github.io/KevinHWong_Notebook/DNA-RNA-Extractions-Thermal-Transplant-Porites-Trial-2/)for fragments
+I used a modified version of [this protocol](https://kevinhwong1.github.io/KevinHWong_Notebook/DNA-RNA-Extraxtion-Thermal-Transplant-Porites-Homogenates/)for homogenates, [this protocol](https://kevinhwong1.github.io/KevinHWong_Notebook/DNA-RNA-Extractions-Thermal-Transplant-ADULT-AND-LARVAE-Trial-4/) for larvae, and [this protocol](https://kevinhwong1.github.io/KevinHWong_Notebook/DNA-RNA-Extractions-Thermal-Transplant-Porites-Trial-2/) for fragments.
 
 ### Homogenate preparation
 1. Immediately after taking sample out of the -80&deg;C freezer, add 500&mu;L of DNA/RNA shield
