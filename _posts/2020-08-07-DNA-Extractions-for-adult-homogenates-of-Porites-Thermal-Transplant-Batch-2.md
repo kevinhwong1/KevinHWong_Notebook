@@ -63,7 +63,7 @@ All samples were snap frozen, then airbrushed with filtered seawater. 0.5 mL of 
 14. Centrifuge at 12,000 rcf for 1 minute
 15. Label final tubes
 16. Aliquot 10 uL into labelled PCR tubes for QC
-17. Store labelled samples in -20deg;C
+17. Store labelled samples in -20 &deg;C
 
 # Quantify Results
 

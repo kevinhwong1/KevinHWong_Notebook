@@ -138,7 +138,7 @@ Modified from the [Zymo protocol](https://github.com/kevinhwong1/KevinHWong_Note
   * Discard column and keep flow through in tube
   * Took out qubit standards
 13. Aliquot 5 &mu;L in PCR strip tubes for QC.
-14. Store remaining aliquot at -80&deg;C
+14. Store remaining aliquot at -80 &deg;C
 
 ## Clean-up
 1. Place tissue and liquid in the waste container labeled Zymo extraction waste.  
