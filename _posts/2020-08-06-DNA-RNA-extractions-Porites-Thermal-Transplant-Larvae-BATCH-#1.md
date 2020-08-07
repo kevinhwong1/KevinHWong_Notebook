@@ -43,6 +43,7 @@ All samples were aliquots of 20 larvae released by a single colony and frozen at
 ### Qubit
 
 DNA: Broad Range
+
 RNA: Broad Range
 
 | Sample Type 	| Sample     	| DNA (ng/uL) 	| RNA (ng/uL) 	|
