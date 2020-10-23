@@ -60,7 +60,7 @@ I used DNA and RNA broad range.
 
 To test DNA quality: [Gel Electrophoresis](https://github.com/emmastrand/EmmaStrand_Notebook/blob/master/_posts/2019-07-16-Gel-Electrophoresis-Protocol.md)
 
-![Gel]({{ site.baseurl}}/images/202001022_Gel-A.png "Gel")
+![Gel]({{ site.baseurl}}/images/20201022_Gel-A.png "Gel")
 
 ### TapeStation
 
