@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 20201110 DNA RNA Extractions Porites July Bleaching Experiment
-date: '2020-11-12'
+date: '2020-11-10'
 categories: Processing
 tags: DNA, RNA, Porites astreoides, Porites July Bleaching
 ---
@@ -36,12 +36,12 @@ I used DNA and RNA broad range.
 |:----------:	|:-----------:	|:-----------:	|
 | Standard 1 	|    175.34   	|    398.35   	|
 | Standard 2 	|   19251.93  	|   8705.28   	|
-|      19    	|     3.86    	|     LOW     	|
-|      20    	|     22.6    	|     12.4    	|
-|      21    	|     30.8    	|     13.6    	|
-|      22    	|     9.02    	|     13.2    	|
-|      23    	|     13.5    	|     36.2    	|
-|      24    	|     7.32    	|     25.6    	|
+|      25    	|     3.86    	|     LOW     	|
+|      26    	|     22.6    	|     12.4    	|
+|      27    	|     30.8    	|     13.6    	|
+|      28    	|     9.02    	|     13.2    	|
+|      29    	|     13.5    	|     36.2    	|
+|      30    	|     7.32    	|     25.6    	|
 
 ### Gel
 
