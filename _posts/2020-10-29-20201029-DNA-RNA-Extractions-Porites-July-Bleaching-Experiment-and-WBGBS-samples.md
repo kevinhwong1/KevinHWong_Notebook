@@ -83,3 +83,5 @@ Sample #17:
 
 Sample #17:
 ![Sample#17]({{ site.baseurl}}/images/20201029_Sample17.png "Sample#17")
+
+Full TapeStation report can be found [here](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/Tapestation_Results/2020-10-29_tapestation.pdf)
