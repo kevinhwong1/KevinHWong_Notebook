@@ -62,8 +62,6 @@ To test DNA quality: [Gel Electrophoresis](https://github.com/emmastrand/EmmaStr
 
 ### TapeStation
 Summary:
-![Summary1]({{ site.baseurl}}/images/20201120-1_Summary.png "Summary")
-
-![Summary2]({{ site.baseurl}}/images/20201120-2_Summary.png "Summary")
+![Summary]({{ site.baseurl}}/images/20201125_Summary.png "Summary")
 
 Full TapeStation report can be found [here](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/Tapestation_Results/2020-11-25_tapestation.pdf)
