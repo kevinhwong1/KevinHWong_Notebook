@@ -13,6 +13,7 @@ tags: RNA, Porites astreoides, Porites July Bleaching, Tag-seq
 Dilute extracted RNA to 10 ug/uL in 50 uL and consolidate into one plate for Tag-seq. Molecular QC information can be found [here](https://docs.google.com/spreadsheets/d/1bLsWHy7dzJcp06hSLESLgp66e4YscQf4IkLxQdHO2Ss/edit#gid=1053192266).
 
 ### Samples
+
 | Fragment ID 	| Timepoint 	| Group     	| Vial # 	| Extraction Date 	| RNA Conc (ng/uL) 	| Input for 10ng/ul (uL) 	| Dilutent Vol (uL) 	| Total Vol (uL) 	| Well 	|
 |-------------	|-----------	|-----------	|--------	|-----------------	|------------------	|------------------------	|-------------------	|----------------	|------	|
 | R29         	| A1        	| Bleached  	| 44     	| 20201117        	| 13.2             	| 37.88                  	| 12.12             	| 50             	| A1   	|
