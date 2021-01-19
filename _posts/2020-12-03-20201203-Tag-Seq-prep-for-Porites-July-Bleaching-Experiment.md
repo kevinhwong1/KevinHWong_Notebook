@@ -72,6 +72,8 @@ Dilute extracted RNA to 10 ug/uL in 50 uL and consolidate into one plate for Tag
 
 2) Fill each well of the 96-well PCR plate with the corresponding diluent volume (I used Ultra Pure Water).
 
+![Dilutent]({{ site.baseurl}}/images/ultra-pure-h2o-RNA.jpg "Dilutent")
+
 3) Place plate onto a block frozen at -80&deg;C.
 
 4) Once samples are thawed, vortex and spin down the sample before adding the appropriate volume into the corresponding well.
