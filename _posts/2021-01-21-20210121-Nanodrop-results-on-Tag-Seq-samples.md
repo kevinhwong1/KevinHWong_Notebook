@@ -32,7 +32,7 @@ Testing the purity of extracted RNA from 4 *Porites astreoides* and 3 geoduck sa
 | 1510-1 |   2.12   |   0.57   |         177.6         |    Geoduck   |
 | 1510-2 |   2.12   |   0.58   |         180.2         |    Geoduck   |
 
-The graphs can be found [here](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/Nanodrop_Results).
+The graphs can be found [here](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/Nanodrop_Results/20210121).
 
 ### Conclusions
 
