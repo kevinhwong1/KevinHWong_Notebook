@@ -43,4 +43,6 @@ The main modifications from this protocol were to adjust the dilutions for 2 rep
 #### Gel Results
 [Gel Electrophoresis](https://github.com/emmastrand/EmmaStrand_Notebook/blob/master/_posts/2019-07-16-Gel-Electrophoresis-Protocol.md)
 
-- Today I did a small gel of the above protocol and ran it at 100V.
+- I ran a small 2% agarose gel of the above protocol and ran it at 100V for 60 minutes.
+
+![Gel]({{ site.baseurl}}/images/20210218_ITS2_Gel.png "Gel")
