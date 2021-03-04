@@ -12,7 +12,7 @@ tags: Thermal Transplant, Porites astreoides, ITS2
 
 To test ITS2 sequencing prep on 4 *Porites astreoides* samples and 1 *Pocillopora spp.* sample from D. Becker. The DNA from these samples were extracted with the Zymo Quick-DNA kit and Zymo DNA/RNA mini prep kit plus.
 
-The diliution and plate planning can be found [here](https://docs.google.com/spreadsheets/d/1PgZ8r-qgFSdBX9QOENyytBzJxyPzGEyn5nUdGs1Klrc/edit#gid=868081107)
+The dilution and plate planning can be found [here](https://docs.google.com/spreadsheets/d/1PgZ8r-qgFSdBX9QOENyytBzJxyPzGEyn5nUdGs1Klrc/edit#gid=868081107)
 
 ### Samples
 
