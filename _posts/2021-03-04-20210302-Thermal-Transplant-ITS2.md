@@ -30,9 +30,9 @@ The main modifications from this protocol were to adjust the dilutions for 2 rep
 ![Planning]({{ site.baseurl}}/images/20210302_ITS2_Planning.png "Planning")
 
 #### Gel Results
-[Gel Electrophoresis](https://github.com/emmastrand/EmmaStrand_Notebook/blob/master/_posts/2019-07-16-Gel-Electrophoresis-Protocol.md)
+[Gel Electrophoresis](https://github.com/meschedl/PPP-Lab-Resources/blob/master/Protocols/100well-gel.md)
 
-- I ran a small 2% agarose gel of the above protocol and ran it at 100V for 60 minutes.
+- I ran a large 100 well 2% agarose gel of the above protocol and ran it at 100V for 60 minutes.
 
 ![GelAB]({{ site.baseurl}}/images/20210302_ITS2_Gel-AB.png "GelAB")
 
