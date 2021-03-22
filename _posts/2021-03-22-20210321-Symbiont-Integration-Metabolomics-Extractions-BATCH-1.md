@@ -42,4 +42,5 @@ AH Samples that were snap frozen in liquid nitrogen and stored at -80&deg;C.
 All samples were loaded into duplicate vials (A and B) and additional extracts were saved in the same box and stored at -80&deg;C.
 
 **Box Label:** Symbiont integration Metabolomic Extractions 20210321 - KW/AH/Putnam Box 1
-**Freezer:** New grey/blue -80&deg;C 
+
+**Freezer:** New grey/blue -80&deg;C
