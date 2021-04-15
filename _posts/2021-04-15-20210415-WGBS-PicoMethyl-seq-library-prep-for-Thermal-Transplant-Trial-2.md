@@ -11,7 +11,7 @@ tags: Porites astreoides, WGBS, PicoMethyl-seq
 
 ### Goal
 
-Second trial of WGBS library prep using the Zymo Pico Methyl-seq library prep kit and [this protocol](https://github.com/Putnam-Lab/Lab_Management/blob/master/Lab_Resourses/DNA_RNA-protocols/WGBS-PicoMethyl-Protocol.md). The modification I made today was reducing the number of PCR cycles in the second amplification from 12 cycle to 10.
+Second trial of WGBS library prep using the Zymo Pico Methyl-seq library prep kit and [this protocol](https://github.com/Putnam-Lab/Lab_Management/blob/master/Lab_Resourses/DNA_RNA-protocols/WGBS-PicoMethyl-Protocol.md). The modification I made today was reducing the number of PCR cycles in the second amplification from 12 cycles to 10.
 
 
 Sample dilution and mix calculations can be found on [this google sheet](https://docs.google.com/spreadsheets/d/1kthTxfiwn0RAWAQLLW3-pWBg5MBleQaFaEdjgEvHr58/edit#gid=0)
@@ -21,7 +21,7 @@ Sample dilution and mix calculations can be found on [this google sheet](https:/
 
 I am using a modified version of [this protocol](https://github.com/Putnam-Lab/Lab_Management/blob/master/Lab_Resourses/DNA_RNA-protocols/WGBS-PicoMethyl-Protocol.md).
 
-The only modification I made to this protocol was changing the input DNA from 1ng to 10ng. This worked in previous library preps performed by E. Strand and M. Scheld.
+The other modification I made to this protocol was changing the input DNA from 1ng to 10ng. This worked in previous library preps performed by E. Strand and M. Scheld.
 
 
 #### Samples and Indices
@@ -42,9 +42,9 @@ I used the DNA broad range assay.
 |:-----------:|:-------------:|:-------------:|
 |  Standard 1 |     182.09    |               |
 |  Standard 2 |    19121.60   |               |
-| 18-358 (#1) |      17.1     |      16.8     |
-|  18-20 (#2) |      15.8     |      15.3     |
-|  L-933 (#3) |      13.4     |      13.2     |
+|  18-9 (#4)  |      17.1     |      16.8     |
+|  18-91 (#5) |      15.8     |      15.3     |
+|  L-728 (#6) |      13.4     |      13.2     |
 
 
 #### Tapestation Results
