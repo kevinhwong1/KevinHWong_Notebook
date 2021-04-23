@@ -20,7 +20,7 @@ Sample dilution and mix calculations can be found on [this google sheet](https:/
 
 I am using a modified version of [this protocol](https://github.com/Putnam-Lab/Lab_Management/blob/master/Lab_Resourses/DNA_RNA-protocols/WGBS-PicoMethyl-Protocol.md).
 
-The only modification I made to this protocol was changing the input DNA from 1ng to 10ng. This worked in previous library preps performed by E. Strand and M. Scheld.
+The only modification I made to this protocol was changing the input DNA from 1ng to 10ng. This worked in previous library preps performed by E. Strand and M. Schedl.
 
 
 #### Samples and Indices
