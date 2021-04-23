@@ -19,7 +19,7 @@ Today, I wanted to test 2 different modifications during the second amplificatio
 - Reduce the Library Amp Master Mix (2x) to **13uL** (was originally 14uL)
 
 *Modification #2:*
-- Use the **KAPA HiHi HotStart ReadyMix (2X)** instead of the Library Amp Master Mix (2x)
+- Use the **KAPA HiFi HotStart ReadyMix (2X)** instead of the Library Amp Master Mix (2x)
 
 Sample dilution and mix calculations can be found on [this google sheet](https://docs.google.com/spreadsheets/d/1kthTxfiwn0RAWAQLLW3-pWBg5MBleQaFaEdjgEvHr58/edit#gid=0)
 
