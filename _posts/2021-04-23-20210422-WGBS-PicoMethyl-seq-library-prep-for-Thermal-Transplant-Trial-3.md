@@ -19,7 +19,7 @@ Today, I wanted to test 2 different modifications during the second amplificatio
 - Reduce the Library Amp Master Mix (2x) to **13uL** (was originally 14uL)
 
 *Modification #2:*
-- Use the KAPA HiHi HotStart ReadyMix (2X) instead of the Library Amp Master Mix (2x)
+- Use the **KAPA HiHi HotStart ReadyMix (2X)** instead of the Library Amp Master Mix (2x)
 
 Sample dilution and mix calculations can be found on [this google sheet](https://docs.google.com/spreadsheets/d/1kthTxfiwn0RAWAQLLW3-pWBg5MBleQaFaEdjgEvHr58/edit#gid=0)
 
@@ -45,7 +45,7 @@ To test DNA quantity: [Qubit](https://github.com/emmastrand/EmmaStrand_Notebook/
 
 I used the DNA broad range assay.
 
-I ran the qubit and tapestation on the following day (20210422). After the bead clean up step I stored the libraries in the fridge at 4C for ~16 hours.
+I ran the qubit and tapestation on the following day (20210423). After the bead clean up step I stored the libraries in the fridge at 4C for ~16 hours.
 
 |    Sample    | DNA 1 (ng/ul) | DNA 2 (ng/ul) |
 |:------------:|:-------------:|:-------------:|
