@@ -77,4 +77,4 @@ I used the DNA broad range assay.
 
 ![#39]({{ site.baseurl}}/images/20210504_39.png "Summary")
 
-![#40]({{ site.baseurl}}/images/20210504_40s.png "Summary")
+![#40]({{ site.baseurl}}/images/20210504_40.png "Summary")
