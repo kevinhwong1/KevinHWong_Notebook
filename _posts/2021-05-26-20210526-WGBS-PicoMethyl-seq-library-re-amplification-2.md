@@ -27,16 +27,17 @@ For all samples, I used the following inputs for the second amplification:
 
 #### Samples, indices, original Qubit quantification, post re-amplification Qubit quantification
 
-| KW/ES |   Sample #   |  Vial  | i5/i7 index # | Original Library (ng/uL) | DNA 1 (ng/uL) | DNA 2 (ng/uL) |
-|:-----:|:------------:|:------:|:-------------:|:------------------------:|:-------------:|:-------------:|
-|   KW  |      49      | 18-358 |       49      |           5.96           |      20.4     |      20.4     |
-|   KW  |      52      |  L-924 |       52      |           2.50           |      26.6     |      26.4     |
-|   ES  |       7      |  1707  |       7       |           2.78           |      12.7     |      12.6     |
-|   ES  |       8      |  2212  |       8       |           5.94           |      25.0     |      24.8     |
-|   ES  |      10      |  2861  |       10      |            LOW           |      LOW      |      LOW      |
-|   ES  |      15      |  1103  |       15      |            LOW           |      LOW      |      LOW      |
-|       | Qubit std. 1 |        |               |                          |     178.04    |               |
-|       | Qubit std. 2 |        |               |                          |    19128.66   |               |
+
+| KW/ES |   Sample #  |  Vial  | i5/i7 index # | Original Library  (ng/uL) | DNA 1  (ng/uL) | DNA 2  (ng/uL) |
+|:-----:|:-----------:|:------:|:-------------:|:-------------------------:|:--------------:|:--------------:|
+|   KW  |      49     | 18-358 |       49      |            5.96           |      20.4      |      20.4      |
+|   KW  |      52     |  L-924 |       52      |            2.50           |      26.6      |      26.4      |
+|   ES  |      7      |  1707  |       7       |            2.78           |      12.7      |      12.6      |
+|   ES  |      8      |  2212  |       8       |            5.94           |      25.0      |      24.8      |
+|   ES  |      10     |  2861  |       10      |            LOW            |       LOW      |       LOW      |
+|   ES  |      15     |  1103  |       15      |            LOW            |       LOW      |       LOW      |
+|       | Qubit std.1 |        |               |                           |     178.04     |                |
+|       | Qubit std.2 |        |               |                           |    19128.66    |                |
 
 
 #### Tapestation Results
