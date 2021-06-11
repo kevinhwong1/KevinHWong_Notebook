@@ -41,18 +41,22 @@ tags: Porites astreoides, Porites July Bleaching
 3. **Aliquots for downstream assays** (see flowchart below)
 
 	- Label six 1.5-mL microcentrifgue tubes for each sample.
-    - See labelling scheme below: A-Host, A-Sym-1, A-Sym-2, B-Host, B-Sym, C)
-	- Add 1 mL homogenized tissue blastate to three of the 1.5-mL tubes (Tubes: A-Sym-1, B-Sym, C)
-  - Set aside  **C tube**. *This is the Holobiont fraction for protein, carbohydrate, and lipid assays*
-	- Centrifuge tubes A-Sym-1 and B-Sym 1.5-mL tubes at 13,000g for 3 min.
-	- From **A-Sym-1** tube:
-    - Pipet off supernatant (~1mL) and transfer to **A-Host** tube. *this fraction is for host protein, carbohydrate, and lipid assays*
-    - Resuspend pellet in 1mL 1xPBS. Vortex thoroughly and pipet up and down to fully dissolve pellet.
-    - Transfer 200uL to the **A-Sym-2** tube. *this fraction is for symbiont cell counts*
-    - Keep the remaining 800uL in the **A-Sym-1** tube. *this fraction is for symbiont protein, carbohydrate, and lipid assays*
-	- From B-Sym tube:
-    - Pipet off supernatant (~1mL) and transfer to **B-Host** tube. *This is extra host fraction*
-    - Store this pellet as is in the **B-Sym** tube. *This is the chlorophyll assay tube*
-	- Freeze the remainder of the homogenate for Ash-free dry weight (5 mL)
-	
+      - See labelling scheme below: A-Host, A-Sym-1, A-Sym-2, B-Host, B-Sym, C)
+
+  - Add 1 mL homogenized tissue blastate to three of the 1.5-mL tubes (Tubes: A-Sym-1, B-Sym, C).
+      - Set aside  **C tube**. *This is the Holobiont fraction for protein, carbohydrate, and lipid assays*
+  	   - Centrifuge tubes **A-Sym-1** and **B-Sym** 1.5-mL tubes at 13,000g for 3 min.
+
+  - From **A-Sym-1** tube:
+      - Pipet off supernatant (~1mL) and transfer to **A-Host** tube. *This fraction is for host protein, carbohydrate, and lipid assays*
+      - Resuspend pellet in 1mL 1xPBS. Vortex thoroughly and pipet up and down to fully dissolve pellet.
+      - Transfer 200uL to the **A-Sym-2** tube. *this fraction is for symbiont cell counts*
+      - Keep the remaining 800uL in the **A-Sym-1** tube. *this fraction is for symbiont protein, carbohydrate, and lipid assays*
+
+  - From **B-Sym** tube:
+      - Pipet off supernatant (~1mL) and transfer to **B-Host** tube. *This is extra host fraction*
+      - Store this pellet as is in the **B-Sym** tube. *This is the chlorophyll assay tube*
+
+  - Freeze the remainder of the homogenate for Ash-free dry weight (5 mL)
+
 ![Airbrushing Schematic]({{ site.baseurl}}/images/July_Bleaching_Phys_Schematic.jpg "Airbrushing Schematic")
