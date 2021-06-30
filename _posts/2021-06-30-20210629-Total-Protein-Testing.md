@@ -58,7 +58,7 @@ Symbiont Fraction:
 |   8  |      R7     |     A1    |   Coral   |
 |   9  |      R7     |     A1    |  Symbiont |
 
-** Results**
+**Results**
 
 ![standard]({{ site.baseurl}}/images/20210629_Standard.png "standard")
 
