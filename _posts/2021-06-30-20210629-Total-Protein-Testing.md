@@ -60,9 +60,9 @@ Symbiont Fraction:
 
 ** Results**
 
-![]({{ site.baseurl}}/images/20210629_Standard.png "")
+![standard]({{ site.baseurl}}/images/20210629_Standard.png "standard")
 
-![]({{ site.baseurl}}/images/20210629_Fracton_Test.png "")
+![samples]({{ site.baseurl}}/images/20210629_Fracton_Test.png "samples")
 
 
 - The values correspond with other holobiont or coral fractions of Porites spp.
