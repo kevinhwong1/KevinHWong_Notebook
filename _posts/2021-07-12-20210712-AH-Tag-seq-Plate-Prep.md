@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 20210712 AH Tag-seq Plate Prep
-date: '2021-06-30'
+date: '2021-07-12'
 categories: Processing
 tags: Tagseq, Mcap2020
 ---
