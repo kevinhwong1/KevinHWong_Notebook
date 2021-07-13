@@ -10,7 +10,7 @@ tags: Tagseq, Mcap2020
 
 ### Goal
 
-Dilute extracted RNA to 13 ug/uL in 50 uL and consolidate into one plate for Tag-seq. Molecular QC information can be found [here](https://docs.google.com/spreadsheets/d/1bLsWHy7dzJcp06hSLESLgp66e4YscQf4IkLxQdHO2Ss/edit#gid=1053192266).
+Dilute extracted RNA to 13 ug/uL in 50 uL and consolidate into one plate for Tag-seq. Molecular QC information can be found [here](https://docs.google.com/spreadsheets/d/1Ew0AOs88n1i6wEyuqbv3tsRXwMjhqyYEeZX5sACFdDY/edit#gid=1004871473).
 
 ### Samples
 
