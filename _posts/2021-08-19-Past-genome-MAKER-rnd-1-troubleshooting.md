@@ -126,4 +126,31 @@ JobID: 77107
 
 Started: August 19, 2021 at 11:43am
 
+Ended:August 23 - FAILED due to timeout error. Running the following script to increase time and pick up where it left off.
+
+`maker_rnd1_pt2.sh`
+
+```
+#!/bin/bash
+#SBATCH --job-name="MAKER_RND1"
+#SBATCH -t 500:00:00
+#SBATCH --export=NONE
+#SBATCH --exclusive
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH -D /data/putnamlab/kevin_wong1/Past_Genome/maker_rnd1
+#SBATCH --mem=100GB
+#SBATCH --nodelist=n076
+
+module load maker/3.01.03
+
+maker -cpus $SLURM_CPUS_ON_NODE -base Rnd1 maker_opts.ctl maker_bopts.ctl maker_exe.ctl
+
+echo "Mission complete." $(date)
+
+```
+JobID: 79060
+
+Started: August 24, 2021 at 7:42am
+
 Ended:
