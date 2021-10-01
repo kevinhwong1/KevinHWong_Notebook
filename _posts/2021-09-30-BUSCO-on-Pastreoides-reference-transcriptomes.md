@@ -8,8 +8,10 @@ tags: Porites astreoides, transcriptome,BUSCO
 
 
 # Creating new ref folders
-mkdir Past_mansour
-cd Past_mansour
+
+`mkdir Past_mansour`
+
+`cd Past_mansour`
 
 # Uploading reference transcriptome and annotations from [Mansour](http://gigadb.org/dataset/100207)
 wget https://ftp.cngb.org/pub/gigadb/pub/10.5524/100001_101000/100207/p_ast2016.fasta
