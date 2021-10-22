@@ -9,10 +9,9 @@ tags: porites astreoides, genome, augustus, busco, bioinfiormatics
 First attempt at training AUGUSTUS with BUSCO
 
 References:
-- https://scilifelab.github.io/courses/annotation/2017/practical_session/TrainingAbInitionpredictor.html
-- https://vcru.wisc.edu/simonlab/bioinformatics/programs/augustus/docs/tutorial2015/training.html
-- https://www.biostars.org/p/207801/
-
+- [1](https://scilifelab.github.io/courses/annotation/2017/practical_session/TrainingAbInitionpredictor.html)
+- [2](https://vcru.wisc.edu/simonlab/bioinformatics/programs/augustus/docs/tutorial2015/training.html)
+- [3](https://www.biostars.org/p/207801/)
 
 ## Config parameters
 
