@@ -125,3 +125,52 @@ nextflow run nf-core/methylseq -profile singularity \
 
 - Started October 21 2021 @ 15:00
 - Job ID 93817
+
+## Resuming methylseq script because it timed out
+
+`nano methylseq_resume.sh`
+
+```
+#!/bin/bash
+#SBATCH --job-name="methylseq"
+#SBATCH -t 120:00:00
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --mem=500GB
+#SBATCH --account=putnamlab
+#SBATCH --export=NONE
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS
+#SBATCH -p putnamlab
+#SBATCH --exclusive
+#SBATCH --cpus-per-task=3
+
+# load modules needed
+
+module load Nextflow/21.03.0
+
+# run nextflow methylseq
+
+nextflow run nf-core/methylseq -resume \
+-profile singularity \
+--aligner bismark \
+--igenomes_ignore \
+--fasta /data/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta \
+--save_reference \
+--input '/data/putnamlab/KITT/hputnam/20211008_Past_ThermalTransplant_WGBS/*_R{1,2}_001.fastq.gz' \
+--clip_r1 10 \
+--clip_r2 10 \
+--three_prime_clip_r1 10 --three_prime_clip_r2 10 \
+--non_directional \
+--cytosine_report \
+--relax_mismatches \
+--unmapped \
+--outdir WGBS_methylseq
+```
+
+### Running methylseq script
+
+`sbatch /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_resume.sh`
+
+- Started October 25 2021 @ 10:54
+- Job ID 94131
