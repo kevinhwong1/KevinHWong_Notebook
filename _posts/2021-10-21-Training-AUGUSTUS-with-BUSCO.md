@@ -164,3 +164,51 @@ echo "BUSCO Mission complete!" $(date)
 ```
 
 `sbatch /data/putnamlab/kevin_wong1/Past_Genome/BUSCO_AUGUSTUS_past.sh`
+
+
+ERROR MESSAGE: Metaeuk did not recognize any genes matching the dataset metazoa_odb10 in the input file. If this is unexpected, check your input file and your installation of Metaeuk
+
+
+## trying this script again but defining Metaeuk disk space metaeuk disk space parameters
+
+https://gitlab.com/ezlab/busco/-/issues/416
+
+`nano AUGUSTUS_BUSCO.sh`
+
+```
+#!/bin/bash
+#SBATCH --job-name="BUSCO"
+#SBATCH -t 100:00:00
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH -D /data/putnamlab/kevin_wong1/Past_Genome/AUGUSTUS_BUSCO
+#SBATCH --mem=500GB
+
+echo "Starting BUSCO" $(date)
+
+#load modules
+module load BUSCO/5.2.2-foss-2020b
+
+#run BUSCO
+busco \
+--config config.ini \
+--in ../past_filtered_assembly.fasta \
+--out past_geome_AUG_BUSCO \
+-l busco_downloads/metazoa_odb10 \
+-m genome \
+-f \
+--long \
+--augustus_parameters='--progress=true' \
+--metaeuk_parameters="--disk-space-limit=500M,--remove-tmp-files=1" --metaeuk_rerun_parameters="--disk-space-limit=500M,--remove-tmp-files=1" \
+--offline
+
+echo "BUSCO Mission complete!" $(date)
+```
+
+`sbatch /data/putnamlab/kevin_wong1/Past_Genome/BUSCO_AUGUSTUS_past.sh`
+
+Job ID: 94134
+
+Started: Oct 25, 11:15
