@@ -18,6 +18,8 @@ I am using a modified version of [this protocol](https://github.com/emmastrand/E
 
 The main modifications from this protocol were to adjust the dilutions for 2 replicates instead of 3.
 
+The negative control was ultrapure water and the positive control was the same positive control from [this ITS2 run](https://kevinhwong1.github.io/KevinHWong_Notebook/20210325-Thermal-Transplant-ITS2/) (Becker E9) diluted to 2ng/ul.
+
 #### Master Mix Calculation
 
 ![MM]({{ site.baseurl}}/images/20211104_MasterMix_ITS2.png "MM")
@@ -28,3 +30,5 @@ The main modifications from this protocol were to adjust the dilutions for 2 rep
 
 #### Gel Results
 [Gel Electrophoresis](https://github.com/emmastrand/EmmaStrand_Notebook/blob/master/_posts/2019-07-16-Gel-Electrophoresis-Protocol.md)
+
+![Gel]({{ site.baseurl}}/images/20211104_ITS2_Gel.png "Gel")
