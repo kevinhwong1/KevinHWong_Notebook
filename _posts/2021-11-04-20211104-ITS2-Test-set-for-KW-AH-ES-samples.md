@@ -8,7 +8,7 @@ tags: ITS2, Porites July Bleaching
 
 ### Goal
 
-To test ITS2 sequencing prep on *Porites astreoides* anf *Montipora capitata* samples from the Porites July Bleaching, Symbiont Integration, and Bleaching Pairs projects. The DNA from these samples were extracted with the Zymo Quick-DNA kit and Zymo DNA/RNA mini prep kit plus.
+To test ITS2 sequencing prep on *Porites astreoides* and *Montipora capitata* samples from the Porites July Bleaching, Symbiont Integration, and Bleaching Pairs projects. The DNA from these samples were extracted with the Zymo Quick-DNA kit and Zymo DNA/RNA mini prep kit plus.
 
 The dilution and plate planning can be found [here](https://docs.google.com/spreadsheets/d/1hFIY0g74x_yjGrz7F8n_IFccVfC5TheEPZtd7_je3uI/edit#gid=1710792962)
 
