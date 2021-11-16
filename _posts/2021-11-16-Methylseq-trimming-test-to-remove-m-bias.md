@@ -90,7 +90,7 @@ All tests were run on the same sample file: 18-9_S159_L004_R1_001_val_1
 
 For Trim_3 and Trim_4 Parameters, the % methylation also decreases at the beginning of the R1:
 
-**Trim_3 R1**
+**Trim_2 R1**
 
 ![Trim_2_R1]({{ site.baseurl}}/images/20211116_Trim_2_R1.png "Trim_2_R1")
 
