@@ -10,9 +10,22 @@ tags: ITS2, Porites astreoides
 
 The goal of touchdown PCR is to increase specificity of the primers during PCR. I am currently having troubles with our [original ITS2 protocol](https://github.com/emmastrand/EmmaStrand_Notebook/blob/master/_posts/2020-01-31-ITS2-Sequencing-Protocol.md) on coral samples with very low Symbiodiniaceae densities. Our previous protocol is sequencing coral DNA when the Symbiodiniaceae densities are very low.
 
-insert picture here
+![ ](https://github.com/kevinhwong1/Porites_Rim_Bleaching_2019/blob/master/output/ITS2/Relative_Abundance_Barplot.png)
+
+**Previous gel results:**
+
+G3 (Vial 43) is higher than the other samples.
+
+![]({{ site.baseurl}}/images/20211109_ITS2_GelA.png)
+
+Samples 74, 41, 40 are on this [post] and had very faint bands.
+
+![]({{ site.baseurl}}/images/20211116_ITS2_Gel.png)
 
 Touchdown PCR reference: [Korbie and Mattick 2008](https://www.nature.com/articles/nprot.2008.133)
+
+
+
 
 # 20220315
 
