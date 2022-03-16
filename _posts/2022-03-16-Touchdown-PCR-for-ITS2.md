@@ -42,6 +42,7 @@ I am using DNA that is already diluted to 4ng/uL in [this post](https://kevinhwo
 
 ### Master Mix Calculations
 
+**Determining number of wells:**
 | 20220315 test set |    |
 |:-----------------:|:--:|
 |     # Samples     |  4 |
@@ -50,6 +51,9 @@ I am using DNA that is already diluted to 4ng/uL in [this post](https://kevinhwo
 |       Error       |  1 |
 |  Total # Samples  |  7 |
 |   Total # Wells   | 14 |
+
+
+**Calculating Master mix:**
 
 |                    | Volume (uL) |  Total # Wells  | Master Mix Vol (uL) |
 |:------------------:|:-----------:|:---------------:|:-------------------:|
