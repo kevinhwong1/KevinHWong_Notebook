@@ -119,3 +119,148 @@ Today I ran a 1% gel on a 100 well gel.
 ![Gel]({{ site.baseurl}}/images/20220315_ITS2_Gel.png "Gel")
 
 This protocol did not seem to work based off of the gel results.
+
+# 20220317
+
+Today I ran 2 different variations of the thermocycler settings:
+
+1. TD_2: Starting 10°C + Tm, going down a degree every cycle until Tm-5°C and continuing the remaining cycles at Tm-5°C.
+
+2. TD_3: A protocol modified from H. Putnam, 7 min at 95°C, 20 cycles of 94°C for 30s, 62°C for 30s (decreased by 0.5°C at each cycle), 72°C for 1 min, followed by 12 additional cycles with an annealing temperature set at 52°C, final extension of 72°C for 7 min.
+
+### TD_2 thermocycler settings
+
+| Phase | Step Number | Number of cycles | Step     | Temperature | Time  |
+|-------|-------------|------------------|----------|-------------|-------|
+| 1     | 1           | 1                | Denature | 95          | 3 min |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 62          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 61          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 60          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 59          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 58          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 57          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 56          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 55          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 54          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 53          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 52          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 51          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 50          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 49          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 48          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 95          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 47          | 45 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 2     | 1           | 20               | Denature | 95          | 30 s  |
+| 2     | 2           | 20               | Anneal   | 47          | 45 s  |
+| 2     | 3           | 20               | Elongate | 72          | 60 s  |
+| 3     | 1           | 1                | Elongate | 72          | 5 min |
+| 3     | 2           | 1                | Halt     | 4           | Hold  |
+
+### TD_3 thermocycler settings
+
+| Phase | Step Number | Number of cycles | Step     | Temperature | Time  |
+|-------|-------------|------------------|----------|-------------|-------|
+| 1     | 1           | 1                | Denature | 95          | 7 min |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 62          | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 61.5        | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 60          | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 59.5        | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 59          | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 58.5        | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 58          | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 57.5        | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 57          | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 56.5        | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 56          | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 55.5        | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 55          | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 54.5        | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 54          | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 53.5        | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 53          | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 52.5        | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 1                | Denature | 94          | 30 s  |
+| 1     | 3           | 1                | Anneal   | 52          | 30 s  |
+| 1     | 4           | 1                | Elongate | 72          | 60 s  |
+| 1     | 2           | 12               | Denature | 94          | 30 s  |
+| 1     | 3           | 12               | Anneal   | 52          | 30 s  |
+| 1     | 4           | 12               | Elongate | 72          | 60 s  |
+| 3     | 1           | 1                | Elongate | 72          | 7 min |
+| 3     | 2           | 1                | Halt     | 4           | Hold  |
+
+
+### Samples Master Mix calculations
+
+I used the same samples and master mix calculations for each thermocycler setting.
+
+### Gel Results
+
+
+![Gel]({{ site.baseurl}}/images/20220317_ITS2_Gel.png "Gel")
