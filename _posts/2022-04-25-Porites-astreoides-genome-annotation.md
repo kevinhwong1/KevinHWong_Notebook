@@ -10,7 +10,7 @@ tags: Porites astreoides, genome, bioinformatics
 
 ## </span>**Table of Contents**</span>
 
-### [Structural Annotation]((https://github.com/hputnam/Past_Genome/blob/master/genome_annotation_pipeline.md#structural-annotation-1)
+### [Structural Annotation](https://github.com/hputnam/Past_Genome/blob/master/genome_annotation_pipeline.md#structural-annotation-1)
 
 *Initial MAKER Analysis*
 
