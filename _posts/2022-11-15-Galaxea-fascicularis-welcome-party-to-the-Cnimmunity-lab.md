@@ -18,10 +18,10 @@ tags: Galaxea fascicularis
 
 ## Tank Prep
 
-* Prior to arrival, David Erhens (lab manager) and I build a recirculating tank system that can we both open and closed system. 
-* This allows us keep the recircculating water system separate from the Caribbean coral tanks
+* Prior to arrival, David Ehrens (lab manager) and I build a recirculating tank system that can be both open and closed system. 
+* This allows us keep the recircculating water system separate from the Caribbean coral tanks.
 
-Tank conditions as of 202211
+Tank conditions as of 20221108
 
 | Measurement | Unique Corals | Cnimmunity Lab |
 |:-----------:|:-------------:|:--------------:|
@@ -63,6 +63,8 @@ Tank conditions as of 202211
 
 
 # 20221116
+
+* Corals looked visibily healthy with no tissue loss compared to yesterday.
 
 * Corals were fed with Reef Roids by David
     * Water and pumps were turned off
