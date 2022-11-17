@@ -61,7 +61,7 @@ Table 1: Chemical concentrations of each buffer. I will break down the volumes i
 
 
 
-#### Tissue dissociation (Adapted from Grace Snyder)
+### Tissue dissociation (Adapted from Grace Snyder)
 
 * Mechanical Dissociation: 
     * Remove cells/tissue from skeleton with air brush and cold cell media
