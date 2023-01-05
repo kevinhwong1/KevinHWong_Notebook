@@ -16,15 +16,14 @@ I am also going to think about preserving the nuclei using [this protocol](http:
 
 ### Materials
 
-Equipment
-
+Equipment:
 * Cold centrifuge with 15mL rotor
 * Air Brush
 * 15mL tubes
 * Sterile whirlpak
 * Dounce homogenizer
 
-Chemicals
+Chemicals:
 * KCl
 * NaCl
 * MgCl<sub>2</sub>
