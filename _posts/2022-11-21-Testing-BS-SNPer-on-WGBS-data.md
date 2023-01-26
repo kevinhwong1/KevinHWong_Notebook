@@ -210,3 +210,135 @@ Error! at /opt/software/BS-Snper/1.0-foss-2021b/bin/BS-Snper.pl line 110.
 
 ## 2d. Unique SNP variants
 
+`mkdir all_SNP_output`
+
+`nano bs_snper_all.sh`
+
+```bash
+#!/bin/bash
+#SBATCH --job-name="BS_snper"
+#SBATCH -t 500:00:00
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --mem=120GB
+#SBATCH --account=putnamlab
+#SBATCH --export=NONE
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/BS-SNPer/all_SNP_output
+
+# load modules
+module load BS-Snper/1.0-foss-2021b
+
+# symbolically link files
+ln -s /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/bismark_deduplicated/*_deduplicated_sorted.bam .
+
+# Loop BSsnper for each file
+FILES=$(ls *_deduplicated_sorted.bam)
+echo ${FILES}
+
+for file in ${FILES}
+do
+    NAME=$(echo ${file} | awk -F "." '{print $1}')
+    echo ${NAME}
+
+    perl /opt/software/BS-Snper/1.0-foss-2021b/bin/BS-Snper.pl \
+    --fa /data/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta \
+    --input ${NAME}.deduplicated.sorted.bam \
+    --output ${NAME}.SNP-candidates.txt \
+    --methcg ${NAME}.CpG-meth-info.tab \
+    --methchg ${NAME}.CHG-meth-info.tab \
+    --methchh ${NAME}.CHH-meth-info.tab \
+    --mincover 5 \
+    > ${NAME}.SNP-results.vcf 2> ${NAME}.ERR.log
+
+done
+```
+
+I keep on getting the same error:
+
+```
+Unknown option: input
+FLAG: 1
+refSeqFile = /data/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta.
+bamFileName = 18-442_S165_deduplicated_sorted.deduplicated.sorted.bam.
+snpFileName = 18-442_S165_deduplicated_sorted.SNP-candidates.txt.
+methCgFileName = 18-442_S165_deduplicated_sorted.CpG-meth-info.tab.
+methChgFileName = 18-442_S165_deduplicated_sorted.CHG-meth-info.tab.
+methChhFileName = 18-442_S165_deduplicated_sorted.CHH-meth-info.tab.
+vQualMin = 15.
+nLayerMax = 1000.
+vSnpRate = 0.100000.
+vSnpPerBase = 0.020000.
+mapqThr = 20.
+Too many characters in one row! Try to split the long row into several short rows (fewer than 1000000 characters per row).
+Error! at /opt/software/BS-Snper/1.0-foss-2021b/bin/BS-Snper.pl line 110.
+```
+
+
+I am going to try on the original bam files (potentially not sorted)
+
+_L004_R1_001_val_1_bismark_bt2_pe.deduplicated.bam
+
+`mkdir all_notsorted_SNP_output`
+
+`nano bs_snper_all_notsorted.sh`
+
+```bash
+#!/bin/bash
+#SBATCH --job-name="BS_snper"
+#SBATCH -t 500:00:00
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --mem=120GB
+#SBATCH --account=putnamlab
+#SBATCH --export=NONE
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/BS-SNPer/all_notsorted_SNP_output
+
+# load modules
+module load BS-Snper/1.0-foss-2021b
+
+# symbolically link files
+ln -s /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/bismark_deduplicated/*_L004_R1_001_val_1_bismark_bt2_pe.deduplicated.bam .
+
+# Loop BSsnper for each file
+FILES=$(ls *_L004_R1_001_val_1_bismark_bt2_pe.deduplicated.bam)
+echo ${FILES}
+
+for file in ${FILES}
+do
+    NAME=$(echo ${file} | awk -F "." '{print $1}')
+    echo ${NAME}
+
+    perl /opt/software/BS-Snper/1.0-foss-2021b/bin/BS-Snper.pl \
+    --fa /data/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta \
+    --input ${NAME}.deduplicated.sorted.bam \
+    --output ${NAME}.SNP-candidates.txt \
+    --methcg ${NAME}.CpG-meth-info.tab \
+    --methchg ${NAME}.CHG-meth-info.tab \
+    --methchh ${NAME}.CHH-meth-info.tab \
+    --mincover 5 \
+    > ${NAME}.SNP-results.vcf 2> ${NAME}.ERR.log
+
+done
+```
+
+Same error: 
+
+```
+Unknown option: input
+FLAG: 1
+refSeqFile = /data/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta.
+bamFileName = L-933_S203_L004_R1_001_val_1_bismark_bt2_pe.deduplicated.sorted.bam.
+snpFileName = L-933_S203_L004_R1_001_val_1_bismark_bt2_pe.SNP-candidates.txt.
+methCgFileName = L-933_S203_L004_R1_001_val_1_bismark_bt2_pe.CpG-meth-info.tab.
+methChgFileName = L-933_S203_L004_R1_001_val_1_bismark_bt2_pe.CHG-meth-info.tab.
+methChhFileName = L-933_S203_L004_R1_001_val_1_bismark_bt2_pe.CHH-meth-info.tab.
+vQualMin = 15.
+nLayerMax = 1000.
+vSnpRate = 0.100000.
+vSnpPerBase = 0.020000.
+mapqThr = 20.
+Too many characters in one row! Try to split the long row into several short rows (fewer than 1000000 characters per row).
+Error! at /opt/software/BS-Snper/1.0-foss-2021b/bin/BS-Snper.pl line 110.
+```
