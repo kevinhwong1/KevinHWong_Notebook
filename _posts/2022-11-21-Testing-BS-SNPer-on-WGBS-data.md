@@ -49,7 +49,7 @@ for f in *.deduplicated.bam
 do
   STEM=$(basename "${f}" _L004_R1_001_val_1_bismark_bt2_pe.deduplicated.bam)
   samtools sort "${f}" \
-  -o "${STEM}"_deduplicated_sorted.bam
+  -o "${STEM}".deduplicated_sorted.bam
 done
 ```
 *revisit this to see if this sort actually worked*
@@ -230,10 +230,10 @@ Error! at /opt/software/BS-Snper/1.0-foss-2021b/bin/BS-Snper.pl line 110.
 module load BS-Snper/1.0-foss-2021b
 
 # symbolically link files
-ln -s /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/bismark_deduplicated/*_deduplicated_sorted.bam .
+ln -s /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/bismark_deduplicated/*.deduplicated_sorted.bam .
 
 # Loop BSsnper for each file
-FILES=$(ls *_deduplicated_sorted.bam)
+FILES=$(ls *.deduplicated_sorted.bam)
 echo ${FILES}
 
 for file in ${FILES}
@@ -243,7 +243,7 @@ do
 
     perl /opt/software/BS-Snper/1.0-foss-2021b/bin/BS-Snper.pl \
     --fa /data/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta \
-    --input ${NAME}.deduplicated.sorted.bam \
+    --input ${NAME}.deduplicated_sorted.bam \
     --output ${NAME}.SNP-candidates.txt \
     --methcg ${NAME}.CpG-meth-info.tab \
     --methchg ${NAME}.CHG-meth-info.tab \
@@ -260,11 +260,11 @@ I keep on getting the same error:
 Unknown option: input
 FLAG: 1
 refSeqFile = /data/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta.
-bamFileName = 18-442_S165_deduplicated_sorted.deduplicated.sorted.bam.
-snpFileName = 18-442_S165_deduplicated_sorted.SNP-candidates.txt.
-methCgFileName = 18-442_S165_deduplicated_sorted.CpG-meth-info.tab.
-methChgFileName = 18-442_S165_deduplicated_sorted.CHG-meth-info.tab.
-methChhFileName = 18-442_S165_deduplicated_sorted.CHH-meth-info.tab.
+bamFileName = L-933_S203.deduplicated_sorted.bam.
+snpFileName = L-933_S203.SNP-candidates.txt.
+methCgFileName = L-933_S203.CpG-meth-info.tab.
+methChgFileName = L-933_S203.CHG-meth-info.tab.
+methChhFileName = L-933_S203.CHH-meth-info.tab.
 vQualMin = 15.
 nLayerMax = 1000.
 vSnpRate = 0.100000.
@@ -276,8 +276,6 @@ Error! at /opt/software/BS-Snper/1.0-foss-2021b/bin/BS-Snper.pl line 110.
 
 
 I am going to try on the original bam files (potentially not sorted)
-
-_L004_R1_001_val_1_bismark_bt2_pe.deduplicated.bam
 
 `mkdir all_notsorted_SNP_output`
 
