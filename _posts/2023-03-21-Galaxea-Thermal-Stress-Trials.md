@@ -15,7 +15,7 @@ Thermal Stress test for Galaxea fasicularis TEM imaging:
 
 # 20230316
 * Colony D was cut into three pieces (~5cm x 5cm) and glued to square pcv plates.
-* The three fragments were immediately fed with ReefRoids and left too acclimate/recover in the raceway
+* The three fragments were immediately fed with ReefRoids and left to acclimate/recover in the raceway
 
 # 20230321
 * The tank was cleaned and the water was drained/refilled
