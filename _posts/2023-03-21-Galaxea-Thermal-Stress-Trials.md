@@ -28,9 +28,19 @@ Thermal Stress test for Galaxea fasicularis TEM imaging:
     * Time set: 14:00
 * We are aiming for a 1 degree increase per day until we reach 35C
 
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20230321_gfas_test.JPG?raw=true)
+
+
 # 20230322
 * Apex settings for the 3 heaters were set to as followed: 
     * On temperature: 29.5
     * Off tempeature: 30.0
     * Time set: 14:27
 
+# 20230323
+* Apex settings for the 3 heaters were set to as followed: 
+    * On temperature: 30.5
+    * Off tempeature: 31.0
+    * Time set: 14:00
+
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20230323_gfas_test.JPG?raw=true)
