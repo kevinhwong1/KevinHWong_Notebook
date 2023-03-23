@@ -11,7 +11,7 @@ Thermal Stress test for Galaxea fasicularis TEM imaging:
 # Tank prep
 
 * One mesocosm raceway with two wave pumps and an independent sump with three heaters connected to the Apex system.
-* oone 5 gallon tank with a mini water pump and two 3/4 in lines for water input 
+* One 5 gallon tank with a mini water pump and two lines for water input 
 
 # 20230316
 * Colony D was cut into three pieces (~5cm x 5cm) and glued to square pcv plates.
