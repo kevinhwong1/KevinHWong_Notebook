@@ -114,3 +114,7 @@ echo "Beginning mapping" $(date)
 
 echo "Analysis complete!" $(date)
 ```
+
+```bash
+scp -r kevin_wong1@ssh3.hac.uri.edu:/data/putnamlab/kevin_wong1/kofamscan/Mnemi_KO_annot.txt /Users/kevinwong/MyProjects/Mnemi_Phagocyte/output/KofamScan/Mnemi_KO_annot.txt
+```
