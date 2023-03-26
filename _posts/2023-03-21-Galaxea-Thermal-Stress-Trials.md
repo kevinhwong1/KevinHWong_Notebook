@@ -53,3 +53,16 @@ Thermal Stress test for Galaxea fasicularis TEM imaging:
 * Cleaned tank
 
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20230324_gfas_test.JPG?raw=true)
+
+# 20230325
+* Apex settings for the 3 heaters were set to as followed: 
+    * On temperature: 32.5
+    * Off tempeature: 33.0
+    * Time set: 14:08
+
+
+# 20230326
+* Apex settings for the 3 heaters were set to as followed: 
+    * On temperature: 33.5
+    * Off tempeature: 34.0
+    * Time set: 13:15
