@@ -78,6 +78,8 @@ Run the following script:
 [kevin_wong1@n063 EpiDiverse]$ conda activate snps
 ```
 
+# 20230415 Attempt
+
 `nano episnp.sh`
 
 ```bash
@@ -115,11 +117,8 @@ NXF_VER=20.07.1 nextflow run epidiverse/snp -resume \
 --take 47 # Number of samples 
 
 echo "STOP" $(date) # this will output the time it takes to run within the output message
-
 ```
-
-
-trying to resolve container(?) issue: 
+Did not work... trying to resolve container(?) issue:
 
 ```bash
 (base) [kevin_wong1@n063 EpiDiverse]$ conda init
@@ -136,4 +135,128 @@ no change     /opt/software/Mamba/22.11.1-4/lib/python3.10/site-packages/xontrib
 no change     /opt/software/Mamba/22.11.1-4/etc/profile.d/conda.csh
 no change     /home/kevin_wong1/.bashrc
 No action taken.
+```
+
+# 20230808 Attempt
+
+We are going to try this without activiating conda before running the script. 
+
+`nano episnp.sh`
+
+```bash
+#!/bin/bash
+#SBATCH -t 200:00:00
+#SBATCH --nodes=1 --ntasks=1 --cpus-per-task=18
+#SBATCH --export=NONE
+#SBATCH --account=putnamlab
+#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse 
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH --error="%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output="%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+
+# load modules needed (specific need for my computer)
+source /usr/share/Modules/init/sh # load the module function
+
+# load modules needed
+echo "START" $(date)
+module load Nextflow/20.07.1 #this pipeline requires this version 
+module load SAMtools/1.9-foss-2018b 
+module load Pysam/0.15.1-foss-2018b-Python-3.6.6
+
+# define location for fasta_generate_regions.py
+#fasta_generate_regions.py = ./fasta_generate_regions.py
+
+# only need to direct to input folder not *bam files 
+NXF_VER=20.07.1 nextflow run epidiverse/snp -resume \
+-profile conda \
+--input /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/bismark_deduplicated/ \
+--reference /data/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta \
+--output /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse/ \
+--clusters \
+--variants \
+--coverage 5 \
+--take 47 # Number of samples 
+
+echo "STOP" $(date) # this will output the time it takes to run within the output message
+
+```
+
+```bash
+(base) [kevin_wong1@n063 EpiDiverse]$ less episnp.sh_error.273737
+Exception in thread "Thread-3" groovy.lang.GroovyRuntimeException: exception while reading process stream
+        at org.codehaus.groovy.runtime.ProcessGroovyMethods$TextDumper.run(ProcessGroovyMethods.java:496)
+        at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.io.IOException: Stream closed
+        at java.base/java.io.BufferedInputStream.getBufIfOpen(BufferedInputStream.java:176)
+        at java.base/java.io.BufferedInputStream.read1(BufferedInputStream.java:289)
+        at java.base/java.io.BufferedInputStream.read(BufferedInputStream.java:351)
+        at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:284)
+        at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:326)
+        at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:178)
+        at java.base/java.io.InputStreamReader.read(InputStreamReader.java:185)
+        at java.base/java.io.BufferedReader.fill(BufferedReader.java:161)
+        at java.base/java.io.BufferedReader.readLine(BufferedReader.java:326)
+        at java.base/java.io.BufferedReader.readLine(BufferedReader.java:392)
+        at org.codehaus.groovy.runtime.ProcessGroovyMethods$TextDumper.run(ProcessGroovyMethods.java:489)
+        ... 1 more
+```
+
+```bash
+[kevin_wong1@ssh3 EpiDiverse]$ less episnp.sh_output.273737
+Error executing process > 'SNPS:preprocessing (18-227_S170_L004_R1_001_val_1_bismark_bt2_pe.deduplicated)'
+
+Caused by:
+  Failed to create Conda environment
+  command: conda env create --prefix /glfs/brick01/gv0/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse/work/conda/snps-8882ee7ea1a0aa0094bec65b6ca3edc3 --file /ho
+me/kevin_wong1/.nextflow/assets/epidiverse/snp/env/environment.yml
+  status : 120
+  message:
+    ==> WARNING: A newer version of conda exists. <==
+      current version: 22.11.1
+      latest version: 23.7.2
+    
+    Please update conda by running
+    
+        $ conda update -n base -c conda-forge conda
+    
+    Or to minimize the number of packages updated during conda update use
+    
+         conda install conda=23.7.2
+
+```
+
+It looks like we need to update or reference a different conda version. Check which conda versions are available on Andromeda
+
+```bash
+kevin_wong1@ssh3 EpiDiverse]$ module av -t |& grep -i conda
+all/Anaconda3/2020.11
+all/Anaconda3/2021.11
+all/Anaconda3/2022.05
+all/Anaconda3/4.2.0
+all/Anaconda3/5.3.0
+all/Anaconda3/default
+all/Miniconda3/22.11.1-1 # I think it is using this one
+all/Miniconda3/4.6.14
+all/Miniconda3/4.7.10
+all/Miniconda3/4.9.2
+lang/Anaconda3/2020.11
+lang/Anaconda3/2021.11
+lang/Anaconda3/2022.05
+lang/Anaconda3/4.2.0
+lang/Anaconda3/5.3.0
+lang/Miniconda3/22.11.1-1 
+lang/Miniconda3/4.6.14
+lang/Miniconda3/4.7.10
+lang/Miniconda3/4.9.2
+Anaconda3/2020.11
+Anaconda3/2021.11
+Anaconda3/2022.05
+Anaconda3/4.2.0
+Anaconda3/5.3.0
+Anaconda3/default
+Miniconda3/22.11.1-1
+Miniconda3/4.6.14
+Miniconda3/4.7.10
+Miniconda3/4.9.2
 ```
