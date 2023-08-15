@@ -8,7 +8,7 @@ tags: KOFamScan, Porites astreoides
 
 # KOFamScan for *P. astreoides*
 
-`cp ../Past_Genome/past_filtered_orf_protein.fasta ./`  
+`cp ../Past_Genome/past_struc_annotations_v1/Pastreoides_proteins_v1.fasta ./`  
 
 `nano kofamscan_Past.sh`
 
@@ -43,9 +43,13 @@ echo "Beginning mapping" $(date)
 -p ./profiles/eukaryote.hal \
 -E 0.00001 \
 -f detail-tsv \
---report-unannotated ./past_filtered_orf_protein.fasta
+--report-unannotated ./Pastreoides_proteins_v1.fasta
 
 echo "Analysis complete!" $(date)
 ```
 
 `sbatch kofamscan_Past.sh`
+
+Took 1 hour to complete
+
+`scp -r kevin_wong1@ssh3.hac.uri.edu:/data/putnamlab/kevin_wong1/kofamscan/Past_KO_annot.txt /Users/kevinwong/MyProjects/Porites_Rim_Bleaching_2019/data/Molecular/Past_KO_annot.txt`
