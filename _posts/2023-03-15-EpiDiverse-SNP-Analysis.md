@@ -618,3 +618,183 @@ Command error:
 Work dir:
   /glfs/brick01/gv0/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse/work/5d/e6bdcee831ab4508170d1317d6025f
 ```
+
+# 20230816 Attempt 
+
+Kevin Bryan suggested this: 
+
+```
+Can you try putting this in your batch file before calling nextflow?
+
+`export APPTAINER_BINDPATH=/data,/glfs`
+
+If that doesn’t work, try referring to all of your paths as starting with /glfs/brick01/gv0 instead of /data. You can see that the “files” that it said it couldn’t find are symlinks to the /glfs path, but because the singularity container only binds what it thinks the working directory is, it binds it with /data instead of /glfs, but nextflow has created the symlinks using the canonical path (/glfs before launching the container), so the links aren’t valid.
+```
+
+
+`nano episnp.sh`
+
+```bash
+#!/bin/bash
+#SBATCH -t 200:00:00
+#SBATCH --nodes=1 --ntasks=1 --cpus-per-task=18
+#SBATCH --export=NONE
+#SBATCH --account=putnamlab
+#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse 
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH --error="%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output="%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+
+# load modules needed (specific need for my computer)
+source /usr/share/Modules/init/sh # load the module function
+
+#Forcing the glfs path
+export APPTAINER_BINDPATH=/data,/glfs
+
+# load modules needed
+echo "START" $(date)
+module load Nextflow/20.07.1 #this pipeline requires this version 
+module load SAMtools/1.9-foss-2018b 
+module load Pysam/0.15.1-foss-2018b-Python-3.6.6
+
+# define location for fasta_generate_regions.py
+#fasta_generate_regions.py = ./fasta_generate_regions.py
+
+# only need to direct to input folder not *bam files 
+NXF_VER=20.07.1 nextflow run epidiverse/snp -resume \
+-profile singularity \
+--input /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/test_epidiverse/ \
+--reference /data/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta \
+--output /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse/ \
+--clusters \
+--variants \
+--coverage 5 \
+--take 47 # Number of samples 
+
+echo "STOP" $(date) # this will output the time it takes to run within the output message
+
+```
+
+This produced the same error. Let me try putting the full glfs path
+
+
+`nano episnp.sh`
+
+```bash
+#!/bin/bash
+#SBATCH -t 200:00:00
+#SBATCH --nodes=1 --ntasks=1 --cpus-per-task=18
+#SBATCH --export=NONE
+#SBATCH --account=putnamlab
+#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse 
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH --error="%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output="%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+
+# load modules needed (specific need for my computer)
+source /usr/share/Modules/init/sh # load the module function
+
+#Forcing the glfs path
+export APPTAINER_BINDPATH=/data,/glfs/brick01/gv0
+
+# load modules needed
+echo "START" $(date)
+module load Nextflow/20.07.1 #this pipeline requires this version 
+module load SAMtools/1.9-foss-2018b 
+module load Pysam/0.15.1-foss-2018b-Python-3.6.6
+
+# define location for fasta_generate_regions.py
+#fasta_generate_regions.py = ./fasta_generate_regions.py
+
+# only need to direct to input folder not *bam files 
+NXF_VER=20.07.1 nextflow run epidiverse/snp -resume \
+-profile singularity \
+--input /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/test_epidiverse/ \
+--reference /data/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta \
+--output /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse/ \
+--clusters \
+--variants \
+--coverage 5 \
+--take 47 # Number of samples 
+
+echo "STOP" $(date) # this will output the time it takes to run within the output message
+
+```
+
+This also did not work. Let me try replacing all of the paths as Kevin suggested: 
+
+
+`nano episnp.sh`
+
+```bash
+#!/bin/bash
+#SBATCH -t 200:00:00
+#SBATCH --nodes=1 --ntasks=1 --cpus-per-task=18
+#SBATCH --export=NONE
+#SBATCH --account=putnamlab
+#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse 
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH --error="%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output="%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+
+# load modules needed (specific need for my computer)
+source /usr/share/Modules/init/sh # load the module function
+
+# load modules needed
+echo "START" $(date)
+module load Nextflow/20.07.1 #this pipeline requires this version 
+module load SAMtools/1.9-foss-2018b 
+module load Pysam/0.15.1-foss-2018b-Python-3.6.6
+
+# define location for fasta_generate_regions.py
+#fasta_generate_regions.py = ./fasta_generate_regions.py
+
+# only need to direct to input folder not *bam files 
+NXF_VER=20.07.1 nextflow run epidiverse/snp -resume \
+-profile singularity \
+--input /glfs/brick01/gv0/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/test_epidiverse/ \
+--reference /glfs/brick01/gv0/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta \
+--output /glfs/brick01/gv0/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse/ \
+--clusters \
+--variants \
+--coverage 5 \
+--take 47 # Number of samples 
+
+echo "STOP" $(date) # this will output the time it takes to run within the output message
+
+```
+
+Still getting the same error.... 
+
+```bash
+Error executing process > 'SNPS:preprocessing (18-67_S176.deduplicated_sorted)'
+
+Caused by:
+  Process `SNPS:preprocessing (18-67_S176.deduplicated_sorted)` terminated with an error exit status (1)
+
+Command executed:
+
+  samtools sort -T deleteme -m 966367642 -@ 4 \
+  -o sorted.bam 18-67_S176.deduplicated_sorted.bam || exit $?
+  samtools calmd -b sorted.bam past_filtered_assembly.fasta 1> calmd.bam 2> /dev/null && rm sorted.bam
+  samtools index calmd.bam
+
+Command exit status:
+  1
+
+Command output:
+  (empty)
+
+Command error:
+  INFO:    Environment variable SINGULARITYENV_TMP is set, but APPTAINERENV_TMP is preferred
+  INFO:    Environment variable SINGULARITYENV_TMPDIR is set, but APPTAINERENV_TMPDIR is preferred
+  INFO:    Environment variable SINGULARITYENV_NXF_DEBUG is set, but APPTAINERENV_NXF_DEBUG is preferred
+  [E::hts_open_format] Failed to open file "18-67_S176.deduplicated_sorted.bam" : No such file or directory
+  samtools sort: can't open "18-67_S176.deduplicated_sorted.bam": No such file or directory
+
+Work dir:
+  /glfs/brick01/gv0/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse/work/cf/d934a34af1e0ccf6bf52ac672daffa
+```
