@@ -23,7 +23,6 @@ tags:
     - [Dougan et al. 2022](https://www.biorxiv.org/content/10.1101/2022.04.10.487810v1.full.pdf)
     - [Download site](https://espace.library.uq.edu.au/view/UQ:27da3e7)
 
-
 ## Transfer data from Box to Pegasus 
 
 1. I manually downloaded the files from Box to my hard drive. 
@@ -74,7 +73,22 @@ Durisdinum trenchii genome files:
 
 4. md5 file for Pegasus files
 
-`$ cd 20230905_SingleCell_DG /`
+`$ cd 20230905_SingleCell_DG/`
+
+`$ md5sum *.gz `
+
+```bash
+a41d311fed6542869cbfca5d933a3d5d  AndradeRodriguez-15275-001_GEX3_S9_L001_R1_001.fastq.gz
+8a70aaa04c6bffbf2bcb4576f4aeb9b3  AndradeRodriguez-15275-001_GEX3_S9_L001_R2_001.fastq.gz
+06f5e9b6b9b6713fe65376dc53539488  AndradeRodriguez-15275-001_GEX3_S9_L002_R1_001.fastq.gz
+7dcffd1668d4b335061bdaded9d9e898  AndradeRodriguez-15275-001_GEX3_S9_L002_R2_001.fastq.gz
+8e801a9bb82cedac7e6b3470e27e4095  AndradeRodriguez-15275-001_GEX3_S9_L003_R1_001.fastq.gz
+4eff72dca6601f22134982a6c0a3577f  AndradeRodriguez-15275-001_GEX3_S9_L003_R2_001.fastq.gz
+f9b85b014e123dcadf854ea037cf7f75  AndradeRodriguez-15275-001_GEX3_S9_L004_R1_001.fastq.gz
+b953a5d66ba7b47e19d3485cdc3a774c  AndradeRodriguez-15275-001_GEX3_S9_L004_R2_001.fastq.gz
+3df3e6b965af17f451df16dab1604110  AndradeRodriguez-15275-001_GEX3_S9_L005_R1_001.fastq.gz
+4a33ee1e8dda001a9b1d7463afbe726b  AndradeRodriguez-15275-001_GEX3_S9_L005_R2_001.fastq.gz
+```
 
 
 ## Build a custom reference
