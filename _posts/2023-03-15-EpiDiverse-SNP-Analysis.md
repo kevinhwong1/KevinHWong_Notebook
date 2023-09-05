@@ -897,3 +897,54 @@ Work dir:
 
 Tip: when you have fixed the problem you can continue the execution adding the option `-resume` to the run command line
 ```
+
+# 20230821 Attempt
+
+`nano episnp.sh`
+
+```bash
+#!/bin/bash
+#SBATCH -t 200:00:00
+#SBATCH --nodes=1 --ntasks=1 --cpus-per-task=18
+#SBATCH --export=NONE
+#SBATCH --account=putnamlab
+#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse 
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH --error="%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output="%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+
+# load modules needed (specific need for my computer)
+#source /usr/share/Modules/init/sh # load the module function
+
+# load modules needed
+echo "START" $(date)
+module load Anaconda3/2022.05
+module load Nextflow/20.07.1 #this pipeline requires this version 
+#module load SAMtools/1.9-foss-2018b 
+#module load Pysam/0.15.1-foss-2018b-Python-3.6.6
+
+# define location for fasta_generate_regions.py
+#fasta_generate_regions.py = ./fasta_generate_regions.py
+
+#make conda env
+
+conda env create --prefix /glfs/brick01/gv0/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse/work/conda/snps-8882ee7ea1a0aa0094bec65b6ca3edc2 --file /home/kevin_wong1/.nextflow/assets/epidiverse/snp/env/environment.yml --force
+
+conda activate snps
+
+# only need to direct to input folder not *bam files 
+NXF_VER=20.07.1 nextflow run epidiverse/snp -resume \
+-profile conda \
+--input /glfs/brick01/gv0/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/test_epidiverse/ \
+--reference /glfs/brick01/gv0/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta \
+--output /glfs/brick01/gv0/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse/ \
+--clusters \
+--variants \
+--coverage 5 \
+--take 47 # Number of samples 
+
+echo "STOP" $(date) # this will output the time it takes to run within the output message
+
+```
+
