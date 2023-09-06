@@ -221,3 +221,5 @@ cellranger count \
 ## Summary
 
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20230905_W045_scRNAseq_Summary.png?raw=true)
+
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20230905_W045_scRNAseq_Summary2.png?raw=true)
