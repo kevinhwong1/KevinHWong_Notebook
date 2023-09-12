@@ -80,6 +80,23 @@ echo "START" $(date)
 cp /data/putnamlab/KITT/hputnam/20211008_Past_ThermalTransplant_WGBS/*.fastq.gz ./
 ```
 
+move the error files out of the folder so it is only fastqs
+
+`mv r* ../`
+
+I have to rename the files to remove the _001 since the pipeline requires a *{1,2}.fastq.gz format
+
+```bash
+interactive
+for file in *fastq.gz; do
+    mv "$file" "${file/_001/}"
+done
+```
+
+Run the wgbs pipeline
+
+`nano epidiverse_wgbs.sh`
+
 ```bash
 #!/bin/bash
 #SBATCH -t 200:00:00
@@ -112,4 +129,36 @@ nextflow run epidiverse/wgbs \
 --clip3 10 \
 --fastqc \
 --noLambda 
+```
+
+This runs without terminating the job but I think I still have a Docker issue...
+
+```bash
+Error executing process > 'WGBS:read_trimming (18-130_S172_L004_R)'
+
+Caused by:
+  Process `WGBS:read_trimming (18-130_S172_L004_R)` terminated with an error exit status (127)
+
+Command executed:
+
+  mkdir fastq fastq/logs
+  cutadapt -j 2 -a AGATCGGAAGAGC -A AGATCGGAAGAGC -u 10 -u -10 \
+  -q 20 -m 36 -O 3 \
+  -o fastq/18-130_S172_L004_R1.fastq.gz \
+  -p fastq/18-130_S172_L004_R2.fastq.gz 18-130_S172_L004_R1.fastq.gz 18-130_S172_L004_R2.fastq.gz \
+  > fastq/logs/cutadapt.18-130_S172_L004_R.input.log 2>&1
+
+Command exit status:
+  127
+
+Command output:
+  (empty)
+
+Command error:
+  .command.run: line 259: docker: command not found
+
+Work dir:
+  /glfs/brick01/gv0/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse/wgbs/work/ce/8eae537f967936c0ed58a31d005c09
+
+Tip: you can replicate the issue by changing to the process work dir and entering the command `bash .command.run`
 ```

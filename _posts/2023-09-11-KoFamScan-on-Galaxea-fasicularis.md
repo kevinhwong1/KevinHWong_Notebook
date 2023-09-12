@@ -63,5 +63,5 @@ echo "Analysis complete!" $(date)
 ```
 
 ```bash
-scp -r kevin_wong1@ssh3.hac.uri.edu:/data/putnamlab/kevin_wong1/kofamscan/Mnemi_KO_annot.txt /Users/kevinwong/MyProjects/Mnemi_Phagocyte/output/KofamScan/Mnemi_KO_annot.txt
+scp -r kevin_wong1@ssh3.hac.uri.edu:/data/putnamlab/kevin_wong1/kofamscan/Gfas_KO_annot.txt /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/Annotations/Gfas_KO_annot.txt
 ```
