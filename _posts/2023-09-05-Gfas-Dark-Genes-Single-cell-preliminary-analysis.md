@@ -223,3 +223,96 @@ cellranger count \
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20230905_W045_scRNAseq_Summary.png?raw=true)
 
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20230905_W045_scRNAseq_Summary2.png?raw=true)
+
+
+# 20231004 Analysis
+
+Since this run went well, we asked Oncogenomics to so a deeper sequencing (50,000 reads per cell) on the same sample (5000 cells)
+
+## Transfer data from Box to Pegasus 
+
+1. I manually downloaded the files from Box to my hard drive. 
+
+2. md5 on hard drive files
+
+#### All Cells:
+
+Copying files form my computer to Pegasus
+
+`scp -r /Users/kevinwong/Desktop/BCL_Convert_10_02_2023_9_01_08-695873424.zip kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/`
+
+unzip files
+
+`unzip BCL_Convert_10_02_2023_9_01_08-695873424.zip`
+
+Make a new directory
+
+`mkdir 20231004_SingleCell_DG`
+
+Find all *.gz files in lower directories and copy them into one directory
+
+`find /BCL_Convert_10_02_2023_9_01_08-695873424 -type f -name "*.gz" -exec mv {} ./20231004_SingleCell_DG \:`
+
+This kind of worked, but I ended up using mv to copy them into one foler individually. 
+
+There are 16 files in total: 
+
+```bash
+AndradeRodriguez-15275-001_GEX3_S14_L001_R1_001.fastq.gz
+AndradeRodriguez-15275-001_GEX3_S14_L001_R2_001.fastq.gz    
+AndradeRodriguez-15275-001_GEX3_S14_L003_R1_001.fastq.gz  
+AndradeRodriguez-15275-001_GEX3_S14_L005_R1_001.fastq.gz  
+AndradeRodriguez-15275-001_GEX3_S14_L007_R1_001.fastq.gz
+
+AndradeRodriguez-15275-001_GEX3_S14_L003_R2_001.fastq.gz  
+AndradeRodriguez-15275-001_GEX3_S14_L005_R2_001.fastq.gz  
+AndradeRodriguez-15275-001_GEX3_S14_L007_R2_001.fastq.gz
+AndradeRodriguez-15275-001_GEX3_S14_L002_R1_001.fastq.gz  
+AndradeRodriguez-15275-001_GEX3_S14_L004_R1_001.fastq.gz  
+AndradeRodriguez-15275-001_GEX3_S14_L006_R1_001.fastq.gz  
+AndradeRodriguez-15275-001_GEX3_S14_L008_R1_001.fastq.gz
+AndradeRodriguez-15275-001_GEX3_S14_L002_R2_001.fastq.gz  
+AndradeRodriguez-15275-001_GEX3_S14_L004_R2_001.fastq.gz  
+AndradeRodriguez-15275-001_GEX3_S14_L006_R2_001.fastq.gz  
+AndradeRodriguez-15275-001_GEX3_S14_L008_R2_001.fastq.gz
+```
+
+## Count 
+
+`$ cd /nethome/kxw755/20231004_SingleCell_DG`
+
+`$ nano count_W045_deep.job`
+
+```bash
+#BSUB -J count_W045_deep
+#BSUB -q general
+#BSUB -P dark_genes
+#BSUB -n 6
+#BSUB -W 120:00
+#BSUB -u kxw755@earth.miami.edu
+#BSUB -o count.out
+#BSUB -e count.err
+#BSUB -B
+#BSUB -N
+###################################################################
+
+cellranger count \
+ --id=W-045_1_deep \
+ --transcriptome=/nethome/kxw755/Gfas_v1/gfas \
+ --fastqs=/nethome/kxw755/20231004_SingleCell_DG \
+ --sample=AndradeRodriguez-15275-001_GEX3
+```
+
+`$ bsub < count_W045_deep.job`
+
+## Exporting files
+
+`scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20231004_SingleCell_DG/W-045_1_deep/outs/filtered_feature_bc_matrix.h5 /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/W-045_1_deep_raw_feature_bc_matrix.h5`
+
+`scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20231004_SingleCell_DG/W-045_1_deep/outs/web_summary.html /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/W-045_1_deep_web_summary.html`
+
+## Summary
+
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20231004_W045_scRNAseq_Summary.png?raw=true)
+
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20231004_W045_scRNAseq_Summary2.png?raw=true)

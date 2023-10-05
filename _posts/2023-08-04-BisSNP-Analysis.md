@@ -37,51 +37,67 @@ bis-snp/1.0.1.3-Java-13
 
 It should be available to use. 
 
-## Mark duplicated reads
+## Sort files
 
-Use Picard tools to mark the duplicated reads which are mostly come from PCR duplication. This step could be
-done before indel realignment if there are too many duplicated reads which would mislead indel alignment:
+We are using this [pipeline](https://github.com/lyijin/pdae_dna_meth/tree/master/genetic_contribution/bissnp). 
 
 
-java -Xmx10g -jar MarkDuplicates.jar I=sample.withRG.realigned.bam O=sample.withRG.realigned.mdups.bam
-METRICS_FILE=sample.withRG.realigned.metric.txt CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT
-
-`nano episnp.sh`
+`nano sort_bam.sh`
 
 ```bash
 #!/bin/bash
-#SBATCH -t 200:00:00
-#SBATCH --nodes=1 --ntasks=1 --cpus-per-task=18
-#SBATCH --export=NONE
+#SBATCH --job-name="sort_bam"
+#SBATCH -t 500:00:00
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --mem=120GB
 #SBATCH --account=putnamlab
-#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse 
+#SBATCH --export=NONE
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=kevin_wong1@uri.edu
-#SBATCH --error=output_messages/"%x_error.%j" #if your job fails, the error report will be put in this file
-#SBATCH --output=output_messages/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
-
-# load modules needed (specific need for my computer)
-source /usr/share/Modules/init/sh # load the module function
+#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/bismark_deduplicated
 
 # load modules needed
-echo "START" $(date)
-module load Nextflow/20.07.1 #this pipeline requires this version 
-module load SAMtools/1.9-foss-2018b 
-Pysam/0.15.1-foss-2018b-Python-3.6.6
 
-# define location for fasta_generate_regions.py
-fasta_generate_regions.py = /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse/fasta_generate_regions.py
+module load SAMtools/1.9-foss-2018b
+module load picard/2.25.1-Java-11
 
-# only need to direct to input folder not *bam files 
-NXF_VER=20.07.1 nextflow run epidiverse/snp -resume \
---input /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/bismark_deduplicated/ \
---reference /data/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta \
---output /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/EpiDiverse/ \
---clusters \
---variants \
---coverage 5 \
---take 47 # Number of samples 
+for f in *.deduplicated.bam
+do
+  STEM=$(basename "${f}" _L004_R1_001_val_1_bismark_bt2_pe.deduplicated.bam)
+  samtools sort "${f}" \
+  -o "${STEM}".deduplicated_sorted.bam 
+  java -jar $EBROOTPICARD/picard.jar AddOrReplaceReadGroups I="${STEM}".deduplicated_sorted.bam O="${STEM}".deduplicated_sorted_rg.bam LB=lib1 PL=illumina PU=unit1 SM="${f}"
+done
 
-echo "STOP" $(date) # this will output the time it takes to run within the output message
+samtools index *rg.bam
+```
+
+
+```bash
+#!/bin/bash
+#SBATCH --job-name="bssnp_geno"
+#SBATCH -t 500:00:00
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --mem=120GB
+#SBATCH --account=putnamlab
+#SBATCH --export=NONE
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/bismark_deduplicated
+
+# load modules needed
+
+module load bis-snp/1.0.1.3-Java-13
+
+for a in *rg.bam; 
+do 
+b=`echo ${a} | sed 's/.deduplicated_sorted_rg.bam/vfn/'` && java -Xmx10g -jar BisSNP-1.0.1.jar -T BisulfiteGenotyper -C CG,1 -I ${a} -R ../../../../Past_Genome/past_filtered_assembly.fasta -vfn1 ${b}1.vcf -vfn2 snp_vcfs/${b}2.vcf 
+done
 
 ```
+
+usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+
+https://gatk.broadinstitute.org/hc/en-us/articles/360037226472-AddOrReplaceReadGroups-Picard-
+
+https://gatk.broadinstitute.org/hc/en-us/articles/360035890671-Read-groups
