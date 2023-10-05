@@ -263,7 +263,6 @@ AndradeRodriguez-15275-001_GEX3_S14_L001_R2_001.fastq.gz
 AndradeRodriguez-15275-001_GEX3_S14_L003_R1_001.fastq.gz  
 AndradeRodriguez-15275-001_GEX3_S14_L005_R1_001.fastq.gz  
 AndradeRodriguez-15275-001_GEX3_S14_L007_R1_001.fastq.gz
-
 AndradeRodriguez-15275-001_GEX3_S14_L003_R2_001.fastq.gz  
 AndradeRodriguez-15275-001_GEX3_S14_L005_R2_001.fastq.gz  
 AndradeRodriguez-15275-001_GEX3_S14_L007_R2_001.fastq.gz
