@@ -315,3 +315,50 @@ cellranger count \
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20231004_W045_scRNAseq_Summary.png?raw=true)
 
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20231004_W045_scRNAseq_Summary2.png?raw=true)
+
+
+# 20231012
+
+As per Levy et al 2021, they used the `--force-cells` flag to their estimated number of cells captured. I am going to try this with 5000 cells and see if the output differs. 
+
+
+## Count 
+
+`$ cd /nethome/kxw755/20231004_SingleCell_DG`
+
+`$ nano count_W045_deep_force.job`
+
+```bash
+#BSUB -J count_W045_deep_force
+#BSUB -q general
+#BSUB -P dark_genes
+#BSUB -n 6
+#BSUB -W 120:00
+#BSUB -u kxw755@earth.miami.edu
+#BSUB -o count.out
+#BSUB -e count.err
+#BSUB -B
+#BSUB -N
+###################################################################
+
+cellranger count \
+ --id=W-045_1_deep_force \
+ --transcriptome=/nethome/kxw755/Gfas_v1/gfas \
+ --fastqs=/nethome/kxw755/20231004_SingleCell_DG \
+ --sample=AndradeRodriguez-15275-001_GEX3 \
+ --force-cells=5000
+```
+
+`$ bsub < count_W045_deep_force.job`
+
+## Exporting files
+
+`scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20231004_SingleCell_DG/W-045_1_deep_force/outs/filtered_feature_bc_matrix.h5 /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/W-045_1_deep_force_raw_feature_bc_matrix.h5`
+
+`scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20231004_SingleCell_DG/W-045_1_deep_force/outs/web_summary.html /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/W-045_1_deep_force_web_summary.html`
+
+## Summary
+
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20231012_W045_scRNAseq_Summary.png?raw=true)
+
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20231012_W045_scRNAseq_Summary2.png?raw=true)
