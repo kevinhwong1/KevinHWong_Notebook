@@ -111,3 +111,12 @@ interproscan.sh -f TSV -i gfas_1.0.proteins.fasta -b Gfas.interpro.20231004 -ipr
 echo "DONE $(date)"
 
 ```
+
+
+# eggNOG-Mapper
+
+http://eggnog-mapper.embl.de/
+
+used the metazoan and all database and default parameters. 
+
+
