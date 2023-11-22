@@ -142,7 +142,7 @@ Time: ~115 Minutes
 * Mix thoroughly by flicking the tube to avoid unwanted shearing
 * Spin down briefly in a microfuge
 
-2. In a 0.2 ml thin-walled PCR tube, mix the reagents in the following order:
+2. Spin down all reagents and pipette mix. In a 0.2 ml thin-walled PCR tube, mix the reagents in the following order:
 
 |                 Reagent                | Volume (μl) |
 |:--------------------------------------:|:-----------:|
