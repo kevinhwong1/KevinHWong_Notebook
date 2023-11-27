@@ -44,7 +44,7 @@ bis-snp/1.0.1.3-Java-13
 
 It should be available to use. 
 
-## Sort files
+# Sort files
 
 We are using this [pipeline](https://github.com/lyijin/pdae_dna_meth/tree/master/genetic_contribution/bissnp). 
 
@@ -259,7 +259,6 @@ To get help, see http://broadinstitute.github.io/picard/index.html#GettingHelp
 
 ## Lets try indexing this file
 
-
 `samtools index 18-118_S162.deduplicated_sorted_rg.bam`
 
 This didn't work suggesting that the file is not sorted. Lets backtrack and repeat the previous sorting steps.
@@ -351,7 +350,6 @@ done
 ```
 
 
-
 # Re-run Bisulfite genotyper
 
 `mkdir snp_vcfs`
@@ -383,12 +381,11 @@ done
 This script completed in 9 days. 
 
 
-
-## Tabulate vcfs
+# Tabulate vcfs
 
 First we need to get scaffold lengths of our genome:
 
-```
+```bash
 interactive
 
 cd /data/putnamlab/kevin_wong1/Past_Genome
@@ -396,12 +393,24 @@ cd /data/putnamlab/kevin_wong1/Past_Genome
 module load pyfaidx/0.7.0-GCCcore-11.3.0
 
 faidx past_filtered_assembly.fasta -i chromsizes > past_scaffold_lengths.tsv
-
 ```
 
 Second, we need to modify the script to our own paths:
 
 `wget https://github.com/lyijin/pdae_dna_meth/blob/master/genetic_contribution/bissnp/tabulate_snp_vcfs.py`
+
+
+Copy this file to the same directory because it was struggling trying to find this file in other directories. 
+
+`cp ~/../../data/putnamlab/kevin_wong1/Past_Genome/past_scaffold_lengths.tsv .`
+
+
+Install [natsort](https://pypi.org/project/natsort/)
+
+`pip install --kevin_wong1 natsort`
+
+
+Modify the python file 
 
 `nano tabulate_snp_vcfs.py`
 
@@ -420,7 +429,7 @@ import re
 
 import numpy as np
 
-import natural_sort
+from natsort import natsort
 
 def convert_gt_to_int(gt_string):
     """
@@ -450,13 +459,13 @@ parser.add_argument('vcfs', metavar='vcf_files',
 
 args = parser.parse_args()
 
-vcf_filenames = natural_sort.natural_sort([x.name for x in args.vcfs])
+vcf_filenames = natsort.natsorted([x.name for x in args.vcfs])
 
 # read styl scaffold lengths to create appropriately-sized NumPy arrays
 scaf_lens = {}
 
 tsv_reader = csv.reader(open(
-    '~/data/putnamlab/kevin_wong1/Past_Genome/past_scaffold_lengths.tsv'), delimiter='\t')
+    'past_scaffold_lengths.tsv'), delimiter='\t')
 for row in tsv_reader:
     if not row: continue
     
@@ -482,10 +491,10 @@ for v in vcf_filenames:
         gt_info[v][scaf][pos] = convert_gt_to_int(gt_string)
 
 # print stuff out
-print ('scaf', 'pos', *natural_sort.natural_sort(gt_info), sep='\t')
-for s in natural_sort.natural_sort(scaf_lens):
+print ('scaf', 'pos', *natsort.natsorted(gt_info), sep='\t')
+for s in natsort.natsorted(scaf_lens):
     for n in range(scaf_lens[s]):
-        pos_covs = [gt_info[x][s][n] for x in natural_sort.natural_sort(gt_info)]
+        pos_covs = [gt_info[x][s][n] for x in natsort.natsorted(gt_info)]
         
         # do not print positions that are 0 coverage in all files
         if not any(pos_covs): continue
@@ -513,16 +522,10 @@ for s in natural_sort.natural_sort(scaf_lens):
 # load modules needed
 
 module load Python/3.10.8-GCCcore-12.2.0
+module load SciPy-bundle/2023.02-gfbf-2022b
 
 # tabulate
-python3 tabulate_snp_vcfs.py snp_vcfs/*.vcf > tabulated_genotypes.tsv
+python3 tabulate_snp_vcfs.py *.vcf > tabulated_genotypes.tsv
 
 ```
 
-ERROR:
-```bash
-Traceback (most recent call last):
-  File "/glfs/brick01/gv0/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/bismark_deduplicated/snp_vcfs/tabulate_snp_vcfs.py", line 13, in <module>
-    import numpy as np
-ModuleNotFoundError: No module named 'numpy'
-```
