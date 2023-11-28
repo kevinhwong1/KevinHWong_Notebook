@@ -380,15 +380,10 @@ Today we recieved 10X Chromium data back from three bleached samples:
 
 ```bash
 MD5 (AndradeRodriguez-16000-001_GEX3_S1_L003_R1_001.fastq.gz) = 0509ab579a8302d2dad5d6005ba7a53f
-
 MD5 (AndradeRodriguez-16000-001_GEX3_S1_L003_R2_001.fastq.gz) = 5229e27eb1253012ac2302fedd286402
-
 MD5 (AndradeRodriguez-16000-001_GEX3_S1_L005_R1_001.fastq.gz) = be95fd8c9c2e35e92e233d0499b2d9b8
-
 MD5 (AndradeRodriguez-16000-001_GEX3_S1_L005_R2_001.fastq.gz) = 596678cb8f08de73f7e15b356e96b9ea
-
 MD5 (AndradeRodriguez-16000-001_GEX3_S1_L006_R1_001.fastq.gz) = 45b7c0cf2416d81874d81184a350e0ac
-
 MD5 (AndradeRodriguez-16000-001_GEX3_S1_L006_R2_001.fastq.gz) = 07118cc601cabb199b17862f2565b7e8
 ```
 
@@ -396,15 +391,10 @@ MD5 (AndradeRodriguez-16000-001_GEX3_S1_L006_R2_001.fastq.gz) = 07118cc601cabb19
 
 ```bash
 MD5 (AndradeRodriguez-16000-002_GEX3_S2_L003_R1_001.fastq.gz) = 8984816bbda5a211cf33407d1cc3ee52
-
 MD5 (AndradeRodriguez-16000-002_GEX3_S2_L003_R2_001.fastq.gz) = 8c9fe770c68995a6f3a2b95c709a0e63
-
 MD5 (AndradeRodriguez-16000-002_GEX3_S2_L005_R1_001.fastq.gz) = 20b78b32cb2e82a219bc8a3e07e729fd
-
 MD5 (AndradeRodriguez-16000-002_GEX3_S2_L005_R2_001.fastq.gz) = 17ddf534e38d9eaf1c400542d714ac04
-
 MD5 (AndradeRodriguez-16000-002_GEX3_S2_L006_R1_001.fastq.gz) = 3f40c16136672822205bd710406df0ba
-
 MD5 (AndradeRodriguez-16000-002_GEX3_S2_L006_R2_001.fastq.gz) = b2de3bb63694119a2b4f3d43b5483a48
 ```
 
@@ -412,15 +402,10 @@ MD5 (AndradeRodriguez-16000-002_GEX3_S2_L006_R2_001.fastq.gz) = b2de3bb63694119a
 
 ```bash
 MD5 (AndradeRodriguez-16000-003_GEX3_S3_L003_R1_001.fastq.gz) = 1b8cd4810fa19725a4a385c73a73a15f
-
 MD5 (AndradeRodriguez-16000-003_GEX3_S3_L003_R2_001.fastq.gz) = 8560db1974a914d5d1ef7fb3441b8456
-
 MD5 (AndradeRodriguez-16000-003_GEX3_S3_L005_R1_001.fastq.gz) = 6d0c9d594fac387a3a3268b7bdcbe758
-
 MD5 (AndradeRodriguez-16000-003_GEX3_S3_L005_R2_001.fastq.gz) = d8b81b64bb1ee970c428a12ef65aabf8
-
 MD5 (AndradeRodriguez-16000-003_GEX3_S3_L006_R1_001.fastq.gz) = edaec25952b9ee5428b791087b41a90b
-
 MD5 (AndradeRodriguez-16000-003_GEX3_S3_L006_R2_001.fastq.gz) = 825745ba7fb6e01874743ec91b7c5466
 ```
 
