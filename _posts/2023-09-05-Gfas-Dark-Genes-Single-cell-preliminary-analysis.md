@@ -362,3 +362,180 @@ cellranger count \
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20231012_W045_scRNAseq_Summary.png?raw=true)
 
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20231012_W045_scRNAseq_Summary2.png?raw=true)
+
+
+
+# 20231128 - Analysis with new sequences 
+
+Today we recieved 10X Chromium data back from three bleached samples: 
+
+* S1 = Bleached (menthol)
+* S2 = Bleached (menthol)
+* S3 = Bleached (temperature)
+
+
+## Download data from basespace and upload to Pegasus
+
+`cnidarianimmunity@Cnidarians-Mac-mini 16000-001_GEX3_S1 % md5 *gz`
+
+```bash
+MD5 (AndradeRodriguez-16000-001_GEX3_S1_L003_R1_001.fastq.gz) = 0509ab579a8302d2dad5d6005ba7a53f
+
+MD5 (AndradeRodriguez-16000-001_GEX3_S1_L003_R2_001.fastq.gz) = 5229e27eb1253012ac2302fedd286402
+
+MD5 (AndradeRodriguez-16000-001_GEX3_S1_L005_R1_001.fastq.gz) = be95fd8c9c2e35e92e233d0499b2d9b8
+
+MD5 (AndradeRodriguez-16000-001_GEX3_S1_L005_R2_001.fastq.gz) = 596678cb8f08de73f7e15b356e96b9ea
+
+MD5 (AndradeRodriguez-16000-001_GEX3_S1_L006_R1_001.fastq.gz) = 45b7c0cf2416d81874d81184a350e0ac
+
+MD5 (AndradeRodriguez-16000-001_GEX3_S1_L006_R2_001.fastq.gz) = 07118cc601cabb199b17862f2565b7e8
+```
+
+`cnidarianimmunity@Cnidarians-Mac-mini 16000-002_GEX3_S2 % md5 *gz`
+
+```bash
+MD5 (AndradeRodriguez-16000-002_GEX3_S2_L003_R1_001.fastq.gz) = 8984816bbda5a211cf33407d1cc3ee52
+
+MD5 (AndradeRodriguez-16000-002_GEX3_S2_L003_R2_001.fastq.gz) = 8c9fe770c68995a6f3a2b95c709a0e63
+
+MD5 (AndradeRodriguez-16000-002_GEX3_S2_L005_R1_001.fastq.gz) = 20b78b32cb2e82a219bc8a3e07e729fd
+
+MD5 (AndradeRodriguez-16000-002_GEX3_S2_L005_R2_001.fastq.gz) = 17ddf534e38d9eaf1c400542d714ac04
+
+MD5 (AndradeRodriguez-16000-002_GEX3_S2_L006_R1_001.fastq.gz) = 3f40c16136672822205bd710406df0ba
+
+MD5 (AndradeRodriguez-16000-002_GEX3_S2_L006_R2_001.fastq.gz) = b2de3bb63694119a2b4f3d43b5483a48
+```
+
+`cnidarianimmunity@Cnidarians-Mac-mini 16000-003_GEX3_S3 % md5 *gz`
+
+```bash
+MD5 (AndradeRodriguez-16000-003_GEX3_S3_L003_R1_001.fastq.gz) = 1b8cd4810fa19725a4a385c73a73a15f
+
+MD5 (AndradeRodriguez-16000-003_GEX3_S3_L003_R2_001.fastq.gz) = 8560db1974a914d5d1ef7fb3441b8456
+
+MD5 (AndradeRodriguez-16000-003_GEX3_S3_L005_R1_001.fastq.gz) = 6d0c9d594fac387a3a3268b7bdcbe758
+
+MD5 (AndradeRodriguez-16000-003_GEX3_S3_L005_R2_001.fastq.gz) = d8b81b64bb1ee970c428a12ef65aabf8
+
+MD5 (AndradeRodriguez-16000-003_GEX3_S3_L006_R1_001.fastq.gz) = edaec25952b9ee5428b791087b41a90b
+
+MD5 (AndradeRodriguez-16000-003_GEX3_S3_L006_R2_001.fastq.gz) = 825745ba7fb6e01874743ec91b7c5466
+```
+
+`scp -r 20231128_BCL_Convert_FASTQ kxw755@pegasus.ccs.miami.edu:/scratch/projects/dark_genes/`
+
+
+## md5 on samples after Pegasus transfer
+
+`md5sum *.gz`
+
+```bash
+0509ab579a8302d2dad5d6005ba7a53f  AndradeRodriguez-16000-001_GEX3_S1_L003_R1_001.fastq.gz
+5229e27eb1253012ac2302fedd286402  AndradeRodriguez-16000-001_GEX3_S1_L003_R2_001.fastq.gz
+be95fd8c9c2e35e92e233d0499b2d9b8  AndradeRodriguez-16000-001_GEX3_S1_L005_R1_001.fastq.gz
+596678cb8f08de73f7e15b356e96b9ea  AndradeRodriguez-16000-001_GEX3_S1_L005_R2_001.fastq.gz
+45b7c0cf2416d81874d81184a350e0ac  AndradeRodriguez-16000-001_GEX3_S1_L006_R1_001.fastq.gz
+07118cc601cabb199b17862f2565b7e8  AndradeRodriguez-16000-001_GEX3_S1_L006_R2_001.fastq.gz
+
+8984816bbda5a211cf33407d1cc3ee52  AndradeRodriguez-16000-002_GEX3_S2_L003_R1_001.fastq.gz
+8c9fe770c68995a6f3a2b95c709a0e63  AndradeRodriguez-16000-002_GEX3_S2_L003_R2_001.fastq.gz
+20b78b32cb2e82a219bc8a3e07e729fd  AndradeRodriguez-16000-002_GEX3_S2_L005_R1_001.fastq.gz
+17ddf534e38d9eaf1c400542d714ac04  AndradeRodriguez-16000-002_GEX3_S2_L005_R2_001.fastq.gz
+3f40c16136672822205bd710406df0ba  AndradeRodriguez-16000-002_GEX3_S2_L006_R1_001.fastq.gz
+b2de3bb63694119a2b4f3d43b5483a48  AndradeRodriguez-16000-002_GEX3_S2_L006_R2_001.fastq.gz
+
+1b8cd4810fa19725a4a385c73a73a15f  AndradeRodriguez-16000-003_GEX3_S3_L003_R1_001.fastq.gz
+8560db1974a914d5d1ef7fb3441b8456  AndradeRodriguez-16000-003_GEX3_S3_L003_R2_001.fastq.gz
+6d0c9d594fac387a3a3268b7bdcbe758  AndradeRodriguez-16000-003_GEX3_S3_L005_R1_001.fastq.gz
+d8b81b64bb1ee970c428a12ef65aabf8  AndradeRodriguez-16000-003_GEX3_S3_L005_R2_001.fastq.gz
+edaec25952b9ee5428b791087b41a90b  AndradeRodriguez-16000-003_GEX3_S3_L006_R1_001.fastq.gz
+825745ba7fb6e01874743ec91b7c5466  AndradeRodriguez-16000-003_GEX3_S3_L006_R2_001.fastq.gz
+```
+
+
+## Sample 1 Count
+
+`cd /scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-001_GEX3_S1`
+
+`nano count_S1.job`
+
+```bash
+#BSUB -J count_S1
+#BSUB -q general
+#BSUB -P dark_genes
+#BSUB -n 6
+#BSUB -W 120:00
+#BSUB -u kxw755@earth.miami.edu
+#BSUB -o count.out
+#BSUB -e count.err
+#BSUB -B
+#BSUB -N
+###################################################################
+
+cellranger count \
+ --id=S1 \
+ --transcriptome=/nethome/kxw755/Gfas_v1/gfas \
+ --fastqs=/scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-001_GEX3_S1 \
+ --sample=AndradeRodriguez-16000-001_GEX3
+ ```
+
+` bsub < count_S1.job`
+
+ ## Sample 2 Count
+
+`cd /scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-002_GEX3_S2`
+
+`nano count_S2.job`
+
+```bash
+#BSUB -J count_S2
+#BSUB -q general
+#BSUB -P dark_genes
+#BSUB -n 6
+#BSUB -W 120:00
+#BSUB -u kxw755@earth.miami.edu
+#BSUB -o count.out
+#BSUB -e count.err
+#BSUB -B
+#BSUB -N
+###################################################################
+
+cellranger count \
+ --id=S2 \
+ --transcriptome=/nethome/kxw755/Gfas_v1/gfas \
+ --fastqs=/scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-002_GEX3_S2 \
+ --sample=AndradeRodriguez-16000-002_GEX3
+```
+
+`bsub < count_S2.job `
+
+
+## Sample 3 Count
+
+`cd /scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-003_GEX3_S3`
+
+`nano count_S3.job`
+
+```bash
+#BSUB -J count_S3
+#BSUB -q general
+#BSUB -P dark_genes
+#BSUB -n 6
+#BSUB -W 120:00
+#BSUB -u kxw755@earth.miami.edu
+#BSUB -o count.out
+#BSUB -e count.err
+#BSUB -B
+#BSUB -N
+###################################################################
+
+cellranger count \
+ --id=S3 \
+ --transcriptome=/nethome/kxw755/Gfas_v1/gfas \
+ --fastqs=/scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-003_GEX3_S3 \
+ --sample=AndradeRodriguez-16000-003_GEX3
+```
+
+`bsub < count_S3.job`
