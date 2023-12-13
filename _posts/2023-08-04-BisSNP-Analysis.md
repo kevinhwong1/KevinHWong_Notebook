@@ -529,3 +529,41 @@ python3 tabulate_snp_vcfs.py *.vcf > tabulated_genotypes.tsv
 
 ```
 
+## Calculate fst
+
+* [vcf files](http://samtools.github.io/hts-specs/VCFv4.2.pdf)
+* Left off - 
+
+https://github.com/lyijin/pdae_dna_meth/blob/master/genetic_contribution/calc_indiv_fst/calc_hudson_fst.py
+- download tsv file and see what it looks like
+- figure out filtering prior to FST analysis
+- choose which analysis we want to perform and how to blacklist snps/genes 
+
+
+
+`mkdir fst`
+
+`nano fst.sh`
+
+```bash
+#!/bin/bash
+#SBATCH --job-name="fst"
+#SBATCH -t 500:00:00
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --mem=120GB
+#SBATCH --account=putnamlab
+#SBATCH --export=NONE
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/bismark_deduplicated/snp_vcfs
+
+
+#load modules
+module load VCFtools/0.1.16-GCC-11.2.0
+
+#calculate fast
+vcftools --gzvcf *.vcf \
+--weir-fst-pop \
+--out ./fst
+
+```

@@ -310,6 +310,9 @@ cellranger count \
 
 `scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20231004_SingleCell_DG/W-045_1_deep/outs/web_summary.html /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/W-045_1_deep_web_summary.html`
 
+`scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20231004_SingleCell_DG/W-045_1_deep/outs/metrics_summary.csv /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/W-045_1_deep_metrics_summary.csv`
+
+
 ## Summary
 
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20231004_W045_scRNAseq_Summary.png?raw=true)
@@ -372,6 +375,8 @@ Today we recieved 10X Chromium data back from three bleached samples:
 * S1 = Bleached (menthol)
 * S2 = Bleached (menthol)
 * S3 = Bleached (temperature)
+
+The sequencing facility did mention that the runs were unbalanced, therefore we may need to resequence. This is also apparent because the file sizes greatly differ between libraries. 
 
 
 ## Download data from basespace and upload to Pegasus
@@ -468,6 +473,13 @@ cellranger count \
 
 ` bsub < count_S1.job`
 
+`scp -r kxw755@pegasus.ccs.miami.edu:/scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-001_GEX3_S1/S1/outs/filtered_feature_bc_matrix.h5 /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/S1_raw_feature_bc_matrix.h5`
+
+`scp -r kxw755@pegasus.ccs.miami.edu:/scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-001_GEX3_S1/S1/outs/web_summary.html /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/S1_web_summary.html`
+
+`scp -r kxw755@pegasus.ccs.miami.edu:/scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-001_GEX3_S1/S1/outs/metrics_summary.csv /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/S1_metrics_summary.csv`
+
+
  ## Sample 2 Count
 
 `cd /scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-002_GEX3_S2`
@@ -495,6 +507,12 @@ cellranger count \
 ```
 
 `bsub < count_S2.job `
+
+`scp -r kxw755@pegasus.ccs.miami.edu:/scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-002_GEX3_S2/S2/outs/filtered_feature_bc_matrix.h5 /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/S2_raw_feature_bc_matrix.h5`
+
+`scp -r kxw755@pegasus.ccs.miami.edu:/scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-002_GEX3_S2/S2/outs/web_summary.html /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/S2_web_summary.html`
+
+`scp -r kxw755@pegasus.ccs.miami.edu:/scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-002_GEX3_S2/S2/outs/metrics_summary.csv /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/S2_metrics_summary.csv`
 
 
 ## Sample 3 Count
@@ -524,3 +542,12 @@ cellranger count \
 ```
 
 `bsub < count_S3.job`
+
+`scp -r kxw755@pegasus.ccs.miami.edu:/scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-003_GEX3_S3/S3/outs/filtered_feature_bc_matrix.h5 /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/S3_raw_feature_bc_matrix.h5`
+
+`scp -r kxw755@pegasus.ccs.miami.edu:/scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-003_GEX3_S3/S3/outs/web_summary.html /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/S3_web_summary.html`
+
+`scp -r kxw755@pegasus.ccs.miami.edu:/scratch/projects/dark_genes/20231128_BCL_Convert_FASTQ/16000-003_GEX3_S3/S3/outs/metrics_summary.csv /Users/kevinwong/MyProjects/DarkGenes_Bleaching_Comparison/output/CellRanger/S3_metrics_summary.csv`
+
+
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20231213_CellRanger_Stat_Comparison.png?raw=true)
