@@ -340,3 +340,77 @@ mapqThr = 20.
 Too many characters in one row! Try to split the long row into several short rows (fewer than 1000000 characters per row).
 Error! at /opt/software/BS-Snper/1.0-foss-2021b/bin/BS-Snper.pl line 110.
 ```
+
+
+## 20240220 Attempt
+
+we are following Danielle's post now: https://github.com/daniellembecker/DanielleBecker_Lab_Notebook/blob/master/_posts/2024-02-12-Testing-BS-SNPer-Molec-Underpinnings-WGBS.md
+
+
+`nano BS_SNPER.sh`
+
+```bash
+#!/bin/bash
+#SBATCH --job-name="BS_snper"
+#SBATCH -t 500:00:00
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --mem=120GB
+#SBATCH --account=putnamlab
+#SBATCH --export=NONE
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kevin_wong1@uri.edu
+#SBATCH -D /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/BS-SNPer/merged_SNP_output/
+
+# load modules
+module load BS-Snper/1.0-foss-2021b
+
+perl /opt/software/BS-Snper/1.0-foss-2021b/bin/BS-Snper.pl \
+--fa /data/putnamlab/kevin_wong1/Past_Genome/past_filtered_assembly.fasta \
+--input /data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/methylseq_trim3/WGBS_methylseq/bismark_deduplicated/merged-sorted-deduplicated.bam \
+--output SNP-candidates.txt \
+--methcg CpG-meth-info.tab \
+--methchg CHG-meth-info.tab \
+--methchh CHH-meth-info.tab \
+--minhetfreq 0.1 \
+--minhomfreq 0.85 \
+--minquali 15 \
+--mincover 5 \
+--maxcover 1000 \
+--minread2 2 \
+--errorate 0.02 \
+--mapvalue 20 \
+
+>SNP-results.vcf 2>SNP.log
+
+```
+
+According to Kevin Bryan and Danielle, the number of scaffold/chromosomes and lines must be adjusted in the program. The following code determines how many lines are in our genome file: 
+
+`cd /data/putnamlab/kevin_wong1/Past_Genome`
+
+`nano max_ln.py`
+
+````
+import sys
+mx = 0
+with open(sys.argv[1]) as fd:
+ for ln in fd.readlines():
+  mx = max(len(ln), mx)
+print(mx)
+````
+
+`interactive`
+
+`module load Python/3.10.8-GCCcore-12.2.0`
+
+`python max_ln.py past_filtered_assembly.fasta` 
+
+This outputs: 3369716
+
+I asked Kevin Bryan to increase the line input to accomodate 3.3 million lines and re-ran the same script. It is running now!!
+
+
+
+
+
+
