@@ -237,7 +237,7 @@ Here I will perform the Seurat analysis until the QC step to see how many cells 
 
 ## Install and load dependencies
 
-```{r, message=FALSE, warning=FALSE}
+```bash
 
 # Load packages
 library(Seurat)
@@ -250,7 +250,7 @@ library(gprofiler2)
 
 ### Load the dataset
 
-```{r}
+```bash
 allcells.data <- Read10X_h5(filename = '../../output/CellRanger/V3_genome/R1_AllCells_v3_filtered_feature_bc_matrix.h5')
 str(allcells.data)
 
@@ -261,7 +261,7 @@ allcells
 
 ### QC and selecting cells for further analysis
 
-```{r}
+```bash
 
 # Visualize QC metrics as a violin plot
 VlnPlot(allcells, features = c("nFeature_RNA", "nCount_RNA"), ncol = 2)
@@ -281,7 +281,7 @@ allcells
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240328_AllcellsQC.png?raw=true)
 
 
-```{r}
+```bash
 # subest for features > 200 and < 3000, counts < 20000
 allcells_sub <- subset(allcells, subset = nFeature_RNA > 200 & nFeature_RNA < 3000 & nCount_RNA < 10000)
 
@@ -299,7 +299,7 @@ allcells_sub
 
 ### Load the dataset
 
-```{r}
+```bash
 allcells_cat.data <- Read10X_h5(filename = '../../output/CellRanger/V3_genome/R1_AllCells_v3_cat_filtered_feature_bc_matrix.h5')
 str(allcells_cat.data)
 
@@ -310,7 +310,7 @@ allcells_cat
 
 ### QC and selecting cells for further analysis
 
-```{r}
+```bash
 # The [[ operator can add columns to object metadata. This is a great place to stash QC stats
 
 allcells_cat[["percent.mt"]] <- PercentageFeatureSet(allcells_cat, pattern = "^gene-")
@@ -330,7 +330,7 @@ allcells_cat
 
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240328_Allcells_cat_QC.png?raw=true)
 
-```{r}
+```bash
 # subest for features > 200 and < 3000, counts < 20000
 allcells_cat_sub <- subset(allcells_cat, subset = nFeature_RNA > 200 & nFeature_RNA < 3000 & nCount_RNA < 10000 & percent.mt < 0.2)
 
@@ -348,7 +348,7 @@ allcells_cat_sub
 
 ### Load the dataset
 
-```{r}
+```bash
 allcells_comb.data <- Read10X_h5(filename = '../../output/CellRanger/V3_genome/R1_AllCells_v3_comb_filtered_feature_bc_matrix.h5')
 str(allcells_comb.data)
 
@@ -362,7 +362,7 @@ allcells_comb
 ### QC and selecting cells for further analysis
 
 
-```{r}
+```bash
 # The [[ operator can add columns to object metadata. This is a great place to stash QC stats
 
 allcells_comb[["percent.mt"]] <- PercentageFeatureSet(allcells_comb, pattern = "^mle")
@@ -382,7 +382,7 @@ allcells_comb
 
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240328_Allcells_comb_QC.png?raw=true)
 
-```{r}
+```bash
 # subest for features > 200 and < 3000, counts < 20000
 allcells_comb_sub <- subset(allcells_comb, subset = nFeature_RNA > 200 & nFeature_RNA < 3000 & nCount_RNA < 10000 & percent.mt < 0.2)
 
