@@ -196,6 +196,84 @@ cellranger mkref \
 
 `bsub < mkgtf_syms.job`
 
+error: 
+
+```bash
+Fatal LIMIT error: the number of junctions to be inserted on the fly =2833619 is larger than the limitSjdbInsertNsj=1000000
+Fatal LIMIT error: the number of junctions to be inserted on the fly =2833619 is larger than the limitSjdbInsertNsj=1000000
+SOLUTION: re-run with at least --limitSjdbInsertNsj 2833619
+
+Mar 26 16:12:54 ...... FATAL ERROR, exiting
+
+```
+
+Maybe lets try this without symA and see if this frees up the memory/RAM usage
+
+`nano mkgtf_syms2.job`
+
+```bash
+#!/bin/bash
+
+#BSUB -J scSeq_mkgtf_syms2
+#BSUB -q bigmem
+#BSUB -P dark_genes
+#BSUB -n 16
+#BSUB -W 120:00
+#BSUB -R "rusage[mem=15000]"
+#BSUB -u kxw755@earth.miami.edu
+#BSUB -o gfas_syms_mkgtf_v2.out
+#BSUB -e gfas_syms_mkgtf_v2.err
+
+###################################################################
+
+cellranger mkref \
+--genome=gfas_1.0 --fasta=/nethome/kxw755/Gfas_v1/gfas_final_1.0.fasta --genes=/nethome/kxw755/Gfas_v1/gfas_1.0.filtered.gtf \
+--genome=symB --fasta=/nethome/kxw755/sym_genomes/symbB.v1.0.genome.fa --genes=/nethome/kxw755/sym_genomes/symbB.v1.2.augustus.gtf \
+--genome=symC --fasta=/nethome/kxw755/sym_genomes/Clago1_AssemblyScaffolds_Repeatmasked.fasta --genes=/nethome/kxw755/sym_genomes/Clago1_GeneCatalog_genes_20200812.gtf \
+--genome=symD --fasta=/nethome/kxw755/sym_genomes/Dtrenchii_SCF082_ASSEMBLY.fasta --genes=/nethome/kxw755/sym_genomes/Dtrenchii_SCF082_ANNOT.gtf 
+```
+
+`bsub < mkgtf_syms2.job`
+
+```bash
+Fatal LIMIT error: the number of junctions to be inserted on the fly =1992803 is larger than the limitSjdbInsertNsj=1000000
+Fatal LIMIT error: the number of junctions to be inserted on the fly =1992803 is larger than the limitSjdbInsertNsj=1000000
+SOLUTION: re-run with at least --limitSjdbInsertNsj 1992803
+
+Mar 27 11:04:18 ...... FATAL ERROR, exiting
+```
+
+okay - according to this [link](https://kb.10xgenomics.com/hc/en-us/articles/360003877352-How-can-I-modify-the-STAR-alignment-parameters-in-Cell-Ranger) I need to adjust a parameter in the STAR file, but I don't think I have access. I am going to just map the symbionts with out the Galaxea genome and see what hits. 
+
+
+`nano mkgtf_syms_only.job`
+
+```bash
+#!/bin/bash
+
+#BSUB -J scSeq_mkgtf_symsonly
+#BSUB -q bigmem
+#BSUB -P dark_genes
+#BSUB -n 16
+#BSUB -W 120:00
+#BSUB -R "rusage[mem=15000]"
+#BSUB -u kxw755@earth.miami.edu
+#BSUB -o syms_mkgtf_only.out
+#BSUB -e syms_mkgtf_only.err
+
+###################################################################
+
+cellranger mkref \
+--genome=symA --fasta=/nethome/kxw755/sym_genomes/Symmic1_AssemblyScaffolds_Repeatmasked.fasta --genes=/nethome/kxw755/sym_genomes/Symmic1.ExternalModels.gtf \
+--genome=symB --fasta=/nethome/kxw755/sym_genomes/symbB.v1.0.genome.fa --genes=/nethome/kxw755/sym_genomes/symbB.v1.2.augustus.gtf \
+--genome=symC --fasta=/nethome/kxw755/sym_genomes/Clago1_AssemblyScaffolds_Repeatmasked.fasta --genes=/nethome/kxw755/sym_genomes/Clago1_GeneCatalog_genes_20200812.gtf \
+--genome=symD --fasta=/nethome/kxw755/sym_genomes/Dtrenchii_SCF082_ASSEMBLY.fasta --genes=/nethome/kxw755/sym_genomes/Dtrenchii_SCF082_ANNOT.gtf 
+```
+
+`bsub < mkgtf_syms_only.job`
+
+
+
 # Rerunning Count with the combined genome
 
 ## Run 1
