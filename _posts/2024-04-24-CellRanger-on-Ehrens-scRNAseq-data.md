@@ -8,13 +8,13 @@ tags: scRNAseq
 
 # Background
 
-* This post describes the initial QC analysis for scRNAseq on Acropora cervicornis and Pocillopora damicornis using the new 10X GEMX cel capture technology. FYI to analyze this data, you must use `cellranger/8.0.0`. 
+* This post describes the initial QC analysis for scRNAseq on *Acropora cervicornis* and *Pocillopora damicornis* using the new 10X GEMX cel capture technology. FYI to analyze this data, you must use `cellranger/8.0.0`. 
 
 * For each species, there are two separate libraries: 001 = All cells, 002 = ALDH+ cells
 
-# Acropora cervicornis analysis
+# *Acropora cervicornis* analysis
 
-## Downloading Acropora cervicornis genome
+## Downloading *Acropora cervicornis* genome
 
 https://www.ncbi.nlm.nih.gov/datasets/genome/GCA_032359415.1/
 
@@ -148,9 +148,9 @@ scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240418_Ehrens-18003-002_GE
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240503_18003-002_tsne.png)
 
 
-# Pocillopora damicornis analysis
+# *Pocillopora damicornis* analysis
 
-## Download Pocillopora damicornis genome
+## Download *Pocillopora damicornis* genome
 
 https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_003704095.1/
 
