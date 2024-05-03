@@ -99,6 +99,8 @@ Export
 scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240418_Ehrens-18003-001_GEX3_GEMX/18003-001/outs/web_summary.html /Users/kxw755/Desktop/Ehrens_StemCells/20240418_Ehrens-18003-001_web_summary.html
 
 scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240418_Ehrens-18003-001_GEX3_GEMX/18003-001/outs/filtered_feature_bc_matrix.h5 /Users/kxw755/Desktop/Ehrens_StemCells/20240418_Ehrens-18003-001_filtered_feature_bc_matrix.h5
+
+scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240418_Ehrens-18003-001_GEX3_GEMX/18003-001/outs/metrics_summary.csv /Users/kxw755/Desktop/Ehrens_StemCells/20240418_Ehrens-18003-001_metrics_summary.csv
 ```
 
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240503_18003-001_Stats.png)
@@ -142,6 +144,8 @@ Export
 scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240418_Ehrens-18003-002_GEX3_GEMX/18003-002/outs/web_summary.html /Users/kxw755/Desktop/Ehrens_StemCells/20240418_Ehrens-18003-002_web_summary.html
 
 scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240418_Ehrens-18003-002_GEX3_GEMX/18003-002/outs/filtered_feature_bc_matrix.h5 /Users/kxw755/Desktop/Ehrens_StemCells/20240418_Ehrens-18003-002_filtered_feature_bc_matrix.h5
+
+scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240418_Ehrens-18003-002_GEX3_GEMX/18003-002/outs/metrics_summary.csv /Users/kxw755/Desktop/Ehrens_StemCells/20240418_Ehrens-18003-002_metrics_summary.csv
 ```
 
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240503_18003-002_Stats.png)
@@ -233,6 +237,8 @@ Export
 scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240501_Ehrens-18114-001_GEX3_GEMX/18114-001/outs/web_summary.html /Users/kxw755/Desktop/Ehrens_StemCells/20240501_Ehrens-18114-001_web_summary.html
 
 scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240501_Ehrens-18114-001_GEX3_GEMX/18114-001/outs/filtered_feature_bc_matrix.h5 /Users/kxw755/Desktop/Ehrens_StemCells/20240501_Ehrens-18114-001_filtered_feature_bc_matrix.h5
+
+scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240501_Ehrens-18114-001_GEX3_GEMX/18114-001/outs/metrics_summary.csv /Users/kxw755/Desktop/Ehrens_StemCells/20240501_Ehrens-18114-001_metrics_summary.csv
 ```
 
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240503_18114-001_Stats.png)
@@ -276,7 +282,14 @@ Export
 scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240501_Ehrens-18114-002_GEX3_GEMX/18114-002/outs/web_summary.html /Users/kxw755/Desktop/Ehrens_StemCells/20240501_Ehrens-18114-002_web_summary.html
 
 scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240501_Ehrens-18114-002_GEX3_GEMX/18114-002/outs/filtered_feature_bc_matrix.h5 /Users/kxw755/Desktop/Ehrens_StemCells/20240501_Ehrens-18114-002_filtered_feature_bc_matrix.h5
+
+scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240501_Ehrens-18114-002_GEX3_GEMX/18114-002/outs/metrics_summary.csv /Users/kxw755/Desktop/Ehrens_StemCells/20240501_Ehrens-18114-002_metrics_summary.csv
 ```
 
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240503_18114-002_Stats.png)
 ![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240503_18114-002_tsne.png)
+
+# Summary
+
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240503_SummaryTable.png)
+
