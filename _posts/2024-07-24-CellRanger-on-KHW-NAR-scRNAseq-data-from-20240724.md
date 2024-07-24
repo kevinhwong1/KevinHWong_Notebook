@@ -5,3 +5,11 @@ date: '2024-07-24'
 categories: Analysis
 tags: scRNAseq
 ---
+
+# Sample information
+
+| Sample # | Customer Sample Name |       BaseSpace Sample ID       | Flow Cell Type |    Read Type   | Total number of clusters (reads) per sample |
+|:--------:|:--------------------:|:-------------------------------:|:--------------:|:--------------:|:-------------------------------------------:|
+|     1    |     gfas_control     | AndradeRodriguez-19876-001_GEX3 |     10B-300    | paired-end,151 |                 581,421,834                 |
+|     2    |      gfas_bleach     | AndradeRodriguez-19876-002_GEX3 |     10B-300    | paired-end,151 |                 636,439,053                 |
+
