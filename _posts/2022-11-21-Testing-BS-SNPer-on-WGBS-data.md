@@ -410,6 +410,22 @@ This outputs: 3369716
 I asked Kevin Bryan to increase the line input to accomodate 3.3 million lines and re-ran the same script. It is running now!!
 
 
+Count number of lines in the SNP-results.vcf file:
+
+`wc -l SNP-results.vcf`
+
+2,209,450
+
+
+Following Stevens code, use the grep function to select for specific SNP mutations where the reference allele is C and the alternate allele is G to find CT SNPs from the output file:
+
+`grep $'C\tT' SNP-results.vcf > CT-SNP.vcf`
+
+`wc -l CT-SNP.vcf`
+
+237,748 SNPs out of 2,209,450 = 11%
+
+`scp -r kevin_wong1@ssh3.hac.uri.edu:/data/putnamlab/kevin_wong1/Thermal_Transplant_WGBS/Past_WGBS/BS-SNPer/merged_SNP_output/CT-SNP.vcf /Users/kevinwong/Desktop`
 
 
 
