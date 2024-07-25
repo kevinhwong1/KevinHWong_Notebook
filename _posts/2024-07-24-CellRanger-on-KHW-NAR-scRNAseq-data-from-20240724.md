@@ -50,6 +50,16 @@ cellranger count \
 
 `bsub < count_001.job`
 
+Export
+
+```bash
+scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240724_AndradeRodriguez-19876-001/19876-001/outs/web_summary.html /Users/kxw755/Desktop/DarkGenes/20240724_CellRanger/20240724_AndradeRodriguez-19876-001_web_summary.html
+
+scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240724_AndradeRodriguez-19876-001/19876-001/outs/filtered_feature_bc_matrix.h5 /Users/kxw755/Desktop/DarkGenes/20240724_CellRanger/20240724_AndradeRodriguez-19876-001_filtered_feature_bc_matrix.h5
+
+scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240724_AndradeRodriguez-19876-001/19876-001/outs/metrics_summary.csv /Users/kxw755/Desktop/DarkGenes/20240724_CellRanger/20240724_AndradeRodriguez-19876-001_metrics_summary.csv
+```
+
 # Count 002
 
 `nano count_002.job`
