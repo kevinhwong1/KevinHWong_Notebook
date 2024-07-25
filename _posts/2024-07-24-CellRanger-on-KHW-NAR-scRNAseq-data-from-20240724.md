@@ -60,6 +60,9 @@ scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240724_AndradeRodriguez-19
 scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240724_AndradeRodriguez-19876-001/19876-001/outs/metrics_summary.csv /Users/kxw755/Desktop/DarkGenes/20240724_CellRanger/20240724_AndradeRodriguez-19876-001_metrics_summary.csv
 ```
 
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240724_001_stats.png)
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240724_001_tsne.png)
+
 # Count 002
 
 `nano count_002.job`
@@ -99,3 +102,10 @@ scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240724_AndradeRodriguez-19
 
 scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20240724_AndradeRodriguez-19876-002/19876-002/outs/metrics_summary.csv /Users/kxw755/Desktop/DarkGenes/20240724_CellRanger/20240724_AndradeRodriguez-19876-002_metrics_summary.csv
 ```
+
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240724_002_stats.png)
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240724_002_tsne.png)
+
+# Summary Table
+
+![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20240724_summary.png)
