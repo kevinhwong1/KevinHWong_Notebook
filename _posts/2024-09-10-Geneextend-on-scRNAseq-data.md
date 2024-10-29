@@ -17,26 +17,20 @@ The code from this post was inspired by Zoe Dellaert.
 ### Installing GeneExt on Pegasus
 
 ```bash
-cd /nethome/kxw755/conda/
-mkdir -p conda/envs
-cd conda/envs
+cd nethome/kxw755/
+source anaconda3/bin/activate 
 
-module load anaconda3/2022.10.lua #load miniconda
-source /share/apps/anaconda/anaconda3_build/bin/activate 
-git clone https://github.com/sebepedroslab/GeneExt.git #clone GeneExt repo
-
-cd GeneExt
+# Copy repo
+git clone https://github.com/sebepedroslab/GeneExt.git
 
 # create environment
-conda env create --prefix /nethome/kxw755/conda/envs/GeneExt/geneext -f environment.yaml
+conda env create --prefix geneext -f GeneExt/environment.yaml
 
-# activate environment
-conda activate /nethome/kxw755/conda/GeneExt/geneext  
-
-# renaming python script
-#mv geneext.py run_geneext.py
+#activate conda
+conda activate /projectnb/pegasus/nethome/kxw755/geneext
 
 # Test run 
+cd GeneExt
 python geneext.py -g test_data/annotation.gtf -b test_data/alignments.bam -o result.gtf --peak_perc 0
 ```
 
@@ -144,50 +138,4 @@ Extended 23/35 genes
 Median extension length: 931.0 bp
 ```
 
-
-### Yay! A successful installation!
-
-### Running GeneExt: Run this on the bam file from cellranger count, with the GTF file you used for cellranger mkref
-
-```
-cd /nethome/kxw755/Mnemi_phagocyte_10x/10X_round2/Round2_AllCells_1
-mkdir GeneExt
-cd GeneExt
-
-nano GeneExt_Mnemi.sh
-```
-
-```bash
-#BSUB -J GeneExt
-#BSUB -q general
-#BSUB -P dark_genes
-#BSUB -n 8
-#BSUB -W 120:00
-#BSUB -u kxw755@earth.miami.edu
-#BSUB -o GeneExt.out
-#BSUB -e GeneExt.err
-#BSUB -B
-#BSUB -N
-###################################################################
-
-module load anaconda3/2022.10.lua #load miniconda
-
-# activate environment
-conda activate /nethome/kxw755/conda/envs/GeneExt/geneext
-
-#cd /nethome/kxw755/Mnemi_phagocyte_10x/Mle_F31_T2T_genome/GeneExt
-
-#the gtf has to have the gene and transcript IDs be different.
-
-# Append -T to each transcript_id and save to a new file
-#sed 's/transcript_id "\([^"]*\)"/transcript_id "\1-T"/g' /work/pi_hputnam_uri_edu/snRNA_analysis/references/Pocillopora_acuta_HIv2.gtf > /work/#pi_hputnam_uri_edu/snRNA_analysis/references/Pocillopora_acuta_HIv2_modified.gtf
-
-# use --clip_strand both to not allow GeneExt to create overlaps on the same strand
-
-python /nethome/kxw755/conda/envs/GeneExt/geneext.py \
-    -g /nethome/kxw755/Mnemi_phagocyte_10x/Mle_F31_T2T_genome/Mle_v3_cat2.gtf \
-    -b /nethome/kxw755/Mnemi_phagocyte_10x/10X_round2/Round2_AllCells_1/R2_AllCells1_v3_cat/outs/possorted_genome_bam.bam \
-    -o Mle_v3_cat_GeneExt.gtf \
-    -v 3 \
-    --clip_strand both
-```
+Yay! A successful installation! Now I can run this on the merged BAM output files from CellRanger. 
