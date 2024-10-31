@@ -45,7 +45,7 @@ Using htslib 1.3.1
 Copyright (C) 2016 Genome Research Ltd.
 ```
 
-# STAR
+# STAR and MultiQC
 
 ```bash
 cd /nethome/kxw755/
@@ -53,6 +53,9 @@ conda create -n star_env
 conda activate star_env
 conda install -c bioconda star=2.7.11b
 STAR --version #2.7.11b
+
+conda install -c bioconda multiqc
+multiqc --version #1.25.1
 ```
 
 # AGAT
