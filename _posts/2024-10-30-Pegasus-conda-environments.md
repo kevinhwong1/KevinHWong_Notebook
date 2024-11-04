@@ -94,10 +94,10 @@ source anaconda3/bin/activate
 git clone https://github.com/sebepedroslab/GeneExt.git
 
 # create environment
-conda env create --prefix geneext -f GeneExt/environment.yaml
+conda env create -n geneext -f GeneExt/environment.yaml
 
 #activate conda
-conda activate /projectnb/pegasus/nethome/kxw755/geneext
+conda activate geneext
 
 # Test run 
 cd GeneExt
