@@ -59,6 +59,7 @@ multiqc --version #1.25.1
 ```
 
 # AGAT
+https://agat.readthedocs.io/en/latest/agat_how_does_it_work.html
 
 ```bash
 cd /nethome/kxw755/
@@ -74,6 +75,15 @@ cd /nethome/kxw755/
 conda create -n ncbi_datasets python=3.8
 conda activate ncbi_datasets
 conda install -c conda-forge -c bioconda ncbi-datasets-cli
+```
+
+# featureCounts (subread)
+https://pubmed.ncbi.nlm.nih.gov/24227677/
+
+```bash
+cd /nethome/kxw755/
+conda create -c bioconda -n featurecounts subread
+conda activate featurecounts
 ```
 
 # GeneExt
