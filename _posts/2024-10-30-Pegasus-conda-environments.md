@@ -217,3 +217,17 @@ Extending genes ... done
 Extended 23/35 genes
 Median extension length: 931.0 bp
 ```
+
+# BUSCO
+
+```bash
+# Create conda environment
+conda create -n busco_env -c conda-forge -c bioconda busco=5.4.7 -y
+conda activate busco_env
+
+# Download databases
+mkdir BUSCO
+cd BUSCO/
+busco --download eukaryota_odb10
+busco --download metazoa_odb10
+```
