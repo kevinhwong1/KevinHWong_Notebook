@@ -13,7 +13,13 @@ I am interested in finding the sequences for these two genes in Nematostella:
 * NV2g011441000.1 (FOX1A)
 * NV2g019682000.1 (FRIS-like-8)
 
-## Determine if sequences are in genome
+## Genomic information
+
+* I am using the NV2 genome: https://simrbase.stowers.org/starletseaanemone
+* I am using the transcript file from here: https://simrbase.stowers.org/files/pub/nematostella/Nvec/genomes/Nvec200/aligned/tcs_v2/20240221/NV2g.20240221.transcripts.fa
+* Whole genome can be found here: https://www.ncbi.nlm.nih.gov/datasets/genome/GCA_033964005.1/
+
+## Determine if sequences are in transcript file
 
 ```bash
 [kxw755@pegasus NV2_Nvec]$ grep -n "NV2g011441000\.1" NV2g.20240221.transcripts.fa | head 
@@ -24,7 +30,7 @@ I am interested in finding the sequences for these two genes in Nematostella:
 1059715:>NV2t019682001.1 gene=NV2g019682000.1 CDS=109-627
 ```
 
-Sweet they are in there but one has multiple transcripts
+Sweet they are in there but one has multiple transcripts.
 
 ## Extract sequences
 
@@ -164,10 +170,7 @@ CTCTGTATTTATCATTGCTTCACTTTTATTTATACTAGTCAGGCGAGGGAACGGTTTTTATTGTAAATGT
 ACTCTCATGGTCAACGTTTGTGGATACTTGAAGAAAATAAATTTTTAACGAATC
 ```
 
-
 ## Find what differs between the transcripts (from the GTF)
-
-Since NV2g011441000.1 has multiple transcripts, we will have to find the common region shared by all isoforms (i.e. gene level validation instead of isoform level)
 
 ```bash
 gene="NV2g011441000.1"
@@ -196,6 +199,8 @@ NV2t011441003.1 chr2    7131875 7133504 +
 ```
 
 ## Identify exons shared by all isoforms vs unique
+
+Since NV2g011441000.1 has multiple transcripts, we will have to find the common region shared by all isoforms (i.e. gene level validation instead of isoform level)
 
 ```bash
 gene="NV2g011441000.1"
@@ -245,7 +250,7 @@ Therefore, the chr2:7131875-7133504:+ region is common across all three transcri
 
 ## Extract the common sequence directly from the transcript FASTA
 
-isolate just the transcripts for NV2g011441000.1:
+Isolate just the transcripts for NV2g011441000.1:
 
 ```bash
 awk '
