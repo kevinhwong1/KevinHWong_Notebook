@@ -170,6 +170,8 @@ CTCTGTATTTATCATTGCTTCACTTTTATTTATACTAGTCAGGCGAGGGAACGGTTTTTATTGTAAATGT
 ACTCTCATGGTCAACGTTTGTGGATACTTGAAGAAAATAAATTTTTAACGAATC
 ```
 
+Since NV2g011441000.1 has multiple transcripts, we will have to find the common region shared by all isoforms (i.e. gene level validation instead of isoform level)
+
 ## Find what differs between the transcripts (from the GTF)
 
 ```bash
@@ -199,8 +201,6 @@ NV2t011441003.1 chr2    7131875 7133504 +
 ```
 
 ## Identify exons shared by all isoforms vs unique
-
-Since NV2g011441000.1 has multiple transcripts, we will have to find the common region shared by all isoforms (i.e. gene level validation instead of isoform level)
 
 ```bash
 gene="NV2g011441000.1"
