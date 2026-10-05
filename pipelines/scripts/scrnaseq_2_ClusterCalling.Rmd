@@ -1,0 +1,466 @@
+---
+title: "scRNA-seq cluster calling: integration, PCA, UMAP, clustering"
+subtitle: "Template from https://kevinhwong1.github.io/KevinHWong_Notebook/pipelines/scrnaseq-qc-clustering.html"
+author: "<fill in: your name>"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+<!--
+STEP 2 OF 2 (cluster calling). Input: QC_Files/SeuratObjectFiltered_<SPECIES>_<sample>.rds from
+scrnaseq_1_QC.Rmd.
+
+HOW TO USE THIS FILE
+Run interactively, chunk by chunk -- do not knit start-to-finish. Several chunks are DECISION
+POINTS: they save diagnostic plots/tables, then you set a parameter (DIMS_FINAL, NN_FINAL,
+MDIST_FINAL, RES_FINAL) by reading those outputs. Later chunks stop with a clear message until the
+parameter is set. Values used for P. damicornis are given in comments as an example, not a default.
+-->
+
+# Setup
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
+```
+
+```{r libraries}
+library(here)
+library(tidyverse)
+library(Seurat)
+library(glmGamPoi)
+library(conflicted)
+library(clustree)
+library(cluster)       # silhouette
+library(clusterCrit)   # Calinski-Harabasz, Davies-Bouldin
+library(FNN)            # neighborhood preservation (get.knn)
+library(patchwork)
+
+conflicts_prefer(
+  dplyr::select, dplyr::filter, dplyr::count, dplyr::rename, dplyr::first,
+  base::intersect, base::union, base::setdiff,
+  purrr::map, purrr::discard,
+  .quiet = TRUE
+)
+
+set.seed(1234)
+```
+
+# Configuration
+
+```{r config}
+SPECIES <- "<fill in: species code, same as in scrnaseq_1_QC.Rmd, e.g. Pdam>"
+
+qc_rds_dir <- here("<fill in: QC output folder from step 1, e.g. output/Pdam/QC>", "QC_Files")
+out_base   <- here("<fill in: output folder for clustering, e.g. output/Pdam/Seurat>")
+
+# Sample IDs exactly as in step 1 (files are QC_Files/SeuratObjectFiltered_<SPECIES>_<sample_id>.rds)
+sample_ids <- c("<fill in: sample ID 1>", "<fill in: sample ID 2>")
+COVARIATE_NAME <- "genotype"   # what the covariate column from step 1 means (plot labels only)
+
+N_VARIABLE_FEATURES <- 3000    # SCTransform / integration features (falls back to 2000 on memory errors)
+```
+
+```{r check-config}
+stopifnot("Replace every '<fill in: ...>' value in the Configuration chunk first." =
+            !any(grepl("<fill in", c(SPECIES, qc_rds_dir, out_base, sample_ids), fixed = TRUE)))
+
+qc_out         <- file.path(out_base, "QC")
+umap_sweep_dir <- file.path(qc_out, "UMAP_Sweep")
+res_umap_dir   <- file.path(qc_out, "Resolution_UMAPs")
+walk(c(out_base, qc_out, umap_sweep_dir, res_umap_dir), dir.create, recursive = TRUE, showWarnings = FALSE)
+
+sample_config <- tibble(
+  sample_id = sample_ids,
+  path      = file.path(qc_rds_dir, sprintf("SeuratObjectFiltered_%s_%s.rds", SPECIES, sample_ids))
+)
+stopifnot("QC-filtered .rds files not found -- run scrnaseq_1_QC.Rmd first and check paths." =
+          all(file.exists(sample_config$path)))
+sample_config
+```
+
+# Load QC-filtered objects
+
+```{r load-objects}
+sample.list <- map(sample_config$path, readRDS)
+names(sample.list) <- sample_config$sample_id
+
+map_int(sample.list, ncol)
+```
+
+# Per-sample SCTransform
+
+```{r sctransform}
+# Regress out percent_mito only if step 1 computed it (no mito genes for Pdam/Gfas -> nothing to regress).
+sample.list <- map(sample.list, function(obj) {
+  SCTransform(
+    obj,
+    method              = "glmGamPoi",
+    variable.features.n = N_VARIABLE_FEATURES,
+    vars.to.regress     = if ("percent_mito" %in% colnames(obj@meta.data)) "percent_mito" else NULL,
+    verbose             = FALSE
+  )
+})
+```
+
+```{r variable-feature-overlap}
+var_feats <- map(sample.list, VariableFeatures)
+
+pairwise_overlap <- combn(names(var_feats), 2, function(pair) {
+  a <- var_feats[[pair[1]]]; b <- var_feats[[pair[2]]]
+  tibble(
+    sample_a = pair[1], sample_b = pair[2],
+    n_shared = length(intersect(a, b)),
+    jaccard  = length(intersect(a, b)) / length(union(a, b))
+  )
+}, simplify = FALSE) %>% bind_rows()
+
+all_shared <- Reduce(intersect, var_feats)
+message("Variable features shared across all samples: ", length(all_shared))
+
+write_csv(pairwise_overlap, file.path(qc_out, "00b_VariableFeature_Overlap.csv"))
+pairwise_overlap
+```
+
+# Integration
+
+```{r integration}
+features <- SelectIntegrationFeatures(object.list = sample.list, nfeatures = N_VARIABLE_FEATURES)
+nfeatures_used <- N_VARIABLE_FEATURES
+
+sample.list.prepped <- PrepSCTIntegration(object.list = sample.list, anchor.features = features)
+
+anchors <- tryCatch({
+  FindIntegrationAnchors(
+    object.list          = sample.list.prepped,
+    normalization.method = "SCT",
+    anchor.features      = features,
+    dims                 = 1:30,
+    k.anchor             = 5
+  )
+}, error = function(e) {
+  # Known Seurat v5 memory issue (protocol Section 3.2 / 6): retry at nfeatures = 2000.
+  message("FindIntegrationAnchors failed at nfeatures=", N_VARIABLE_FEATURES, " (", conditionMessage(e),
+          "). Retrying at nfeatures=2000 -- known Seurat v5 memory issue.")
+  nfeatures_used <<- 2000
+  features2 <- SelectIntegrationFeatures(object.list = sample.list, nfeatures = 2000)
+  sample.list.prepped2 <- PrepSCTIntegration(object.list = sample.list, anchor.features = features2)
+  FindIntegrationAnchors(
+    object.list          = sample.list.prepped2,
+    normalization.method = "SCT",
+    anchor.features      = features2,
+    dims                 = 1:30,
+    k.anchor             = 5
+  )
+})
+
+combined <- IntegrateData(anchorset = anchors, normalization.method = "SCT")
+DefaultAssay(combined) <- "integrated"
+
+message("Integration complete. nfeatures used: ", nfeatures_used, " | cells: ", ncol(combined))
+```
+
+# PCA dimensionality — DECISION POINT
+
+```{r pca}
+combined <- RunPCA(combined, npcs = 50, verbose = FALSE)
+
+p_elbow <- ElbowPlot(combined, ndims = 50) + ggtitle(paste(SPECIES, "— PCA elbow"))
+ggsave(file.path(qc_out, "01_ElbowPlot.jpeg"), p_elbow, width = 7, height = 5)
+
+stdev <- combined[["pca"]]@stdev
+pct_var <- (stdev^2) / sum(stdev^2) * 100
+cum_var <- cumsum(pct_var)
+
+pc_variance_table <- tibble(
+  PC = seq_along(pct_var),
+  pct_var = pct_var,
+  cum_var = cum_var
+)
+algorithmic_elbow <- which.min(diff(pct_var))
+pc_at_80 <- min(which(cum_var >= 80))
+pc_at_85 <- min(which(cum_var >= 85))
+pc_at_90 <- min(which(cum_var >= 90))
+
+message("Algorithmic elbow (max drop in per-PC variance): PC ", algorithmic_elbow)
+message("Cumulative variance crossings — 80%: PC ", pc_at_80,
+        " | 85%: PC ", pc_at_85, " | 90%: PC ", pc_at_90)
+
+write_csv(pc_variance_table, file.path(qc_out, "02_CumulativeVariance.csv"))
+
+p_cumvar <- ggplot(pc_variance_table, aes(PC, cum_var)) +
+  geom_line() + geom_point(size = 0.8) +
+  geom_hline(yintercept = c(80, 85, 90), linetype = "dashed", color = "grey50") +
+  geom_vline(xintercept = algorithmic_elbow, linetype = "dotted", color = "red") +
+  labs(y = "Cumulative % variance", title = paste(SPECIES, "— cumulative PCA variance")) +
+  theme_minimal()
+ggsave(file.path(qc_out, "02_CumulativeVariance.jpeg"), p_cumvar, width = 7, height = 5)
+
+# PC gene-loading heatmaps in blocks of 9 -- confirm no early PC is dominated by a single gene
+# family, and that PCs past your candidate cutoff aren't still biologically coherent.
+pc_blocks <- split(1:50, ceiling(seq_along(1:50) / 9))
+walk2(pc_blocks, seq_along(pc_blocks), function(dims_block, i) {
+  jpeg(file.path(qc_out, sprintf("03_PCHeatmaps_block%02d.jpeg", i)),
+       width = 1600, height = 1600, res = 150)
+  DimHeatmap(combined, dims = dims_block, cells = 500, balanced = TRUE, fast = TRUE)
+  dev.off()
+})
+
+pc_variance_table
+```
+
+```{r set-dims-final}
+# ---- DECISION POINT ----
+# Review 01_ElbowPlot.jpeg, 02_CumulativeVariance.jpeg/csv and the 03_PCHeatmaps_* blocks, then set
+# DIMS_FINAL. Ignore the "algorithmic elbow" if it lands on PC1-2 (common with a steep PC1 drop).
+# Pdam example: DIMS_FINAL = 30 (85% cumulative variance; PC heatmaps still coherent through ~PC36).
+DIMS_FINAL <- NA   # <-- SET ME
+
+stopifnot("Set DIMS_FINAL above before continuing." = !is.na(DIMS_FINAL))
+```
+
+# UMAP parameter sweep — DECISION POINT
+
+```{r umap-sweep, eval = !is.na(DIMS_FINAL)}
+nn_grid   <- c(20, 30, 50)
+mdist_grid <- c(0.1, 0.3, 0.5)
+grid <- expand_grid(nn = nn_grid, mdist = mdist_grid)
+
+DefaultAssay(combined) <- "integrated"
+
+max_cells_metrics <- min(3000, ncol(combined))
+metric_cells <- sample(colnames(combined), max_cells_metrics)
+
+pca_emb <- Embeddings(combined, "pca")[metric_cells, 1:DIMS_FINAL]
+
+sweep_results <- pmap(grid, function(nn, mdist) {
+  combined <- RunUMAP(combined, dims = 1:DIMS_FINAL, n.neighbors = nn, min.dist = mdist,
+                       verbose = FALSE)
+  umap_emb <- Embeddings(combined, "umap")[metric_cells, ]
+
+  # Neighborhood preservation: fraction of true k-NN (PCA space) recovered in UMAP space.
+  k <- 30
+  knn_pca  <- get.knn(pca_emb,  k = k)$nn.index
+  knn_umap <- get.knn(umap_emb, k = k)$nn.index
+  preservation <- mean(map_dbl(seq_len(nrow(knn_pca)), function(i) {
+    length(intersect(knn_pca[i, ], knn_umap[i, ])) / k
+  }))
+
+  # Cluster quality at a fixed placeholder resolution (0.5) -- cross-grid comparison only, NOT the
+  # final resolution decision (that's Section 3.5 below).
+  combined <- FindNeighbors(combined, dims = 1:DIMS_FINAL, verbose = FALSE)
+  combined <- FindClusters(combined, resolution = 0.5, verbose = FALSE)
+  clust_sub <- combined$seurat_clusters[metric_cells]
+
+  crit <- intCriteria(pca_emb, as.integer(clust_sub), c("Calinski_Harabasz", "Davies_Bouldin"))
+  sil <- silhouette(as.integer(clust_sub), dist(pca_emb))
+  avg_sil <- mean(sil[, "sil_width"])
+
+  # Covariate mixing entropy per cluster, normalized to [0,1] (1 = perfectly mixed).
+  covar_sub <- combined$covariate[metric_cells]
+  n_cat <- length(unique(covar_sub))
+  entropy_by_cluster <- tapply(covar_sub, clust_sub, function(x) {
+    p <- table(x) / length(x)
+    -sum(p * log(p)) / log(n_cat)
+  })
+  mean_entropy <- mean(entropy_by_cluster, na.rm = TRUE)
+
+  p_umap <- DimPlot(combined, reduction = "umap", group.by = "seurat_clusters") +
+    ggtitle(sprintf("nn=%d, min.dist=%.1f", nn, mdist)) +
+    theme(legend.position = "none")
+
+  list(
+    metrics = tibble(
+      n_neighbors = nn, min_dist = mdist,
+      neighborhood_preservation = preservation,
+      calinski_harabasz = crit$calinski_harabasz,
+      davies_bouldin = crit$davies_bouldin,
+      avg_silhouette = avg_sil,
+      mean_covariate_entropy = mean_entropy
+    ),
+    plot = p_umap
+  )
+})
+
+umap_sweep_metrics <- bind_rows(map(sweep_results, "metrics"))
+write_csv(umap_sweep_metrics, file.path(umap_sweep_dir, "umap_sweep_metrics.csv"))
+
+p_grid <- wrap_plots(map(sweep_results, "plot"), ncol = 3)
+ggsave(file.path(umap_sweep_dir, "umap_sweep_grid.jpeg"), p_grid, width = 15, height = 15)
+
+umap_sweep_metrics
+```
+
+```{r set-umap-final}
+# ---- DECISION POINT ----
+# Review umap_sweep_metrics.csv and umap_sweep_grid.jpeg. Prioritize neighborhood_preservation when
+# metrics disagree, then prefer clean, round (not smeared) clusters. n.neighbors / min.dist only change
+# the 2D layout -- clusters come from the PCA graph -- so this is a visualization choice. With few
+# samples, don't over-weight mean covariate entropy.
+# Pdam example: NN_FINAL = 30, MDIST_FINAL = 0.3.
+NN_FINAL    <- NA   # <-- SET ME
+MDIST_FINAL <- NA   # <-- SET ME
+
+stopifnot("Set NN_FINAL and MDIST_FINAL above before continuing." =
+            !is.na(NN_FINAL) && !is.na(MDIST_FINAL))
+
+combined <- RunUMAP(combined, dims = 1:DIMS_FINAL, n.neighbors = NN_FINAL, min.dist = MDIST_FINAL,
+                     verbose = FALSE)
+```
+
+# Clustering resolution sweep — DECISION POINT
+
+```{r resolution-sweep, eval = !is.na(NN_FINAL)}
+combined <- FindNeighbors(combined, dims = 1:DIMS_FINAL, verbose = FALSE)
+
+res_seq <- seq(0.2, 1.0, by = 0.1)
+combined <- FindClusters(combined, resolution = res_seq, verbose = FALSE)
+
+res_cols <- grep("^integrated_snn_res\\.", colnames(combined@meta.data), value = TRUE)
+
+# 1. Cluster count vs. resolution
+cluster_counts <- tibble(
+  resolution = res_seq,
+  n_clusters = map_dbl(res_cols, ~ length(unique(combined@meta.data[[.x]])))
+)
+write_csv(cluster_counts, file.path(qc_out, "cluster_count_vs_resolution.csv"))
+
+p_counts <- ggplot(cluster_counts, aes(resolution, n_clusters)) +
+  geom_line() + geom_point() +
+  labs(title = paste(SPECIES, "— cluster count vs. resolution")) +
+  theme_minimal()
+ggsave(file.path(qc_out, "05_ClusterCount_vs_Resolution.jpeg"), p_counts, width = 7, height = 5)
+
+# 2. Clustree
+p_clustree <- clustree(combined, prefix = "integrated_snn_res.")
+ggsave(file.path(qc_out, "06_Clustree.jpeg"), p_clustree, width = 10, height = 10)
+
+# 3. Silhouette width vs. resolution (subsampled, PCA-space distances)
+pca_emb_full <- Embeddings(combined, "pca")[metric_cells, 1:DIMS_FINAL]
+dist_full <- dist(pca_emb_full)
+
+silhouette_by_res <- map_dbl(res_cols, function(col) {
+  clust_sub <- combined@meta.data[metric_cells, col]
+  if (length(unique(clust_sub)) < 2) return(NA_real_)
+  mean(silhouette(as.integer(as.character(clust_sub)) + 1L, dist_full)[, "sil_width"])
+})
+silhouette_table <- tibble(resolution = res_seq, avg_silhouette = silhouette_by_res)
+write_csv(silhouette_table, file.path(qc_out, "silhouette_vs_resolution.csv"))
+
+p_sil <- ggplot(silhouette_table, aes(resolution, avg_silhouette)) +
+  geom_line() + geom_point() +
+  labs(title = paste(SPECIES, "— silhouette width vs. resolution")) +
+  theme_minimal()
+ggsave(file.path(qc_out, "07_Silhouette_vs_Resolution.jpeg"), p_sil, width = 7, height = 5)
+
+# Per-resolution UMAP panels for visual/biological-interpretability review
+walk(res_cols, function(col) {
+  res_label <- sub("integrated_snn_res\\.", "", col)
+  p <- DimPlot(combined, reduction = "umap", group.by = col, label = TRUE) +
+    ggtitle(paste0("Resolution ", res_label))
+  ggsave(file.path(res_umap_dir, sprintf("resolution_%s.jpeg", res_label)),
+         p, width = 7, height = 6)
+})
+
+cluster_counts
+```
+
+```{r set-res-final}
+# ---- DECISION POINT ----
+# Review the plateau in 05_ClusterCount_vs_Resolution.jpeg, stable ("quiet") levels in 06_Clustree.jpeg,
+# the peak/plateau in 07_Silhouette_vs_Resolution.jpeg, and whether clusters in Resolution_UMAPs/ look
+# biologically sensible. Resolutions tested: 0.2-1.0 in steps of 0.1.
+# Pdam example: RES_FINAL = 0.5 (26 clusters).
+RES_FINAL <- NA   # <-- SET ME
+
+stopifnot("Set RES_FINAL above before continuing." = !is.na(RES_FINAL))
+
+res_col_values <- as.numeric(sub("integrated_snn_res\\.", "", res_cols))
+match_idx <- which(abs(res_col_values - RES_FINAL) < 1e-6)
+stopifnot("RES_FINAL does not match any resolution column that was actually computed above." =
+            length(match_idx) == 1)
+final_res_col <- res_cols[match_idx]
+
+combined$seurat_clusters <- combined@meta.data[[final_res_col]]
+Idents(combined) <- "seurat_clusters"
+
+message("Final clustering: ", length(unique(combined$seurat_clusters)), " clusters at resolution ",
+        RES_FINAL)
+```
+
+# Cluster QC diagnostics
+
+```{r cluster-qc, eval = !is.na(RES_FINAL)}
+# Cell counts per cluster per covariate level -- flag <50 cells or >90% from one level.
+cluster_covariate_counts <- combined@meta.data %>%
+  count(seurat_clusters, covariate) %>%
+  group_by(seurat_clusters) %>%
+  mutate(total = sum(n), pct = n / total) %>%
+  ungroup()
+
+cluster_flags <- cluster_covariate_counts %>%
+  group_by(seurat_clusters) %>%
+  summarise(
+    total_cells = first(total),
+    max_covariate_pct = max(pct),
+    flag_low_n = total_cells < 50,
+    flag_covariate_skew = max_covariate_pct > 0.90,
+    .groups = "drop"
+  )
+write_csv(cluster_flags, file.path(qc_out, "cluster_qc_flags.csv"))
+write_csv(cluster_covariate_counts, file.path(qc_out, "cluster_covariate_counts.csv"))
+
+if (any(cluster_flags$flag_low_n | cluster_flags$flag_covariate_skew)) {
+  message("Clusters flagged for review before Stage B annotation:")
+  print(filter(cluster_flags, flag_low_n | flag_covariate_skew))
+}
+
+qc_feats <- intersect(c("nFeature_RNA", "nCount_RNA", "log10GenesPerUMI", "percent_mito"), colnames(combined@meta.data))
+p_qc_violin <- VlnPlot(combined, features = qc_feats, group.by = "seurat_clusters", pt.size = 0, ncol = 1)
+ggsave(file.path(qc_out, "cluster_qc_violins.jpeg"), p_qc_violin, width = 10, height = 8)
+
+# Covariate mixing -- stacked bar + split UMAP
+p_stack <- ggplot(cluster_covariate_counts, aes(seurat_clusters, pct, fill = covariate)) +
+  geom_col() +
+  labs(title = paste(COVARIATE_NAME, "composition per cluster"), y = "Proportion", fill = COVARIATE_NAME) +
+  theme_minimal()
+ggsave(file.path(qc_out, "cluster_covariate_stackedbar.jpeg"), p_stack, width = 8, height = 5)
+
+p_split <- DimPlot(combined, reduction = "umap", split.by = "covariate", label = TRUE)
+ggsave(file.path(qc_out, "umap_split_by_covariate.jpeg"), p_split, width = 6 * length(unique(combined$covariate)), height = 6)
+
+cluster_flags
+```
+
+# Save finalized parameters and pre-annotation object
+
+```{r save-outputs, eval = !is.na(RES_FINAL)}
+finalised_params <- tibble(
+  n_samples = nrow(sample_config),
+  species = SPECIES,
+  n_cells = ncol(combined),
+  nfeatures_used = nfeatures_used,
+  dims_final = DIMS_FINAL,
+  nn_final = NN_FINAL,
+  mdist_final = MDIST_FINAL,
+  res_final = RES_FINAL,
+  n_clusters_final = length(unique(combined$seurat_clusters)),
+  date = as.character(Sys.Date())
+)
+write_csv(finalised_params, file.path(qc_out, "00_Finalised_Parameters.csv"))
+
+saveRDS(combined, file.path(out_base, sprintf("%s_integrated.rds", SPECIES)))
+
+finalised_params
+```
+
+<!--
+NEXT STEPS
+1. Check that each DECISION POINT value is justified by the diagnostics (and note why in your notebook).
+2. Clusters flagged in cluster_qc_flags.csv (<50 cells, or >90% from one covariate level) need a look
+   before annotation.
+3. <SPECIES>_integrated.rds is the input to cluster annotation.
+-->

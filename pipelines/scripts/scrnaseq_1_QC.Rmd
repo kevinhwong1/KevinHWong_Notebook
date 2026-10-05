@@ -1,0 +1,244 @@
+---
+title: "scRNA-seq QC: CellBender counts -> QC-filtered Seurat objects"
+subtitle: "Template from https://kevinhwong1.github.io/KevinHWong_Notebook/pipelines/scrnaseq-qc-clustering.html"
+author: "<fill in: your name>"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+<!--
+STEP 1 OF 2 (QC). Next: scrnaseq_2_ClusterCalling.Rmd.
+
+What this does, per sample:
+  1. Load the CellBender-filtered .h5 (ambient RNA removed, empty droplets already dropped).
+  2. Optionally fix feature IDs so they match your annotation tables.
+  3. Plot nFeature / nCount / log10GenesPerUMI (and percent_mito if you have mitochondrial genes).
+  4. Filter on nFeature / nCount (and percent_mito).
+  5. Detect doublets with scDblFinder ON THE FILTERED CELLS (see the note in that chunk), drop them.
+  6. Save one filtered .rds per sample + a QC summary table.
+
+Fill in every "<fill in: ...>" in the Configuration chunk. The first chunk after it stops if any
+are left. Set thresholds AFTER looking at the pre-filter plots: the defaults are the values used
+for Pocillopora damicornis, not universal numbers.
+-->
+
+# Setup
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
+```
+
+```{r libraries}
+library(here)
+library(tidyverse)
+library(Seurat)
+library(scCustomize)        # Read_CellBender_h5_Mat()
+library(scDblFinder)        # BiocManager::install(c("scDblFinder", "SingleCellExperiment"))
+library(SingleCellExperiment)
+library(conflicted)
+
+conflicts_prefer(
+  dplyr::select, dplyr::filter, dplyr::count, dplyr::rename,
+  base::intersect, base::union, base::setdiff,
+  .quiet = TRUE
+)
+```
+
+# Configuration
+
+```{r config}
+SPECIES <- "<fill in: species code, e.g. Pdam>"
+
+# Folder with the CellBender *_filtered.h5 files, and where QC outputs should go
+# (paths are relative to the project root found by here::here()).
+cellbender_dir <- here("<fill in: folder with CellBender .h5 files, e.g. cellbender_output/Pdam>")
+qc_out_dir     <- here("<fill in: output folder, e.g. output/Pdam/QC>")
+
+# One row per sample. `covariate` is whatever distinguishes samples biologically or technically
+# (genotype, treatment, batch...); it is carried into the clustering step to check mixing.
+sample_config <- tribble(
+  ~sample_id,                           ~covariate,                          ~file,
+  "<fill in: sample ID 1>",             "<fill in: e.g. genotype 1>",        "<fill in: sample1_cellbender_output_filtered.h5>",
+  "<fill in: sample ID 2>",             "<fill in: e.g. genotype 2>",        "<fill in: sample2_cellbender_output_filtered.h5>"
+)
+COVARIATE_NAME <- "genotype"   # what the covariate column means (used in plot labels)
+
+# Optional: make feature IDs match your annotation tables. GeneExt/CellBender IDs for Pdam use
+# underscores (pdam_00025168) while downstream tables use dashes (pdam-00025168).
+# Use identity (function(x) x) to leave IDs unchanged.
+fix_feature_ids <- function(x) gsub("_", "-", x)
+
+# Optional mitochondrial filter. NULL = no mito genes in your reference (true for Pdam and Gfas).
+# Otherwise a regex matching mitochondrial gene IDs (e.g. "^mt-") or a character vector of IDs.
+MITO_GENES <- NULL
+max_percent_mito <- 20   # only used when MITO_GENES is set
+
+# QC thresholds -- check them against the pre-filter plots below before trusting them.
+# Defaults = values used for P. damicornis (cross-checked against Cole et al. 2024 and
+# Valadez-Ingersoll et al. 2025 for other cnidarians).
+qcMetricsThresholds <- c(
+  "min_nFeature_RNA" = 300,
+  "max_nFeature_RNA" = 6000,
+  "min_nCount_RNA"   = 400,
+  "max_nCount_RNA"   = 35000
+)
+noveltyReferenceThreshold <- 0.80   # log10GenesPerUMI reference line: plotted, NOT used to filter
+
+SEED <- 20260827
+```
+
+```{r check-config}
+cfg_values <- c(SPECIES, cellbender_dir, qc_out_dir, unlist(sample_config))
+stopifnot("Replace every '<fill in: ...>' value in the Configuration chunk first." =
+            !any(grepl("<fill in", cfg_values, fixed = TRUE)))
+
+sample_config <- sample_config %>% mutate(path = file.path(cellbender_dir, file))
+stopifnot("One or more CellBender .h5 files not found -- check cellbender_dir and file names." =
+            all(file.exists(sample_config$path)))
+stopifnot("sample_id values must be unique." = !anyDuplicated(sample_config$sample_id))
+
+qc_rds_dir <- file.path(qc_out_dir, "QC_Files")
+dir.create(qc_rds_dir, recursive = TRUE, showWarnings = FALSE)
+
+qcMetrics.tmp <- c("nFeature_RNA", "nCount_RNA", "log10GenesPerUMI",
+                   if (!is.null(MITO_GENES)) "percent_mito")
+sample_config
+```
+
+# Load CellBender-filtered counts
+
+```{r load-objects}
+# CellBender already removed empty droplets, so no separate emptyDrops() step.
+sample.list <- pmap(sample_config, function(sample_id, covariate, file, path) {
+  message("Loading ", sample_id, " ...")
+  mat <- Read_CellBender_h5_Mat(path)
+  rownames(mat) <- fix_feature_ids(rownames(mat))
+  obj <- CreateSeuratObject(mat)
+
+  obj$sample_id <- sample_id
+  obj$covariate <- covariate
+
+  # Complexity/novelty score: mito-independent sign of damaged / low-complexity droplets.
+  obj$log10GenesPerUMI <- log10(obj$nFeature_RNA) / log10(obj$nCount_RNA)
+
+  if (!is.null(MITO_GENES)) {
+    if (length(MITO_GENES) == 1) {
+      obj$percent_mito <- PercentageFeatureSet(obj, pattern = MITO_GENES)
+    } else {
+      obj$percent_mito <- PercentageFeatureSet(obj, features = intersect(MITO_GENES, rownames(obj)))
+    }
+  }
+  obj
+})
+names(sample.list) <- sample_config$sample_id
+
+map_int(sample.list, ncol)
+```
+
+# QC diagnostic plots (pre-filter)
+
+```{r qc-plots}
+walk2(sample.list, names(sample.list), function(obj, sid) {
+  plot_df <- obj@meta.data %>%
+    select(all_of(qcMetrics.tmp)) %>%
+    pivot_longer(everything(), names_to = "metric", values_to = "value") %>%
+    mutate(metric = factor(metric, levels = qcMetrics.tmp))
+
+  thresh_df <- tibble(
+    metric    = str_replace(names(qcMetricsThresholds), "^(min|max)_", ""),
+    threshold = unname(qcMetricsThresholds)
+  ) %>%
+    bind_rows(tibble(metric = "log10GenesPerUMI", threshold = noveltyReferenceThreshold)) %>%
+    bind_rows(if (!is.null(MITO_GENES)) tibble(metric = "percent_mito", threshold = max_percent_mito)) %>%
+    filter(metric %in% qcMetrics.tmp) %>%
+    mutate(metric = factor(metric, levels = qcMetrics.tmp))
+
+  p <- ggplot(plot_df, aes(x = "sample", y = value)) +
+    geom_violin() +
+    ggrastr::rasterise(geom_jitter(size = 0.5), dpi = 300) +
+    facet_wrap(~metric, ncol = length(qcMetrics.tmp), scales = "free_y") +
+    geom_hline(data = thresh_df, aes(yintercept = threshold), color = "red", linetype = "dashed") +
+    labs(title = paste0(SPECIES, " ", sid, " -- pre-filter QC"), x = NULL, y = NULL) +
+    theme_minimal(base_size = 11)
+
+  ggsave(file.path(qc_out_dir, sprintf("QC_Plots_%s.jpeg", sid)),
+         p, dpi = 300, width = 3.7 * length(qcMetrics.tmp), height = 4, units = "in")
+})
+
+cat("QC plots saved to:", qc_out_dir, "\n")
+```
+
+# Filter, remove doublets, save
+
+```{r filter-and-save}
+qc_summary <- pmap_dfr(sample_config, function(sample_id, covariate, file, path) {
+  obj <- sample.list[[sample_id]]
+  total_before <- ncol(obj)
+
+  # Step 1: threshold filter.
+  keep <- obj$nFeature_RNA >= qcMetricsThresholds["min_nFeature_RNA"] &
+          obj$nFeature_RNA <= qcMetricsThresholds["max_nFeature_RNA"] &
+          obj$nCount_RNA   >= qcMetricsThresholds["min_nCount_RNA"] &
+          obj$nCount_RNA   <= qcMetricsThresholds["max_nCount_RNA"]
+  if (!is.null(MITO_GENES)) keep <- keep & obj$percent_mito <= max_percent_mito
+  obj_qc <- subset(obj, cells = colnames(obj)[keep])
+
+  # Step 2: doublets. Run scDblFinder on the ALREADY-FILTERED cells. Its automatic expected doublet
+  # rate scales with the number of cells it is given (~1% per 1,000 cells); running it on the raw
+  # CellBender output (which still contains many marginal droplets) inflated the Pdam doublet rate
+  # to 20-39%. On the filtered cells it was a realistic 6.5-11%.
+  sce <- SingleCellExperiment(
+    assays = list(counts = GetAssayData(obj_qc, assay = DefaultAssay(obj_qc), layer = "counts"))
+  )
+  set.seed(SEED)
+  sce <- scDblFinder(sce)
+  obj_qc$scDblFinder.class <- sce$scDblFinder.class
+  obj_qc$scDblFinder.score <- sce$scDblFinder.score
+
+  p_dbl <- ggplot(obj_qc@meta.data, aes(x = scDblFinder.score, fill = scDblFinder.class)) +
+    geom_histogram(bins = 60, alpha = 0.85, position = "identity") +
+    labs(title = paste0(SPECIES, " ", sample_id, " -- scDblFinder score (after threshold filter)"),
+         x = "scDblFinder score", y = "cells", fill = "call") +
+    theme_minimal(base_size = 11)
+  ggsave(file.path(qc_out_dir, sprintf("Doublet_Score_%s.jpeg", sample_id)),
+         p_dbl, dpi = 300, width = 6, height = 4, units = "in")
+
+  # Step 3: keep singlets.
+  cells_keep <- colnames(obj_qc)[obj_qc$scDblFinder.class == "singlet"]
+  n_doublets <- ncol(obj_qc) - length(cells_keep)
+  obj_filtered <- subset(obj_qc, cells = cells_keep)
+
+  saveRDS(obj_filtered, file.path(qc_rds_dir, sprintf("SeuratObjectFiltered_%s_%s.rds", SPECIES, sample_id)))
+
+  tibble(
+    sample_id                   = sample_id,
+    covariate                   = covariate,
+    total_cells_before          = total_before,
+    total_cells_after_qc_filter = ncol(obj_qc),
+    n_doublets_removed          = n_doublets,
+    pct_doublets                = round(100 * n_doublets / ncol(obj_qc), 2),
+    total_cells_kept            = ncol(obj_filtered),
+    pct_kept                    = round(100 * ncol(obj_filtered) / total_before, 1),
+    median_nFeature             = median(obj_filtered$nFeature_RNA),
+    median_nCount               = median(obj_filtered$nCount_RNA),
+    median_log10GenesPerUMI     = round(median(obj_filtered$log10GenesPerUMI), 3),
+    pct_below_novelty_reference = round(100 * mean(obj_filtered$log10GenesPerUMI < noveltyReferenceThreshold), 1)
+  )
+})
+
+write_csv(qc_summary, file.path(qc_out_dir, sprintf("QC_Filtered_Summary_%s.csv", SPECIES)))
+qc_summary
+```
+
+<!--
+CHECK BEFORE MOVING ON
+- pct_doublets should be roughly 0.5-10% for 10x data. Much higher usually means scDblFinder was
+  given too many (unfiltered) cells, not that the data are bad.
+- In Doublet_Score_<sample>.jpeg the singlet/doublet boundary ideally sits in a trough. With low-UMI
+  data there is often no second peak and the cut falls in the right tail; fine if the rate is sensible.
+- Next: scrnaseq_2_ClusterCalling.Rmd reads QC_Files/SeuratObjectFiltered_<SPECIES>_<sample>.rds.
+-->

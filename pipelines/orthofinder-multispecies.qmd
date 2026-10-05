@@ -1,0 +1,164 @@
+---
+title: "Multi-species orthology with OrthoFinder"
+description: "Find orthogroups and pairwise orthologs across several cnidarian proteomes in a single OrthoFinder run, ready for cross-species marker transfer and comparative genomics. One LSF job."
+date: 2026-05-25
+date-modified: last-modified
+type: "Pipeline"
+categories: ["Comparative genomics", "scRNA-seq", "HPC & computing"]
+tools: ["OrthoFinder 3", "MAFFT", "FastTree", "DIAMOND"]
+filters:
+  - ../_filters/post-meta.lua
+---
+
+## Overview
+
+[OrthoFinder](https://github.com/davidemms/OrthoFinder) groups the proteins of several species into **orthogroups** (gene families descended from one ancestral gene) and uses gene trees to call **orthologs** between every pair of species. In the single-cell work these tables are the bridge between species: published cell-type markers from one coral atlas are mapped onto genes in another species to score its clusters.
+
+::: {.callout-important}
+## Run all species together, not pairwise
+Coral genomes have many tandem duplications. Gene trees built from several species at once (plus an outgroup such as *Nematostella vectensis*) root correctly and separate orthologs from paralogs much better than separate two-species runs. All recent analyses use one combined run.
+:::
+
+```{mermaid}
+flowchart LR
+  P[Proteome FASTA or URL<br/>per species] --> C[Clean + check<br/>login node]
+  C --> O[OrthoFinder<br/>MSA gene trees<br/>one LSF job]
+  O --> G[(Orthogroups.tsv<br/>gene counts<br/>single-copy OGs)]
+  O --> R[(Pairwise ortholog<br/>tables)]
+  R --> S[Pair summary:<br/>total and 1:1 pairs]
+```
+
+## Inputs
+
+| Input | Notes |
+|---|---|
+| One **protein FASTA** per species | Local path or an `https://` URL (e.g. NCBI, reefgenomics, GitHub). Gzipped files are fine. |
+| A short **species code** per species | Becomes the file name (`Pdam.fa`) and therefore the column name in `Orthogroups.tsv`. Letters, numbers and `_` only. |
+| An **outgroup** | e.g. *N. vectensis* (`NV2g.20240221.protein.fa` from [SimrBase](https://simrbase.stowers.org/nematostella)) |
+
+Ideally use **one protein per gene** (longest isoform). OrthoFinder treats every isoform as a separate gene, which inflates paralogs.
+
+## Software
+
+| Tool | How it's loaded |
+|---|---|
+| OrthoFinder (with MAFFT and FastTree for MSA gene trees) | Its own conda env, e.g. `conda create -n orthofinder_env -c bioconda orthofinder` |
+
+Keep `orthofinder_env` separate from other environments (see the [functional annotation pipeline](functional-annotation.qmd), which uses the same rule).
+
+## Run it {#run-it}
+
+The script never needs editing; your species and paths go in a config file.
+
+1. **Make a config file:**
+
+   ```bash
+   bash orthofinder_multispecies.sh --init my_orthofinder.config
+   ```
+
+2. **Fill it in** (`nano my_orthofinder.config`). Replace every `<fill in: ...>` value:
+
+   ```bash
+   RUN="<fill in: short run name, e.g. Pdam_Amil_Spis_Nvec>"
+   RUN_DIR="<fill in: /path/to/scratch/orthofinder/RUN_NAME>"
+   SPECIES=(   "<fill in: code 1, e.g. Pdam>"   "<fill in: code 2>"   "<fill in: code 3>" )
+   PROTEOMES=( "<fill in: /path/or/URL/to/proteins_1.fasta>" "<fill in: proteins_2>" "<fill in: proteins_3>" )
+   # ... plus LSF project, email; defaults for cores, memory and OrthoFinder options
+   ```
+
+3. **Check the proteomes first** (fast, on the login node):
+
+   ```bash
+   PREP_ONLY=1 bash orthofinder_multispecies.sh my_orthofinder.config
+   ```
+
+   This writes cleaned files to `<RUN_DIR>/proteomes/<CODE>.fa` and a `proteome_summary.tsv` with protein counts. It also stops if a download fails, a file has no sequences, or protein IDs are duplicated after shortening headers. Cleaning removes any text before the first `>`, removes blank lines, strips Windows line endings, and shortens each header to its first word.
+
+4. **Submit:**
+
+   ```bash
+   bash orthofinder_multispecies.sh my_orthofinder.config
+   bjobs <JOB ID>
+   ```
+
+   Default resources: `bigmem`, 16 cores, `rusage[mem=15000]`, 120 h walltime (the settings used for the four-species run below).
+
+### Full script
+
+[Download `orthofinder_multispecies.sh`](scripts/orthofinder_multispecies.sh){.btn .btn-sm .btn-outline-primary}
+
+```{.bash filename="orthofinder_multispecies.sh"}
+{{< include scripts/orthofinder_multispecies.sh >}}
+```
+
+## Outputs
+
+In `<RUN_DIR>/summary/` (copied there when the job finishes):
+
+| File | What it is |
+|---|---|
+| `Orthogroups.tsv` | Every orthogroup, with that species' genes in each column |
+| `Orthogroups.GeneCount.tsv` | Genes per species per orthogroup (gene-family expansions) |
+| `Orthogroups_SingleCopyOrthologues.txt` | Orthogroups with exactly one gene in every species |
+| `Statistics_Overall.tsv` | % genes assigned, number of orthogroups, G50/O50 |
+| `ortholog_pair_summary.tsv` | For each species pair: ortholog rows and strict 1:1 pairs |
+
+Pairwise ortholog tables for each species are in `<RUN_DIR>/results/Results_<RUN>/Orthologues/Orthologues_<CODE>/<CODE>__v__<OTHER>.tsv`.
+
+## Example results
+
+**Four species for *P. damicornis* cell-type annotation** (*P. damicornis*, *A. millepora*, *S. pistillata*, *N. vectensis*; May 2026): 103,775 genes (89.3%) assigned to 17,897 orthogroups; 9,303 orthogroups contain all four species, and 4,546 of those are single-copy in every species.
+
+| Pair | Ortholog rows | 1:1 pairs |
+|---|---|---|
+| *P. damicornis* – *A. millepora* | 11,797 | 8,657 |
+| *P. damicornis* – *S. pistillata* | 16,788 | 12,937 |
+| *P. damicornis* – *N. vectensis* | 11,410 | 6,683 |
+
+**Ten species for the cnidarian single-cell atlas** (*A. cervicornis*, *A. millepora*, *A. muricata*, *G. fascicularis*, *N. vectensis*, *O. patagonica*, *O. faveolata*, *P. damicornis*, *S. pistillata*, *Xenia* sp.): 19,320 orthogroups, 1,146 single-copy across all ten.
+
+## Using the tables for marker transfer
+
+Gene IDs rarely match exactly between a published atlas, its proteome and your own Cell Ranger features. Before scoring clusters with transferred markers:
+
+1. **Normalize IDs** on each side (e.g. Pdam: CellBender `pdam_00025168` → `pdam-00025168`; proteome/OrthoFinder `pdam_00000427-RA`; Gfas: strip the trailing `.m1`).
+2. **Check the match rate empirically**: count how many marker-table IDs are actually found in `Orthogroups.tsv` after normalization. In the atlas this was 97.8% (*A. millepora*), 98.7% (*S. pistillata*) and 96.6% (*O. patagonica*). For *A. muricata* the marker IDs (EVM models) and the proteome IDs (RefSeq) had no crosswalk, so that reference was left out of automated scoring.
+3. Prefer **1:1 orthologs** for module scores; one-to-many groups are better for manual follow-up.
+
+## Known issues {#known-issues}
+
+::: {.callout-warning collapse="false"}
+## Messy FASTA files from GitHub and other sources
+The *A. millepora* and *S. pistillata* proteomes downloaded from GitHub had a trailing blank line, and one had text before the first header. Long headers with spaces and pipes also cause trouble downstream. The prep step handles all of these and stops on duplicate IDs.
+:::
+
+::: {.callout-note collapse="true"}
+## Results folder already exists
+OrthoFinder won't write into an existing results folder. The script names results `Results_<RUN>` and stops before submitting if that folder exists. Use a new `RUN` name.
+:::
+
+::: {.callout-note collapse="true"}
+## Default OrthoFinder vs MSA gene trees
+The default (DendroBLAST) is much faster, and is fine for a first look. MSA gene trees (`-M msa -A mafft -T fasttree`) are slower but give better ortholog calls in gene families with many duplications, so they're the default here. To use the fast mode, set `ORTHOFINDER_ARGS=""` in the config.
+:::
+
+## How it connects
+
+- **[Coral proteome functional annotation](functional-annotation.qmd)**: also runs OrthoFinder per species (vs human, mouse and *N. vectensis*) to get best human orthologs.
+- **[scRNA-seq QC and clustering](scrnaseq-qc-clustering.qmd)**: clusters from here are annotated using markers transferred through these orthologs.
+- Earlier notebook entries: [Troubleshooting OrthoFinder](../notebook/2023-12-05-troubleshooting-orthofinder.md), [OrthoFinder between coral species for cell type annotation](../notebook/2024-11-27-orthofinder-between-coral-species-for-cell-type-annotation.md).
+
+## References
+
+- Emms DM & Kelly S 2019. OrthoFinder: phylogenetic orthology inference for comparative genomics. *Genome Biology* 20:238.
+- Levy S et al. 2025. *Nature* 648:368–376 (source of the *A. millepora*, *S. pistillata* and *O. patagonica* proteomes and atlases).
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-10-05 | Config-driven script: `--init` template, FASTA cleaning and checks, `Results_<RUN>` naming, pair summary |
+| 2026-08 | Ten-species combined run replaces separate pairwise tables for the atlas |
+| 2026-05 | Four-species run with MSA gene trees for *P. damicornis* annotation |
+| 2025-11 | Pairwise runs (Acer–Amil, Pdam–Spis, Acer–Pdam–Nvec) |
+| 2023-12 | First OrthoFinder tests |

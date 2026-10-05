@@ -1,0 +1,210 @@
+---
+title: "Coral proteome functional annotation"
+description: "Annotate every gene model in a coral proteome with orthologs, domains, signal peptides, transmembrane topology and a functional class, merged into one master table per species. Eight LSF jobs per species."
+date: 2026-06-05
+date-modified: last-modified
+type: "Pipeline"
+categories: ["Functional annotation", "Comparative genomics", "HPC & computing"]
+tools: ["eggNOG-mapper v2", "OrthoFinder 3.1.0", "InterProScan 5.78-109.0", "DIAMOND 2.2.1", "SignalP 6.0", "DeepTMHMM 1.0", "HMMER 3.4"]
+filters:
+  - ../_filters/post-meta.lua
+---
+
+## Overview
+
+Coral genomes are full of genes with no name. This pipeline gathers every kind of evidence available for each predicted protein and merges it into a **single master annotation table per species** (53 columns, including the protein sequence). The table plugs straight into single-cell annotation, comparative genomics and cell–cell communication (CellChat) analyses.
+
+Every gene gets four independent labels:
+
+| Axis | Values | Meaning |
+|---|---|---|
+| **Confidence tier** | Gold > Silver > Bronze > Informative > Unclassified | How strong the homology evidence is |
+| **Annotation status** | Light / Partial / Dark | Named function / domain only / no evidence ("dark genes"), following Stephens et al. 2026 |
+| **Protein group** | 24 functional groups | For grouping genes in Seurat and CellChat |
+| **CellChat role** | Ligand / Receptor / Receptor_candidate / Neither | From signal peptide and transmembrane predictions |
+
+::: {.callout-tip}
+## Code and full documentation
+All scripts live in the public GitHub repository **[kevinhwong1/coral-func-annotation-pipeline](https://github.com/kevinhwong1/coral-func-annotation-pipeline)**. It also holds finished annotation tables for 10 cnidarian species, the [column schema](https://github.com/kevinhwong1/coral-func-annotation-pipeline/blob/main/docs/column_descriptions.md) and the [classification logic](https://github.com/kevinhwong1/coral-func-annotation-pipeline/blob/main/docs/classification_system.md). This page is the quick guide.
+:::
+
+## How it runs
+
+```{mermaid}
+flowchart LR
+  P[(Proteome FASTA<br/>+ GFF3)] --> A
+  subgraph A [Phase 1: submitted together, run in parallel]
+    direction TB
+    J1[01 eggNOG-mapper<br/>orthology, GO, KEGG]
+    J2[02 OrthoFinder<br/>vs human, mouse, Nvec]
+    J3[03 InterProScan<br/>domains]
+    J4[04 DIAMOND RBH<br/>vs SwissProt]
+    J5[05 SignalP 6]
+    J6[06 HMMER<br/>179 custom HMMs]
+    J7[07 DIAMOND<br/>curated coral refs]
+  end
+  J5 --> T[05b DeepTMHMM<br/>2,000-seq chunks]
+  T --> M{{Phase 2: merge<br/>DeepTMHMM chunks<br/>manual}}
+  A --> F[08 merge_annotate.py]
+  M --> F
+  F --> O[(Master annotation<br/>table + gene lists)]
+```
+
+| Job | Tool | Purpose | Queue | Walltime |
+|---|---|---|---|---|
+| 01 | eggNOG-mapper v2 | Orthology, GO, KEGG, COG | bigmem | 12 h |
+| 02 | OrthoFinder 3.1.0 | Orthologs vs human, mouse and *N. vectensis* | bigmem | 120 h |
+| 03 | InterProScan 5.78-109.0 | Domain annotation (17 databases) | bigmem | 48 h |
+| 04 | DIAMOND 2.2.1 | Reciprocal best hits vs SwissProt | bigmem | 8 h |
+| 05 | SignalP 6.0 | Signal peptides | general | 20 h |
+| 05b | DeepTMHMM 1.0 | Transmembrane topology, in 2,000-sequence chunks | general | 12 h per chunk |
+| 06 | HMMER 3.4 | Tier 3 custom HMM profiles | general | 6 h |
+| 07 | DIAMOND 2.2.1 | Tier 4 curated coral BLAST | general | 1 h |
+| 08 | `08_merge_annotate.py` | Merge all layers → master table | general | 2 h |
+
+## Run it
+
+### 1. One-time setup
+
+You need:
+
+- Anaconda in your home directory and Java 11+ (InterProScan).
+- **Academic licenses** for **SignalP 6.0** and **DeepTMHMM**, requested from [DTU Health Tech](https://services.healthtech.dtu.dk/services/SignalP-6.0/). Put the license tarballs in your home directory.
+- The *N. vectensis* proteome (`NV2g.20240221.protein.fa`) from [SimrBase](https://simrbase.stowers.org/nematostella), used as the OrthoFinder outgroup.
+
+```bash
+git clone https://github.com/kevinhwong1/coral-func-annotation-pipeline.git
+cd coral-func-annotation-pipeline
+```
+
+Edit the **top-level paths** in `pipeline/run_config.sh` for your account and cluster:
+
+```bash
+export NETHOME="<fill in: your home directory>"
+export BASE="<fill in: scratch folder for databases and runs>"
+export EMAIL="<fill in: email for LSF notifications>"
+export LSF_PROJECT="<fill in: LSF project/allocation>"
+```
+
+Then build the conda environments and download all databases. This takes 2–4 h; the eggNOG database alone is ~39 GB.
+
+```bash
+bash pipeline/00_setup_annotation_env.sh
+```
+
+### 2. Submit a species
+
+```bash
+source ~/anaconda3/etc/profile.d/conda.sh
+conda activate annotation_env
+
+# a species already configured in run_config.sh
+bash pipeline/submit_pipeline.sh Pdam
+
+# any new species: pass the paths as flags (no config edits needed)
+bash pipeline/submit_pipeline.sh <SPECIES_CODE> \
+    --proteome        <fill in: /path/to/proteome.fasta> \
+    --gff3            <fill in: /path/to/annotation.gff3> \
+    --genome_version  "<fill in: e.g. MySpecies_v1.0>" \
+    --proteome_source "<fill in: source URL>"
+```
+
+This writes every job script to `<BASE>/runs/<SPECIES>_<date>/logs/` and submits them with LSF dependencies.
+
+### 3. Merge the DeepTMHMM chunks, then the final merge runs
+
+DeepTMHMM chunks can fail individually, so merging them is a manual check:
+
+```bash
+RUN_DIR=<fill in: <BASE>/runs/<SPECIES>_<date>>
+TMHMM_DIR="${RUN_DIR}/05_tmhmm"
+
+# every chunk should say OK; resubmit missing ones with: bsub < ${RUN_DIR}/logs/job_05b_chunk_<NN>.bsub
+for d in "${TMHMM_DIR}"/results/chunk_*/; do
+  [[ -f "${d}/TMRs.gff3" ]] && echo "$(basename $d): OK" || echo "$(basename $d): MISSING"
+done
+
+echo "##gff-version 3" > "${TMHMM_DIR}/TMRs.gff3"
+for d in "${TMHMM_DIR}"/results/chunk_*/; do grep -v "^##gff-version" "${d}/TMRs.gff3" >> "${TMHMM_DIR}/TMRs.gff3"; done
+
+bsub < "${RUN_DIR}/logs/job_08_merge.bsub"
+```
+
+Monitor with `bjobs | grep <SPECIES>` and `bpeek <JID>`. Full restart and manual-merge instructions are in the repository's [pipeline README](https://github.com/kevinhwong1/coral-func-annotation-pipeline/blob/main/pipeline/README.md).
+
+## Outputs
+
+In `<RUN_DIR>/08_final/`:
+
+| File | What it is |
+|---|---|
+| `<SPECIES>_master_annotation.tsv` | **The table to use**: one row per gene, 53 columns (tier, status, protein group, best human ortholog, GO, KEGG, Pfam/InterPro, signal peptide, TM helices, CellChat role, sequence…) |
+| `gene_lists/` | Light / Partial / Dark gene lists, CellChat ligands and receptors, one list per protein group |
+| `<SPECIES>_annotation_summary.md` | Tier and group counts for the run |
+| `<SPECIES>_load_gene_lists.R` | Loads every gene list into R in one line |
+
+Join it to Seurat cluster markers by gene ID. Check that the ID formats match first: CellBender/GeneExt feature IDs often differ from the proteome IDs (e.g. `pdam_00025168` vs `pdam_00000427-RA`), so normalize them before joining.
+
+## Results so far
+
+| Species | Genes | Gold | Silver | Bronze | Light | Partial | Dark |
+|---|---|---|---|---|---|---|---|
+| *Galaxea fascicularis* | 22,418 | 31.2% | 23.0% | 10.7% | 71.6% | 9.9% | 18.4% |
+| *Pocillopora damicornis* | 26,077 | 27.1% | 21.6% | 10.1% | 64.3% | 9.3% | 26.4% |
+| *Acropora cervicornis* | 28,059 | 24.4% | 18.5% | 8.3% | 62.0% | 10.0% | 28.0% |
+| *Nematostella vectensis* | 32,495 | 21.5% | 24.6% | 12.0% | 65.7% | 11.1% | 23.2% |
+
+Six more species (*A. millepora*, *A. muricata*, *O. faveolata*, *O. patagonica*, *S. pistillata*, *Xenia* sp.) are in the [repository](https://github.com/kevinhwong1/coral-func-annotation-pipeline#annotation-results).
+
+## Known issues {#known-issues}
+
+The full list (~30 fixes) is in the repository's [pipeline README](https://github.com/kevinhwong1/coral-func-annotation-pipeline/blob/main/pipeline/README.md#known-issues-and-fixes). These are the ones most likely to catch you:
+
+::: {.callout-warning collapse="false"}
+## DeepTMHMM: compute node only, 12 h per chunk, run from its install folder
+It loads a 2.6 GB protein language model and is killed on login nodes. 2,000 sequences take ~9 h, so a 6 h walltime fails. It must `cd` into its install directory to find its model files, and it crashes if the output folder already exists.
+:::
+
+::: {.callout-warning collapse="false"}
+## Pin `numpy<2.0` and `fair-esm==0.4.0`
+numpy 2.x breaks SignalP and fair-esm; fair-esm 2.0 breaks DeepTMHMM's `predict.py`.
+:::
+
+::: {.callout-warning collapse="false"}
+## SignalP fails on long FASTA headers
+Strip headers to the first word before running (needed for *P. damicornis*). Otherwise SignalP throws an `OSError`.
+:::
+
+::: {.callout-note collapse="true"}
+## NCBI genomes: 0 reciprocal best hits and broken coordinates
+NCBI BLAST databases prefix subject IDs with `gb|accession|`, so reverse hits don't match forward queries; the RBH parser strips the wrapper. NCBI GFF3 mRNA IDs (`gnl|WGS|…`) also differ from the protein accessions, so a gene-to-protein table is needed (pass it with `--gene_to_protein`). Affects *A. cervicornis*, *O. faveolata* and *A. muricata*.
+:::
+
+::: {.callout-note collapse="true"}
+## Conda activation inside job scripts
+Use `source ~/anaconda3/etc/profile.d/conda.sh` (not `bin/activate`) and hard-coded environment names inside BSUB heredocs. Otherwise `conda activate` can read the species name as the environment name.
+:::
+
+::: {.callout-note collapse="true"}
+## Keep OrthoFinder in its own environment
+`orthofinder_env` (OrthoFinder, MAFFT, FastTree) must stay separate from `annotation_env`.
+:::
+
+## How it connects
+
+- **[Multi-species orthology (OrthoFinder)](orthofinder-multispecies.qmd)**: the combined orthogroups used to transfer cell-type markers between species.
+- **[scRNA-seq QC and clustering](scrnaseq-qc-clustering.qmd)**: master tables are joined to cluster markers during annotation.
+- Earlier notebook entries: [KofamScan workflow](../notebook/2023-03-23-kofamscan-workflow.md), [KofamScan on *Galaxea*](../notebook/2023-09-11-kofamscan-on-galaxea-fasicularis.md).
+
+## References
+
+- Stephens TJ et al. 2026. Widespread dark gene evolution in stony corals. *Genome Biol Evol* 18:evag072. <https://doi.org/10.1093/gbe/evag072>
+- Cantalapiedra CP et al. 2021 (eggNOG-mapper v2); Emms & Kelly 2019 (OrthoFinder); Jones et al. 2014 (InterProScan); Buchfink et al. 2021 (DIAMOND); Teufel et al. 2022 (SignalP 6.0); Hallgren et al. 2022 (DeepTMHMM); Eddy 2011 (HMMER).
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-10-05 | Notebook page added, summarizing the GitHub repository |
+| 2026-07 | v4: species-agnostic gene-ID columns, NCBI RBH/GFF3 fixes; 10 species complete |
+| 2026-06 | First complete runs (*Galaxea*, *Pocillopora*, *Acropora cervicornis*) |
