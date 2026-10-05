@@ -1,0 +1,42 @@
+---
+title: "20201008 Adult P.astreoides Metabolomic Extractions"
+date: 2020-10-09
+type: "Lab work"
+project: "Porites July Bleaching"
+categories: ["Lab work", "Porites astreoides", "Metabolomics"]
+protocols: ["metabolite-extraction"]
+aliases:
+  - "/20201008-Adult-P.astreoides-Metabolomic-Extractions/"
+---
+**Project:** [Porites Bleaching 2019](https://github.com/kevinhwong1/Porites_Rim_Bleaching_2019)
+
+**Metric and Protocol:** [Metabolomic extractions](/notebook/2020-02-03-metabolomics-p-astreoides-sample-prep.md)
+
+**Batch Number:** 2
+
+### Goal
+To prepare lab materials and process metabolomic extractions on adult *Porites astreoides* samples for the Porites Bleaching 2019 experiment using [this protocol](/notebook/2020-02-03-metabolomics-p-astreoides-sample-prep.md).
+
+### Laboratory preparation
+
+1. Wiped down all counter tops and fumehood with 10% bleach solution
+2. Sterilize clippers and forceps (10% bleach, DI water, ethanol)
+
+### Samples
+
+All samples were snap frozen in liquid nitrogen and stored at -80&deg;C.
+
+| Extraction # 	| Vial # 	| Fragment ID 	| Timepoint 	| Vial + Buffer (g) 	| Vial + Buffer + Coral (g) 	|
+|:------------:	|:------:	|:-----------:	|:---------:	|:-----------------:	|:-------------------------:	|
+|       4      	|   10   	|     R40     	|     A1    	|       1.9780      	|           2.2263         	  |
+|       5      	|   28   	|     R28     	|     A2    	|       1.9604      	|           2.2168          	|
+|       6      	|   24   	|     R32     	|     A2    	|       1.9673      	|           2.1534          	|
+|       7      	|   20   	|     R37     	|     A2    	|       1.9725      	|           2.2153          	|
+|       8      	|   35   	|     R37     	|     A4    	|       1.9692      	|           2.1935          	|
+|       9      	|   40   	|     R40     	|     A4    	|       1.9670      	|           2.2157          	|
+|      10      	|   32   	|     R19     	|     A4    	|       1.9672      	|           2.1758          	|
+|      11      	|   29   	|     R35     	|     A2    	|       1.9757      	|           2.2252          	|
+|      12      	|    6   	|      R7     	|     A1    	|       1.9570      	|           2.2412          	|
+
+### Notes
+* Extracted R40-A1 from PHYS fragment

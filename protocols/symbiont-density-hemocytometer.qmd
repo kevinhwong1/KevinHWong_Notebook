@@ -1,0 +1,113 @@
+---
+title: "Symbiodiniaceae cell density (hemocytometer counts)"
+description: "Count symbiont cells in coral larvae or tissue homogenates on a hemocytometer, and normalize to larva number or coral surface area."
+date: 2026-10-05
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["Physiology assays", "Symbiodiniaceae"]
+protocol-id: symbiont-density-hemocytometer
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "symbiont-density-hemocytometer"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated 2026-10-05 · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | A vial of larvae (20 per vial) **or** a resuspended symbiont fraction from an airbrushed homogenate |
+| **Output** | Symbiont cells per larva, or cells per cm² of coral surface |
+| **Time** | ~10 min per sample for 6 replicate counts (estimate) |
+| **Tested on** | *Porites astreoides* larvae; *Galaxea fascicularis* homogenates |
+
+## Materials
+
+- Compound microscope (10× objective)
+- Hemocytometer with its coverslip
+- Glass Pasteur pipettes
+- 0.2 µm filtered seawater (FSW)
+- Pestles (larvae) or a homogenizer
+- Kimwipes only for cleaning (anything else scratches the hemocytometer)
+
+## Before you start
+
+You need a normalization value for every sample:
+
+- **Larvae:** the number of larvae in the vial.
+- **Adult tissue:** the total homogenate volume (recorded when airbrushing) **and** the skeleton surface area.
+
+## Procedure
+
+### A. Sample preparation
+
+**Larvae (20 per vial)**
+
+1. Check the vial number against the master spreadsheet.
+2. Homogenize the larvae in the vial with a pestle and **50 µL FSW**.
+3. Add **250 µL FSW** while rinsing the pestle into the vial, for **300 µL total**. Record the exact volume.
+4. If you also need protein from the same larvae, move **200 µL** to a new vial labeled `<vial#>-P` and freeze it at −80 °C (see [Total protein](total-protein-bca.qmd)).
+
+**Adult homogenates**
+
+5. Use the symbiont fraction resuspended in a known volume of PBS (tube **A-Sym-2** in [Coral tissue removal and homogenization](coral-tissue-removal-homogenization.qmd)). Vortex well before loading.
+
+### B. Load the hemocytometer
+
+6. Put the coverslip over the center of the hemocytometer.
+7. With a glass Pasteur pipette, put a small drop at the notch and let capillary action pull it under the coverslip. **Load the same way every time**: uneven loading is the main source of variation.
+8. Place it on the microscope stage at 10×.
+
+### C. Count
+
+9. Count all symbiont cells in the **9 large squares** (the 3 × 3 grid bounded by triple lines). Cells touching the boundary lines count as inside.
+   - Symbiont cells are round with no ridges, golden-brown to green, and refractile.
+10. All 9 squares together are **one replicate**. Count the other chamber for a second replicate.
+11. Mix the sample by pipetting between loads and repeat until you have **6 replicate counts**.
+
+### D. Calculate
+
+For a standard improved Neubauer hemocytometer, each large square holds 0.1 µL, so the 9 squares hold 0.9 µL. (TODO: confirm the model of hemocytometer used; the grid volume differs between models.)
+
+$$
+\text{cells mL}^{-1} = \frac{\overline{\text{count}}_{9\ \text{squares}}}{9} \times 10^{4}
+$$
+
+- **Per larva:** cells mL⁻¹ × sample volume (mL) ÷ number of larvae
+- **Per area:** cells mL⁻¹ × total homogenate volume (mL) ÷ surface area (cm²). Account for any dilution, e.g. if the pellet was resuspended in a different volume than it came from.
+
+### Clean-up
+
+- Wipe the hemocytometer and coverslip with a Kimwipe only.
+- Rinse pipettes with DI water between samples and before storage. Return the hemocytometer to its case.
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+|---|---|---|
+| Replicates vary a lot | Uneven loading or cells settling | Load the same volume the same way each time; pipette-mix before every load |
+| Too many cells to count | Sample too concentrated | Dilute 1:2 or 1:5 in FSW and multiply back |
+| Hard to tell symbionts from debris | Host tissue fragments | Use the washed symbiont pellet (Part C of the tissue protocol) |
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-10-05 | 1.0 | Rewritten from the 2018 notebook protocol; added calculation and adult-homogenate input |
+| 2018-08 | – | Original protocol for *P. astreoides* larvae |

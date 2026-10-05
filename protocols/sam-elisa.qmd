@@ -1,0 +1,97 @@
+---
+title: "S-adenosylmethionine (SAM) ELISA"
+description: "Quantify S-adenosylmethionine, the methyl donor for DNA methylation, in coral host tissue by ELISA (BioVision SAM ELISA kit)."
+date: 2026-10-05
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["Physiology assays", "Astrangia poculata"]
+protocol-id: sam-elisa
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "sam-elisa"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated 2026-10-05 · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | Frozen airbrushed homogenate (host fraction, ~400 µL) |
+| **Output** | SAM concentration (µg mL⁻¹), normalized to protein or surface area |
+| **Kit** | BioVision S-Adenosylmethionine (SAM) ELISA kit ([manual](/images/SAM_Kit_Assay.pdf)); Thermo Halt protease inhibitor cocktail |
+| **Capacity** | One 96-well plate = 8 standards + 40 samples, in duplicate |
+| **Time** | ~1 h sample prep + ~2.5 h assay (estimate) |
+| **Tested on** | *Astrangia poculata* |
+
+## Materials
+
+- SAM ELISA kit: pre-coated plate, SAM standard, Standard/Sample dilution buffer, biotin detection antibody + diluent, HRP-streptavidin (SABC) + diluent, wash buffer concentrate, TMB substrate, stop solution, plate sealers
+- Protease inhibitor cocktail (Thermo 78430)
+- Refrigerated centrifuge, 37 °C incubator, thermocycler or heat block at 37 °C, −80 °C freezer
+- Multichannel pipette, plate reader (450 nm)
+
+## Solutions to prepare (per full plate)
+
+| Solution | Recipe |
+|---|---|
+| **Biotin antibody working solution** (1:100) | 50 µL biotin antibody + 4.95 mL antibody diluent (≥ 4.8 mL needed) |
+| **SABC working solution** (1:100) | 100 µL SABC + 9.9 mL SABC diluent (≥ 9.6 mL needed) |
+| **1× wash buffer** | 30 mL concentrate + 720 mL DI water. Warm to 40 °C if crystals have formed, then cool to room temp |
+| **SAM standards** | Reconstitute the standard in 1 mL Standard/Sample diluent (= 25 µg mL⁻¹), let stand 10 min, mix gently. Make 2-fold serial dilutions (e.g. 0.3 mL standard + 0.3 mL diluent): **25, 12.5, 6.25, 3.125, 1.56, 0.781, 0.39, 0** µg mL⁻¹. Use within 2 h |
+
+## Procedure
+
+### A. Sample preparation
+
+1. Thaw homogenates on ice.
+2. Pellet the symbionts: **6,000 × g, 2 min, 4 °C**. Move **400 µL** of supernatant (host) to a new tube.
+3. Add protease inhibitor at **1:100** (4 µL to 400 µL) and vortex.
+4. Lyse with **5 freeze–thaw cycles**: 5 min at −80 °C → 5 min at 37 °C.
+5. Spin **5,000 × g, 5 min** to remove debris. Use the supernatant.
+
+### B. ELISA
+
+6. Bring all reagents, standards and samples to room temperature (30 min).
+7. Wash the plate **2×** with 1× wash buffer.
+8. Add **50 µL** standard or sample per well, then immediately **50 µL biotin antibody working solution**. Seal, tap gently to mix, and incubate **45 min at 37 °C**.
+9. Discard and wash **3×**: fill each well with **350 µL** wash buffer, soak 1–2 min, aspirate. After the last wash, blot the plate upside down on paper towels.
+10. Add **100 µL SABC working solution** per well. Seal and incubate **30 min at 37 °C**.
+11. Discard and wash **5×** as in step 9.
+12. Add **90 µL TMB** per well. Seal and incubate **15–30 min at 37 °C in the dark**, until the first 3–4 standards are visibly blue.
+13. Add **50 µL stop solution**. Read at **450 nm within 20 min**.
+
+### C. Calculate
+
+14. Sample and detection antibody go in together, so this is a **competitive** format: signal *decreases* as SAM increases (confirm in the kit manual). Fit a 4-parameter logistic curve to the standards and interpolate the samples. Example script: [SAM.R](https://github.com/kevinhwong1/Astrangia_Nutrition/blob/master/RAnalysis/Scripts/SAM.R).
+15. Normalize to protein (from the same homogenate) or to surface area.
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+|---|---|---|
+| High background in all wells | Incomplete washing | Soak 1–2 min per wash and blot thoroughly after the last wash |
+| Not enough wells for all samples | One plate = 40 samples in duplicate | Choose samples to span treatments and colour range before starting (as in [2019-05-15](../notebook/2019-05-15-sam-elisa-kit-for-a-poculata-nutrition-experiment.md)) |
+| Standards don't develop | TMB too cold or incubation too short | Check the blue gradient at 15 min and extend to 30 min if needed |
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-10-05 | 1.0 | Rewritten from the 2019 *Astrangia* nutrition run |
+| 2019-05 | – | First run, 39 *A. poculata* samples |

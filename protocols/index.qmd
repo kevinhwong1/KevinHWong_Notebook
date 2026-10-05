@@ -1,0 +1,40 @@
+---
+title: "Wet Lab Protocols"
+subtitle: "Step-by-step bench protocols written for anyone to use. Each one links to the notebook entries where it was developed and used."
+listing:
+  - id: protocol-pages
+    contents: ["*.qmd", "!index.qmd"]
+    type: grid
+    grid-columns: 2
+    fields: [title, description, categories]
+    sort: "title"
+---
+
+## Protocols
+
+::: {#protocol-pages}
+:::
+
+## Reference protocols
+
+- [Bisulfite sequencing QC and analysis overview](BS_DNA_Methylation_Analysis_Overview.md)
+- [MeDIP-enriched, bisulfite-converted Illumina libraries](MeDIP_Protocol.md) (S. White)
+
+## Manuals (PDF)
+
+| Kit / reagent | File |
+|---|---|
+| Zymo Quick-DNA/RNA Miniprep Plus | [PDF](/images/Zymo_quick-dna-rna_miniprep_plus_kit.pdf) |
+| Zymo EZ DNA Methylation-Gold | [PDF](DNA_Methylation_Gold_Bisulfite_d5005i.pdf) |
+| Zymo Direct-zol RNA | [PDF](directzol_zymo_r2050i.pdf) |
+| Qiagen DNeasy Blood & Tissue | [PDF](EN-DNeasy-Blood--Tissue-Handbook.pdf) |
+| Agilent RNA 6000 Pico | [PDF](G2938-90046_RNA600Pico_KG_EN.pdf) |
+| Qubit RNA HS | [PDF](Qubit_RNA_HS_Assay_UG.pdf) |
+| Qubit dsDNA BR | [PDF](Qubit_dsDNA_BR_Assay_UG.pdf) |
+| Qubit dsDNA HS | [PDF](Qubit_dsDNA_HS_Assay_UG.pdf) |
+| RNAlater | [PDF](RNALater_7020M.pdf) |
+| RNAzol RT | [PDF](RNAzolRTOct2015.pdf) |
+| RiboPure | [PDF](RiboPure_fm_1924.pdf) |
+| Poly(A)Purist | [PDF](polyA_purist_cms_059317.pdf) |
+| Illumina TruSeq DNA Methylation | [PDF](truseq-dna-methylation-library-prep-guide-15066014-a.pdf) |
+| Veal et al. 2010 | [PDF](<veal et al 2010.pdf>) |

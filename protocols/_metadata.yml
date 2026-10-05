@@ -1,0 +1,3 @@
+# Applies to every page in protocols/
+filters:
+  - ../_filters/protocol-usage.lua

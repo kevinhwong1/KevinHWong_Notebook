@@ -1,0 +1,79 @@
+---
+title: "Protocol name (kit / method)"
+description: "One sentence: what goes in, what comes out."
+date: __DATE__
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["<method from _labels.yml>", "<organism>"]
+protocol-id: __SLUG__          # must match the file name; notebook posts list it under `protocols:`
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "__SLUG__"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated __DATE__ · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | |
+| **Output** | |
+| **Kit** | |
+| **Time** | |
+| **Tested on** | |
+
+## Materials
+
+**Kits and reagents**
+
+**Equipment and consumables**
+
+## Solutions to prepare
+
+| Solution | Recipe | Storage |
+|---|---|---|
+
+## Before you start
+
+## Procedure
+
+### A. First stage
+
+1. Step
+
+::: {.callout-tip}
+## ⏸ Safe stopping point
+:::
+
+## QC and expected results
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+|---|---|---|
+
+## Notes by sample type
+
+## References
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| __DATE__ | 1.0 | First version |

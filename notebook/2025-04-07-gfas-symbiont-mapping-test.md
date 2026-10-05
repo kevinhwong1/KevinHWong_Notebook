@@ -1,11 +1,12 @@
 ---
-layout: post
-title: Gfas Symbiont Mapping Test
-date: '2025-04-07'
-categories: Analysis
-tags: scRNAseq, gfas
+title: "Gfas Symbiont Mapping Test"
+date: 2025-04-07
+type: "Analysis"
+project: "Dark Genes"
+categories: ["Analysis", "Galaxea fascicularis", "Symbiodiniaceae", "scRNA-seq"]
+aliases:
+  - "/Gfas-Symbiont-Mapping-Test/"
 ---
-
 # Test for which symbiont type is in the Gfas dataset
 
 So I cannot combine all the genomes together (it is too big for cell ranger to process) so I will run the following 3 tests: 
@@ -449,4 +450,4 @@ scp -r kxw755@pegasus.ccs.miami.edu:/nethome/kxw755/20250306_AndradeRodriguez-23
 
 # Summary
 
-![](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/images/20250407_Gfas_Symbiont_Mapping_test.png)
+![](/images/20250407_Gfas_Symbiont_Mapping_test.png)

@@ -1,0 +1,94 @@
+---
+title: "20210104 BUSCO on P. astreoides transcriptome assembly"
+date: 2021-01-04
+type: "Analysis"
+project: "Porites astreoides Genome"
+categories: ["Analysis", "Porites astreoides", "Transcriptomics", "Genome annotation"]
+tools: ["BUSCO"]
+aliases:
+  - "/20210104-BUSCO-on-P.-astreoides-transcriptome-assembly/"
+---
+**Project:** [Porites Genome Assembly](https://github.com/hputnam/Past_Genome)
+
+### Goal
+
+Assessing the completness of our transcriptome assembly from Trinity using BUSCO. The pipeline used for running BUSCO on Bluewaves can be found [here](https://github.com/hputnam/Past_Genome/blob/master/busco.md).
+
+This script had to be re-run with a new shell script to specifify transcriptome mode for BUSCO
+
+##### Making the new shell script in transcriptome mode
+
+```
+nano run-busco-transcriptome.sh
+```
+
+```
+
+#!/bin/bash
+
+#SBATCH --job-name="busco"
+#SBATCH --time="100:00:00"
+#SBATCH --nodes 1 --ntasks-per-node=20
+#SBATCH --mem=250G
+##SBATCH --output="busco-%u-%x-%j"
+##SBATCH --account=putnamlab
+##SBATCH --export=NONE
+
+echo "START" $(date)
+
+labbase=/data/putnamlab
+busco_shared="${labbase}/shared/busco"
+[ -z "$query" ] && query="${labbase}/REFS/Past/Past_genome_filtered_v1_Genewiz.fasta" # set this to the query (genome/transcriptome) you are running
+[ -z "$db_to_compare" ] && db_to_compare="${busco_shared}/downloads/lineages/metazoa_odb10"
+
+source "${busco_shared}/scripts/busco_init.sh"  # sets up the modules required for this in the right order
+
+# we require the agustus_config/ directory copied to a "writetable" location for
+# busco to run and AUGUSTUS_CONFIG_PATH set to that
+
+if [ ! -d "${labbase}/${USER}/agustus_config" ] ; then
+    echo -e "Copying agustus_config/ to ${labbase}/${USER} .. "
+    tar -C "${labbase}/${USER}" -xzf "${busco_shared}/agustus_config.tgz"
+    echo done
+fi
+
+export AUGUSTUS_CONFIG_PATH="${labbase}/${USER}/agustus_config"
+# This will generate output under your $HOME/busco_output
+cd "${labbase}/${USER}"
+busco --config "${busco_shared}/scripts/busco-config.ini"  -f -c 20 --long -i "${query}" -l "${db_to_compare}" -o busco_output -m transcriptome
+
+echo "STOP" $(date)
+
+```
+
+
+#### Running BUSCO on assembled reference transcriptome
+
+```
+sbatch -o ~/%u-%x.%j.out -e ~/%u-%x.%j.err \
+       --export query=/data/putnamlab/kevin_wong1/20201221_P.astreoides_Ref_Transcriptome/trinity_5/trinity_out_dir.Trinity.fasta  \
+       /data/putnamlab/kevin_wong1/scripts/run-busco-transcriptome.sh
+```
+
+Submitted batch job **1816763**
+
+
+#### Results (20210106)
+
+```
+# BUSCO version is: 4.0.6
+# The lineage dataset is: metazoa_odb10 (Creation date: 2019-11-20, number of species: 65, number of BUSCOs: 954)
+# Summarized benchmarking in BUSCO notation for file /data/putnamlab/kevin_wong1/20201221_P.astreoides_Ref_Transcriptome/trinity_5/trinity_$
+# BUSCO was run in mode: transcriptome
+
+        ***** Results: *****
+
+        C:21.5%[S:14.6%,D:6.9%],F:36.1%,M:42.4%,n:954
+        205     Complete BUSCOs (C)
+        139     Complete and single-copy BUSCOs (S)
+        66	Complete and duplicated BUSCOs (D)
+        344     Fragmented BUSCOs (F)
+        405     Missing BUSCOs (M)
+        954     Total BUSCO groups searched
+
+```

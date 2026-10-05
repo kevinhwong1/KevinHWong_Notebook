@@ -1,0 +1,27 @@
+---
+title: "__TITLE__"
+date: __DATE__
+type: "__TYPE__"
+project: "__PROJECT__"
+categories: [__CATEGORIES__]
+tools: [__TOOLS__]
+protocols: []   # wet-lab protocol(s) used, e.g. ["dna-rna-coextraction-zymo"]
+---
+
+## Goal
+
+What I'm trying to do and why (1–2 sentences).
+
+## What I did
+
+```bash
+# commands / job scripts
+```
+
+## Results
+
+Key numbers, plots, QC reports.
+
+## Next steps
+
+-

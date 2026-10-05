@@ -1,0 +1,125 @@
+---
+title: "Citrate synthase activity (Sigma CS0720, 96-well)"
+description: "Measure citrate synthase activity, a proxy for mitochondrial density, in coral host and symbiont fractions as the DTNB reaction rate at 412 nm, normalized to protein."
+date: 2026-10-05
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["Physiology assays", "Astrangia poculata"]
+protocol-id: citrate-synthase-activity
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "citrate-synthase-activity"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated 2026-10-05 · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | Host or symbiont fraction (or a bead-beaten polyp) in lysis buffer, with known protein content |
+| **Output** | Citrate synthase activity (mU mg⁻¹ protein) |
+| **Kit** | Sigma-Aldrich Citrate Synthase Assay Kit CS0720 ([manual](/images/SA_Citrate_Synthase_Assay.pdf)) + Pierce BCA kit |
+| **Time** | ~1 h for one plate after protein is known (estimate) |
+| **Tested on** | *Astrangia poculata* (symbiotic and aposymbiotic), host and symbiont fractions |
+
+Citrate synthase turns acetyl-CoA and oxaloacetate (OAA) into citrate and releases CoA-SH. CoA-SH reacts with DTNB to give a yellow product, measured at 412 nm. The rate measured before OAA is added (baseline) is subtracted from the rate after.
+
+## Materials
+
+- Sigma CS0720 kit: 5× assay buffer, acetyl-CoA, OAA, DTNB, citrate synthase (positive control)
+- Pierce BCA Protein Assay Kit ([Total protein protocol](total-protein-bca.qmd))
+- 100% ethanol (to dissolve DTNB), DI water
+- Lysis buffer (below); bead tubes with 0.1 and 0.5 mm beads (whole polyps)
+- 96-well flat-bottom plate, plate reader with kinetic mode at 412 nm, multichannel pipette
+
+## Solutions to prepare
+
+| Solution | Recipe | Storage |
+|---|---|---|
+| **Lysis buffer** (25 mM Tris pH 7.8, 1 mM EDTA, 10% glycerol) | 100 mL: 2.5 mL 1 M Tris + 0.2 mL 0.5 M EDTA + 10 mL glycerol + 87.3 mL DI water | Room temp |
+| **1× assay buffer** | 1 part 5× buffer + 4 parts DI water (e.g. 0.7 mL + 2.8 mL). Make enough for the master mix + OAA + control | Make fresh |
+| **Acetyl-CoA, 30 mM** | Dissolve the vial in 1 mL DI water | 200 µL aliquots, −20 °C |
+| **DTNB, 10 mM** | Dissolve the vial in 1 mL 100% ethanol | 200 µL aliquots, −20 °C |
+| **OAA, 10 mM** | 1.3 mg OAA in 1 mL 1× assay buffer | −20 °C, max 1 week |
+| **Positive control** | 2 µL citrate synthase + 60 µL 1× assay buffer | On ice, same day |
+
+## Procedure
+
+### A. Samples and protein
+
+1. **Fractions:** use host and symbiont aliquots from [Part C of the tissue protocol](coral-tissue-removal-homogenization.qmd).
+   **Whole polyps:** put a polyp in a bead tube with 500 µL lysis buffer, vortex ~2 min, spin 16,000 × g for 1.5 min and keep the supernatant.
+2. Measure protein with BCA on a small aliquot.
+3. Dilute each sample so that **20 µL contains 2–6 µg protein** (Hawkins et al. 2016). Samples under 1 µg per 20 µL are too dilute to use.
+   - e.g. 0.774 mg mL⁻¹ × 20 µL = 15.5 µg → dilute 3× (6.6 µL sample + 13.4 µL water).
+4. Prepare **60 µL per sample** (3 replicate wells × 20 µL). Negative control: 60 µL lysis buffer. Positive control: the diluted citrate synthase.
+
+### B. Reaction
+
+5. Make the master mix: **170 µL per well**:
+
+   | Per well | Final conc. |
+   |---|---|
+   | 3.3 µL 30 mM acetyl-CoA | ~0.59 mM |
+   | 5 µL 10 mM DTNB | ~0.29 mM |
+   | 161.7 µL 1× assay buffer | |
+
+   Make ~10–25% extra (e.g. 15 wells' worth for 12 wells).
+6. Add **510 µL** master mix (170 µL × 3) to each 60 µL sample/control tube and vortex.
+7. Pipette **190 µL** into each of 3 wells.
+8. **Baseline:** kinetic read at **412 nm** for ~3 min (e.g. 4 reads, ~49 s apart).
+9. Add **10 µL 10 mM OAA** to each well **with a multichannel** so all reactions start together. Pipette-mix.
+10. Read again with the same kinetic settings.
+
+### C. Calculate
+
+11. Rate (ΔA412 min⁻¹) after OAA minus the baseline rate, minus the negative control.
+12. Convert to activity with the DTNB extinction coefficient and path length as in the kit manual. Normalize to the µg protein in the well and report as mU mg⁻¹ protein.
+    Example R scripts: [assay test](https://github.com/kevinhwong1/methods_testing/blob/master/RAnalysis/Scripts/Citrate_Synthase_20190315.R), [Astrangia nutrition](https://github.com/kevinhwong1/Astrangia_Nutrition/blob/master/RAnalysis/Scripts/Citrate_Synthase.R).
+
+## Expected results
+
+| Sample | Activity |
+|---|---|
+| *A. poculata* symbiotic polyp | 68.9 mU mg⁻¹ |
+| *A. poculata* aposymbiotic polyp | 101.5 mU mg⁻¹ |
+
+These are from the [2019 test](../notebook/2019-03-14-citrate-synthase-troubleshooting.md) and fall in the range reported for *Exaiptasia pallida* (Hawkins et al. 2016).
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+|---|---|---|
+| No increase after OAA | OAA degraded (unstable once dissolved) | Make OAA fresh, and don't keep it more than a week at −20 °C |
+| Reactions in the first columns run ahead | Staggered OAA addition | Add OAA with a multichannel and start reading immediately |
+| Too many samples for the kit volumes | One kit covers limited wells | Scale the master mix; 150 wells needed ~24 mL 1× buffer ([2019-05-15](../notebook/2019-05-15-citrate-synthase-for-a-poculata-nutrition-experiment.md)) |
+
+## References
+
+- Sigma-Aldrich CS0720 technical bulletin ([PDF](/images/SA_Citrate_Synthase_Assay.pdf))
+- Hawkins TD et al. 2016. [PMC4834350](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4834350/)
+- Spinazzi M et al. 2012. *Nature Protocols* ([PubMed 22653162](https://www.ncbi.nlm.nih.gov/pubmed/22653162))
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-10-05 | 1.0 | Rewritten from the 2019 assay development and *Astrangia* nutrition runs |
+| 2019-05 | – | Host and symbiont fractions, 150-well plate (*Astrangia* nutrition) |
+| 2019-03 | – | Assay developed on whole *A. poculata* polyps |

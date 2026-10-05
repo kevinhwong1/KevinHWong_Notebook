@@ -1,0 +1,5 @@
+# Applies to every page in notebook/
+from: markdown-tex_math_dollars+lists_without_preceding_blankline   # old posts: $VARS in prose are not math; lists may start without a blank line (GitHub style)
+filters:
+  - ../_filters/post-meta.lua
+title-block-categories: true

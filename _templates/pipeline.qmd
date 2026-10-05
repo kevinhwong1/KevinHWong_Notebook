@@ -1,0 +1,62 @@
+---
+title: "__TITLE__"
+description: "One sentence: from what input to what output."
+date: __DATE__
+date-modified: last-modified
+type: "Pipeline"
+categories: [__CATEGORIES__]
+tools: [__TOOLS__]
+filters:
+  - ../_filters/post-meta.lua
+---
+
+## Overview
+
+What the pipeline does, why each step is there, and a diagram.
+
+```{mermaid}
+flowchart LR
+  A[input] --> B[step 1] --> C[step 2] --> D[(output)]
+```
+
+## Inputs
+
+| Input | Example | Notes |
+|---|---|---|
+
+## Software
+
+| Tool | How it's loaded on Pegasus |
+|---|---|
+
+## Run it
+
+Keep the script generic: put run-specific settings (paths, sample names, email) in a config file with `<fill in: ...>` placeholders, as in the [scRNA-seq pipeline](scrnaseq-10x-geneext-cellbender.qmd#run-it) (`--init` writes the template; the script refuses to run until every placeholder is replaced).
+
+[Download the script](scripts/__SLUG__.sh){.btn .btn-sm .btn-outline-primary}
+
+```{.bash filename="__SLUG__.sh"}
+{{< include scripts/__SLUG__.sh >}}
+```
+
+## Outputs
+
+| File | What it is |
+|---|---|
+
+## Known issues {#known-issues}
+
+::: {.callout-warning}
+## Short description of the problem
+Exact error message, cause and fix. Link the notebook entry where it came up.
+:::
+
+## Example runs
+
+- [Run name, date](../notebook/...)
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| __DATE__ | First version |

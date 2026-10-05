@@ -1,0 +1,38 @@
+---
+title: "__TITLE__"
+date: __DATE__
+type: "Troubleshooting"
+project: "__PROJECT__"
+categories: [__CATEGORIES__]
+tools: [__TOOLS__]
+protocols: []   # wet-lab protocol(s) used, e.g. ["dna-rna-coextraction-zymo"]
+---
+
+## Symptom
+
+Paste the **exact** error message, so search finds this page next time:
+
+```
+<error message here>
+```
+
+## Context
+
+- Tool + version:
+- Where: Pegasus (queue, cores, memory) / laptop
+- Command that failed:
+
+## Cause
+
+Why it happened.
+
+## Fix
+
+```bash
+# what worked
+```
+
+## Related
+
+- Pipeline:
+- Notebook entry where it came up:

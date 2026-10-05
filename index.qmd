@@ -1,0 +1,85 @@
+---
+title: "Kevin H. Wong's Open Lab Notebook"
+subtitle: "Single-cell genomics, coral biology and bioinformatics."
+page-layout: full
+toc: false
+listing:
+  - id: pipelines
+    contents: ["pipelines/*.qmd", "!pipelines/index.qmd"]
+    type: grid
+    grid-columns: 3
+    fields: [title, description, date-modified]
+    sort: "title"
+    image-placeholder: images/KevinWong_Headshot.jpg
+    max-items: 6
+  - id: protocols
+    contents: ["protocols/*.qmd", "!protocols/index.qmd"]
+    type: grid
+    fields: [title, description, categories]
+    sort: "title"
+  - id: recent
+    contents:
+      - "notebook/*.md"
+      - "notebook/*.qmd"
+    type: default
+    sort: "date desc"
+    fields: [date, title, categories]
+    max-items: 8
+    date-format: "MMM D, YYYY"
+aliases:
+  - /about/
+  - about.html
+---
+
+::: {.home-about}
+<img src="images/KevinWong_Headshot.jpg" alt="Kevin H. Wong" class="home-photo">
+
+::: {.home-about-text}
+Hello! I'm **Kevin H. Wong**, an Assistant Scientist at the University of Miami Rosenstiel School of Marine, Atmospheric, and Earth Science. My research uses bulk and single-cell molecular approaches, genomics and bioinformatics to understand how marine invertebrates respond to climate change stressors.
+
+This notebook is where I share my work: lab work, analyses, roadblocks, fixes and finished workflows. I believe science is best served by transparent, reproducible work, so everything here is open. Questions or suggestions? Email [kevinhwong1@gmail.com](mailto:kevinhwong1@gmail.com) or visit my [website](https://sites.google.com/view/kevin-h-wong/home/).
+:::
+:::
+
+::: {.home-quicklinks}
+[Browse the notebook](notebook.qmd){.btn .btn-primary}
+[Troubleshooting notes](notebook.qmd#category=Troubleshooting){.btn .btn-outline-primary}
+[Pipelines](pipelines/index.qmd){.btn .btn-outline-primary}
+[Wet lab protocols](protocols/index.qmd){.btn .btn-outline-primary}
+:::
+
+## Pipelines
+
+Complete, maintained workflows. Each one is updated in place, with a changelog, instead of being re-posted.
+
+::: {.scroll-row}
+::: {#pipelines}
+:::
+:::
+
+## Wet lab protocols
+
+Step-by-step bench protocols written for anyone to use, each linked to the notebook entries where it was developed and used. Scroll sideways for more.
+
+::: {.scroll-row}
+::: {#protocols}
+:::
+:::
+
+[All wet lab protocols →](protocols/index.qmd)
+
+## Recent notebook entries
+
+::: {#recent}
+:::
+
+[All entries →](notebook.qmd)
+
+## How this notebook is organized
+
+- **[Notebook](notebook.qmd)**: dated entries of what I did and what happened: lab work, analyses and troubleshooting.
+- **[Pipelines](pipelines/index.qmd)**: complete computational workflows, maintained in place with a changelog.
+- **[Wet Lab Protocols](protocols/index.qmd)**: step-by-step bench protocols, each linked to the notebook entries that used it.
+- **[Projects](projects.qmd)**: notebook entries grouped by research project.
+
+The notebook links to GitHub repositories with more detail. *Built with [Quarto](https://quarto.org); originally built with Jekyll Now (Barry Clark) and material from many open lab notebooks. Thanks to all.*

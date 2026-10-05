@@ -1,0 +1,130 @@
+---
+title: "Coral tissue removal, homogenization and host/symbiont separation"
+description: "Airbrush tissue off frozen coral fragments, homogenize the slurry, aliquot it for physiology assays, and split it into host and Symbiodiniaceae fractions."
+date: 2026-10-05
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["Tissue & cell prep", "Porites astreoides", "Astrangia poculata"]
+protocol-id: coral-tissue-removal-homogenization
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "coral-tissue-removal-homogenization"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated 2026-10-05 · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | Snap-frozen coral fragment (−80 °C) |
+| **Output** | Homogenized tissue slurry ("blastate") in PBS, aliquoted as holobiont, host and symbiont fractions for downstream assays |
+| **Time** | ~10–15 min per fragment to airbrush and homogenize; ~1 h for the separation in Part C (estimates) |
+| **Tested on** | *Porites astreoides*, *Astrangia poculata*, *Galaxea fascicularis* |
+
+Tissue is blown off the skeleton with an airbrush, homogenized, and split into aliquots. Part B gives the quick split used for the Porites physiology panel (protein, carbohydrate, lipid, chlorophyll, cell counts). Part C is a more thorough host/symbiont separation with washed symbiont pellets, used for enzyme assays and fraction-specific DNA.
+
+::: {.callout-warning}
+## Not for RNA
+Airbrushed homogenates work for DNA and physiology, but RNA from them came out degraded. For RNA, clip tissue straight from −80 °C into a bead tube instead (see [DNA/RNA co-extraction](dna-rna-coextraction-zymo.qmd)).
+:::
+
+## Materials
+
+**Equipment**
+
+- Airbrush (Iwata Eclipse or similar) and a compressed air source
+- Handheld rotor homogenizer (e.g. Pro Scientific Bio-Gen PRO200)
+- Quart-size zip-top bags, forceps
+- 15 mL Falcon tubes, 1.5 mL tubes
+- Refrigerated microcentrifuge (4 °C), vortex, ice bucket
+- Hemocytometer (cell-integrity check in Part C)
+
+**Reagents**
+
+- Ice-cold 1× PBS, pH 7.4 (filtered seawater also works, as in the *Astrangia* samples)
+- 10% bleach, DI water, isopropanol wipes or 70% ethanol (cleaning between samples)
+- For Part C: lysis buffer and wash buffer (below), 0.5 mm glass beads
+
+## Solutions to prepare (Part C only)
+
+| Solution | Recipe | Storage |
+|---|---|---|
+| **Lysis buffer** (25 mM Tris pH 8, 1 mM EDTA, 10% glycerol) | 250 mL: 6.25 mL 1 M Tris pH 8 + 0.5 mL 0.5 M EDTA + 25 mL glycerol + 218.25 mL DI water | 4 °C |
+| **Wash buffer** | 250 mL lysis buffer + 25 µL Triton X-100 | 4 °C |
+
+## Procedure
+
+### A. Airbrush and homogenize
+
+1. Label a zip-top bag and a 15 mL tube per sample. Pre-chill the PBS on ice.
+2. Take the fragment out of the −80 °C and put it in the bag with forceps.
+3. Airbrush with ice-cold PBS until all tissue is removed, including deep tissue between corallites. Use PBS sparingly: aim to keep the total volume **under ~15 mL** so it fits in one tube.
+4. Pour the slurry into the 15 mL tube and rinse the bag with a little PBS into the same tube.
+5. **Record the total volume.** You need it to normalize every downstream assay. Keep on ice.
+6. Homogenize for **30 s** on ice. If the slurry is split across tubes, homogenize each and pour back and forth to mix.
+7. Clean forceps and homogenizer between samples: 10% bleach (30 s) → DI water (30 s) → DI water (30 s) → isopropanol wipe.
+8. Keep the skeleton (soak in 10% bleach for 24 h, dry and label) if you need surface area for normalization.
+
+[Airbrushing video](https://www.youtube.com/watch?v=tHlVRHVMQeQ)
+
+### B. Aliquot for the physiology panel
+
+Label six 1.5 mL tubes per sample: **A-Host, A-Sym-1, A-Sym-2, B-Host, B-Sym, C**.
+
+9. Add **1 mL** homogenate to each of **A-Sym-1**, **B-Sym** and **C**.
+   - **C** = holobiont fraction (protein, carbohydrate, lipid). Set aside on ice.
+10. Spin **A-Sym-1** and **B-Sym** at **13,000 × g, 3 min**.
+11. From **A-Sym-1**: move the supernatant (~1 mL) to **A-Host** (host protein, carbohydrate, lipid). Resuspend the pellet in **1 mL 1× PBS**, vortex and pipette until fully dispersed. Move **200 µL** to **A-Sym-2** (symbiont cell counts) and keep **800 µL** in A-Sym-1 (symbiont protein, carbohydrate, lipid).
+12. From **B-Sym**: move the supernatant to **B-Host** (spare host). Leave the pellet in B-Sym (chlorophyll).
+13. Freeze all tubes at −80 °C. Freeze the leftover homogenate (~5 mL) for ash-free dry weight.
+
+![Aliquot scheme used for the Porites July Bleaching physiology panel](/images/July_Bleaching_Phys_Schematic.jpg){fig-alt="Flowchart of homogenate aliquots into host, symbiont and holobiont tubes"}
+
+### C. Thorough host/symbiont separation (enzyme assays, fraction DNA)
+
+All steps on ice or at 4 °C. Starting material: a 500 µL frozen homogenate aliquot.
+
+14. Thaw on ice and add **0.6 mL ice-cold lysis buffer**. Vortex.
+15. Check cell integrity on a hemocytometer (symbiont cells should be intact).
+16. Spin **6,000 × g, 2 min, 4 °C**. Move **800 µL** of supernatant to a new tube (**host fraction**). Keep the pellet (**symbiont fraction**) on ice.
+17. **Host:** spin **16,000 × g, 20 min, 4 °C** to remove debris. Move the supernatant to a new tube, vortex, aliquot (e.g. 600 µL DNA, 100 µL citrate synthase, 50 µL protein) and store at −80 °C.
+18. **Symbiont:** resuspend the pellet in **200 µL lysis buffer**, vortex and spin **700 × g, 5 min, 4 °C**. Discard the supernatant.
+19. Resuspend in **1 mL ice-cold wash buffer**, spin again (700 × g, 5 min) and discard the supernatant. Repeat the wash for **5 washes total**.
+20. Resuspend in **300 µL lysis buffer**, add **200 µL 0.5 mm glass beads**, and vortex **3 min** to break the symbiont cells.
+21. Take the supernatant and aliquot (e.g. 200 µL DNA, 50 µL citrate synthase, 50 µL protein). Store at −80 °C.
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+|---|---|---|
+| Slurry over 15 mL, too dilute for assays | Too much PBS while airbrushing | Use short bursts, and work the airbrush close to the surface |
+| Symbiont pellet contaminated with host tissue | Too few washes | Do all 5 washes in Part C, and check a drop on the hemocytometer |
+| Low signal in lipid assays | Homogenate too dilute (600 µL input was below detection in [2021-06-22](../notebook/2021-06-23-20210622-lipid-assay-trial-1.md)) | Use 1 mL input, keep slurry volumes low, or concentrate by vacuum centrifugation |
+
+## References
+
+- Putnam Lab [coral tissue removal protocol](https://hputnam.github.io/Putnam_Lab_Notebook/Coral_Tissue_Removal_protocol/)
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-10-05 | 1.0 | Merged the airbrushing protocol (2021) and the homogenate separation protocol (2019) into one page |
+| 2021-06 | – | Six-tube aliquot scheme for the Porites July Bleaching physiology panel |
+| 2019-05 | – | Host/symbiont separation with washed symbiont pellets (*Astrangia* nutrition) |

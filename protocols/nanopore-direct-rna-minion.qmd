@@ -1,0 +1,93 @@
+---
+title: "Nanopore direct RNA sequencing on the MinION"
+description: "Workflow notes for native RNA sequencing on an Oxford Nanopore MinION (SQK-RNA002 + R9.4.1 flow cell): input requirements, library prep at a glance, flow cell loading and QC. Follow the official ONT protocol for the full steps."
+date: 2026-10-05
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["Nanopore", "Transcriptomics"]
+protocol-id: nanopore-direct-rna-minion
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "nanopore-direct-rna-minion"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated 2026-10-05 · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+::: {.callout-important}
+## Use the official protocol at the bench
+This page is a planning and checklist summary. Run the library prep from Oxford Nanopore's own protocol for your kit version (log in to the [Nanopore Community](https://community.nanoporetech.com/)). Nanopore kits change often, and newer direct RNA kits and flow cells may have replaced SQK-RNA002 / R9.4.1, so check what is current before ordering.
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | **500 ng total RNA** or **50 ng poly(A) RNA** in 9 µL nuclease-free water |
+| **Output** | Native-RNA reads (no RT or PCR bias; base modifications retained) |
+| **Kits** | Direct RNA Sequencing Kit SQK-RNA002; Flow Cell Priming Kit EXP-FLP002; R9.4.1 flow cell FLO-MIN106; Flow Cell Wash Kit EXP-WSH004 |
+| **Device** | MinION Mk1B/Mk1C with MinKNOW |
+| **Time** | ~2 h library prep + ~15 min priming/loading, then sequencing |
+
+## Why direct RNA
+
+Use it to study native RNA (e.g. base modifications), to avoid reverse transcription and PCR bias, or for transcripts that are hard to reverse-transcribe. The RT step in the prep only makes a cDNA strand to stabilize the RNA; the **RNA strand** is what passes through the pore.
+
+## Third-party materials to have ready
+
+- SuperScript III reverse transcriptase + 5× first-strand buffer + 0.1 M DTT
+- 10 mM dNTPs
+- NEBNext Quick Ligation Reaction Buffer; T4 DNA ligase (2 M U mL⁻¹)
+- Agencourt RNAClean XP beads; freshly made 70% ethanol (nuclease-free water)
+- Qubit RNA HS and dsDNA HS assays
+- 1.5 mL DNA LoBind tubes, 0.2 mL PCR tubes, nuclease-free water
+- Hula mixer, magnetic rack, thermal cycler, Qubit; Bioanalyzer/TapeStation optional
+
+## Before you start
+
+- **Check RNA quality**: length, quantity and purity are critical (Qubit + TapeStation/Bioanalyzer).
+- **Check the flow cell**: run a flow cell check in MinKNOW and confirm enough active pores.
+- **Install/update MinKNOW** on the device or computer.
+
+## Workflow at a glance
+
+| Stage | What happens | Key amounts |
+|---|---|---|
+| 1. RT adapter ligation | RNA + RT adapter (RTA) + RNA CS control, ligated 10 min at RT | 9 µL RNA in a 15 µL reaction |
+| 2. Reverse transcription | Make the cDNA strand with SuperScript III: 50 °C 50 min → 70 °C 10 min → 4 °C | 40 µL reaction |
+| 3. Bead cleanup | RNAClean XP beads, two 70% ethanol washes, elute | 72 µL beads; elute in 20 µL water |
+| 4. RNA adapter ligation | Ligate the motor-protein adapter (RMX), 10 min at RT | 40 µL reaction |
+| 5. Bead cleanup | RNAClean XP beads, **2× Wash Buffer (WSB)** washes (no ethanol), elute | 16 µL beads; elute in 21 µL Elution Buffer, 10 min |
+| 6. QC | Qubit dsDNA HS on 1 µL | Aim for **~20 ng** recovered |
+| 7. Prime flow cell | Flush Tether into Flush Buffer; remove air bubble from the priming port; prime | 800 µL, wait 5 min, then 200 µL |
+| 8. Load | Library in RNA Running Buffer, added dropwise to the SpotON port | 37.5 µL RRB + 37.5 µL library (20 µL library + 17.5 µL water) = 75 µL |
+| 9. Sequence | Start the run in MinKNOW (basecalling in real time) | |
+
+## Critical tips
+
+- **Wash with WSB, not ethanol**, after the RMX ligation (stage 5). Ethanol damages the motor protein on the adapter.
+- **Flick the beads** during WSB washes rather than just adding and removing buffer; agitation removes free adapter much better.
+- **No air bubbles** in the priming port or sensor array: draw back 20–30 µL before priming and pipette slowly.
+- Mix RNA by **flicking**, not vortexing, to avoid shearing.
+- Load the library **dropwise**, letting each drop enter the SpotON port before adding the next.
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-10-05 | 1.0 | Condensed from the 2023 notebook copy of the ONT protocol into a planning checklist that links to the official protocol |
+| 2023-10 | – | Protocol notes for SQK-RNA002 on the MinION |

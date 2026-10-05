@@ -1,4 +1,8 @@
-# Preparation of MeDIP-enriched, Bisulfite Converted Illumina Libraries
+---
+title: "Preparation of MeDIP-enriched, Bisulfite Converted Illumina Libraries"
+aliases:
+  - "/protocols/MeDIP_Protocol/"
+---
 
 
 Written 20130513 by Sam White

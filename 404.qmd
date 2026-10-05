@@ -1,0 +1,8 @@
+---
+title: "Page not found"
+toc: false
+---
+
+Sorry, that page doesn't exist (anymore). Try the search box at the top, or go back to the [notebook](notebook.qmd).
+
+![](images/404.jpg){width=400 fig-alt="Constructocat by jasoncostello"}

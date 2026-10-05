@@ -1,0 +1,156 @@
+---
+title: "Projects"
+subtitle: "Notebook entries grouped by the `project:` field. A project shows up here once it has a section below."
+toc: true
+toc-title: "Projects"
+listing:
+  - id: l-stemcells
+    contents: ["notebook/*.md", "notebook/*.qmd"]
+    include: {project: "Cnidarian Stem Cells"}
+    type: table
+    fields: [date, title, type]
+    field-display-names: {type: "Type"}
+    sort-ui: false
+    filter-ui: false
+    sort: "date desc"
+    date-format: "YYYY-MM-DD"
+  - id: l-mnemi
+    contents: ["notebook/*.md", "notebook/*.qmd"]
+    include: {project: "Mnemiopsis Phagocytes"}
+    type: table
+    fields: [date, title, type]
+    field-display-names: {type: "Type"}
+    sort-ui: false
+    filter-ui: false
+    sort: "date desc"
+    date-format: "YYYY-MM-DD"
+  - id: l-darkgenes
+    contents: ["notebook/*.md", "notebook/*.qmd"]
+    include: {project: "Dark Genes"}
+    type: table
+    fields: [date, title, type]
+    field-display-names: {type: "Type"}
+    sort-ui: false
+    filter-ui: false
+    sort: "date desc"
+    date-format: "YYYY-MM-DD"
+  - id: l-pastgenome
+    contents: ["notebook/*.md", "notebook/*.qmd"]
+    include: {project: "Porites astreoides Genome"}
+    type: table
+    fields: [date, title, type]
+    field-display-names: {type: "Type"}
+    sort-ui: false
+    filter-ui: false
+    sort: "date desc"
+    date-format: "YYYY-MM-DD"
+  - id: l-pjb
+    contents: ["notebook/*.md", "notebook/*.qmd"]
+    include: {project: "Porites July Bleaching"}
+    type: table
+    fields: [date, title, type]
+    field-display-names: {type: "Type"}
+    sort-ui: false
+    filter-ui: false
+    sort: "date desc"
+    date-format: "YYYY-MM-DD"
+  - id: l-tt
+    contents: ["notebook/*.md", "notebook/*.qmd"]
+    include: {project: "Porites Thermal Transplant"}
+    type: table
+    fields: [date, title, type]
+    field-display-names: {type: "Type"}
+    sort-ui: false
+    filter-ui: false
+    sort: "date desc"
+    date-format: "YYYY-MM-DD"
+  - id: l-symint
+    contents: ["notebook/*.md", "notebook/*.qmd"]
+    include: {project: "Symbiont Integration"}
+    type: table
+    fields: [date, title, type]
+    field-display-names: {type: "Type"}
+    sort-ui: false
+    filter-ui: false
+    sort: "date desc"
+    date-format: "YYYY-MM-DD"
+  - id: l-pnut
+    contents: ["notebook/*.md", "notebook/*.qmd"]
+    include: {project: "Porites Nutrition"}
+    type: table
+    fields: [date, title, type]
+    field-display-names: {type: "Type"}
+    sort-ui: false
+    filter-ui: false
+    sort: "date desc"
+    date-format: "YYYY-MM-DD"
+  - id: l-anut
+    contents: ["notebook/*.md", "notebook/*.qmd"]
+    include: {project: "Astrangia Nutrition"}
+    type: table
+    fields: [date, title, type]
+    field-display-names: {type: "Type"}
+    sort-ui: false
+    filter-ui: false
+    sort: "date desc"
+    date-format: "YYYY-MM-DD"
+---
+
+<!-- To add a project: copy one listing block above (new id + project name) and one section below.
+     The section id must be the project name in lower case with non-letters replaced by "-",
+     which is what the "Project" link on each post points to. -->
+
+## Cnidarian Stem Cells {#cnidarian-stem-cells}
+
+Stem cells across cnidarians: single-cell RNA-seq of *Acropora cervicornis* and *Pocillopora damicornis* (all cells vs. ALDH+ libraries) and *Nematostella vectensis*.
+
+::: {#l-stemcells}
+:::
+
+## Mnemiopsis Phagocytes {#mnemiopsis-phagocytes}
+
+Functional characterization of putative immune cells in *Mnemiopsis leidyi*. [GitHub repo](https://github.com/kevinhwong1/Mnemi_Phagocyte)
+
+::: {#l-mnemi}
+:::
+
+## Dark Genes {#dark-genes}
+
+Thermally responsive unannotated genes and single-cell atlases in *Galaxea fascicularis* and other corals. [GitHub repo](https://github.com/kevinhwong1/DarkGenes_Bleaching_Comparison)
+
+::: {#l-darkgenes}
+:::
+
+## Porites astreoides Genome {#porites-astreoides-genome}
+
+[GitHub repo](https://github.com/hputnam/Past_Genome)
+
+::: {#l-pastgenome}
+:::
+
+## Porites July Bleaching {#porites-july-bleaching}
+
+::: {#l-pjb}
+:::
+
+## Porites Thermal Transplant {#porites-thermal-transplant}
+
+[GitHub repo](https://github.com/kevinhwong1/Thermal_Transplant_Molecular)
+
+::: {#l-tt}
+:::
+
+## Symbiont Integration {#symbiont-integration}
+
+::: {#l-symint}
+:::
+
+## Porites Nutrition {#porites-nutrition}
+
+::: {#l-pnut}
+:::
+
+## Astrangia Nutrition {#astrangia-nutrition}
+
+::: {#l-anut}
+:::

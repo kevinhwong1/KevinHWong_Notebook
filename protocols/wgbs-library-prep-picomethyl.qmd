@@ -1,0 +1,186 @@
+---
+title: "WGBS library prep (Zymo Pico Methyl-Seq)"
+description: "Bisulfite-convert 10 ng of coral genomic DNA and build indexed whole-genome bisulfite sequencing libraries with the Zymo Pico Methyl-Seq kit, with QC and a re-amplification rescue."
+date: 2026-10-05
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["DNA methylation", "Porites astreoides"]
+protocol-id: wgbs-library-prep-picomethyl
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "wgbs-library-prep-picomethyl"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated 2026-10-05 · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | **10 ng** genomic DNA (1 ng µL⁻¹ in 10 mM Tris-HCl) |
+| **Output** | Dual-indexed WGBS library, ~15 µL, QC'd by Qubit and D5000 TapeStation |
+| **Kit** | Zymo Pico Methyl-Seq Library Prep Kit + KAPA Pure Beads |
+| **Time** | 1.5 days: dilution + conversion in the afternoon (overnight stop), then cleanup through QC the next day |
+| **Tested on** | *Porites astreoides* adults and larvae |
+
+This is an adapted workflow, not a replacement for the kit manual. Follow the [Zymo Pico Methyl-Seq manual](https://www.zymoresearch.com/products/pico-methyl-seq-library-prep-kit) for the full reagent details. The changes from the manual are **10 ng input** (instead of 1 ng) with **fewer amplification cycles**, and a diluted polymerase so you never pipette 0.3 µL.
+
+```{mermaid}
+flowchart LR
+  A[10 ng DNA] --> B[Bisulfite<br/>conversion]
+  B --> C[Column<br/>cleanup]
+  C --> D[PrepAmp<br/>random priming]
+  D --> E[DCC]
+  E --> F[Amp 1<br/>8 cycles]
+  F --> G[DCC]
+  G --> H[Amp 2 + UDI index<br/>10 cycles]
+  H --> I[1× bead<br/>cleanup]
+  I --> J[(Qubit +<br/>TapeStation)]
+```
+
+## Materials
+
+- Zymo Pico Methyl-Seq Library Prep Kit; KAPA Pure Beads (Roche)
+- Unique dual index (UDI) i5/i7 primers, 10 µM. Plan the pairs before you start (see Before you start)
+- 10 mM Tris-HCl pH 8.0; 100% ethanol (fresh 80% each day); ultrapure water
+- Thermocycler, thermomixer (56 °C), microcentrifuge (16,000 × g), magnetic plate for PCR strips, tube rotator/shaker
+- PCR strip tubes, 1.5 mL tubes, filter tips
+- Qubit dsDNA BR assay; Agilent TapeStation with **D5000** ScreenTape and reagents
+
+## Before you start
+
+- **Dilute DNA** to 1 ng µL⁻¹ in 10 mM Tris-HCl. Calculate all dilutions ahead of time.
+- **Plan indexes**: every library gets a unique i5 *and* a unique i7. Don't reuse an index number within a pool, even in a different pairing (this limits index hopping). Putnam Lab UDI list: [UDI index primer pairs](https://github.com/Putnam-Lab/Lab_Management/blob/master/Lab_Resourses/DNA_RNA-protocols/Indexes_and_Barcodes/UDI_Index_Primer_Pairs_for_Pico_WGBS.csv).
+- **Thermocycler programs** to save: BS conversion, PrepAmp priming, Amp 1 and Amp 2 (cycle numbers below).
+- Work out *n* = number of samples + ~5% for every master mix.
+- While each step runs, prepare the master mixes for the next step on ice.
+
+## Procedure
+
+### Day 1: Bisulfite conversion
+
+1. In PCR strips: **10 µL DNA (10 ng)** + **10 µL 10 mM Tris-HCl** = 20 µL.
+2. Add **130 µL Lightning Conversion Reagent** (150 µL total). Vortex and spin down.
+3. Run: **98 °C 8 min → 54 °C 60 min → 4 °C hold** (~1.5 h).
+
+::: {.callout-tip}
+## ⏸ Safe stopping point
+Converted DNA is stable at 4 °C for up to 20 h. Stop here overnight.
+:::
+
+### Day 2
+
+**Post-conversion column cleanup**
+
+4. Add **600 µL M-Binding Buffer** to a spin column, then the whole 150 µL conversion. Cap, invert 5–10×, spin 30 s. Discard flow-through into the kit's hazardous-waste container.
+5. **100 µL M-Wash**, spin 30 s.
+6. **200 µL L-Desulphonation Buffer**, stand **15 min** at room temp, spin 30 s. Meanwhile warm the DNA Elution Buffer to 56 °C.
+7. **200 µL M-Wash**, spin 30 s. Repeat, spinning **2 min** the second time.
+8. Move the column to a 1.5 mL tube. Add **8 µL warm Elution Buffer** to the membrane, wait 5 min, spin 30 s. Keep on ice and check all tubes have the same volume.
+
+**PrepAmp (random priming)**
+
+9. Master mixes (× *n*), on ice:
+
+   | Mix | Per sample |
+   |---|---|
+   | **PMM** (priming) | 2 µL 5× PrepAmp Buffer + 1 µL 40 µM PrepAmp Primer |
+   | **PAMM** (PrepAmp) | 1 µL 5× PrepAmp Buffer + 3.75 µL PrepAmp Pre-mix + 0.3 µL PrepAmp Polymerase |
+   | **Diluted polymerase** | 0.3 µL PrepAmp Polymerase + 0.2 µL Elution Buffer (so you add 0.5 µL) |
+
+10. **7 µL converted DNA + 3 µL PMM** in new strips. Vortex, spin, and start the priming program:
+
+    | Step | Temp / time |
+    |---|---|
+    | Denature | 98 °C 2 min → 8 °C 1 min → **8 °C hold** |
+    | ① At the hold | Take tubes out, vortex/spin, add **5.05 µL PAMM**, vortex/spin, return and continue |
+    | Priming | 8 °C 4 min, then 16, 22, 28, 36, 36.5 °C for 1 min each (3% ramp), 37 °C 8 min |
+    | Repeat | Denature → hold again |
+    | ② At the hold | Add **0.5 µL diluted polymerase**, vortex/spin, continue the priming steps |
+
+**DNA Clean & Concentrator (DCC) 1**
+
+11. Add the whole priming reaction (~15.5 µL) to **108.85 µL DNA Binding Buffer** (7:1), vortex, load a spin column, spin 30 s.
+12. **200 µL DNA Wash**, spin 30 s; repeat with a **2 min** spin.
+13. Elute in **12 µL warm Elution Buffer** (5 min, spin 30 s).
+
+**Amplification 1**
+
+14. Per sample: **12.5 µL 2× Library Amp Mix + 1 µL 10 µM Library Amp Primers** (13.5 µL) + **11.5 µL DCC eluate**.
+15. Run Amp 1 with **8 cycles** for 10 ng input (10 cycles for 1 ng) (~30 min).
+
+**DCC 2**
+
+16. **25 µL** reaction + **175 µL DNA Binding Buffer** (7:1). Bind, wash 2× as above, elute in **12.5 µL** warm Elution Buffer.
+
+**Amplification 2 (indexing)**
+
+17. Per sample: **12 µL DNA + 14 µL 2× Library Amp Mix + 1 µL i5 + 1 µL i7** (10 µM). Tick each addition off on a sheet as you go.
+18. Run Amp 2 with **10 cycles** for 10 ng input (12 for 1 ng) (~30 min). Take the KAPA beads out of the fridge now.
+
+**1× bead cleanup**
+
+19. Beads at room temp (≥ 30 min), swirled not vortexed. Make **fresh 80% ethanol**.
+20. Add **26 µL beads** (1×) to each library. Pipette-mix ≥ 10× and rotate **15 min at 200 rpm**.
+21. On the magnet, wait until clear, then remove the supernatant.
+22. Wash **2× with 200 µL 80% ethanol** without disturbing the beads. Remove all residual liquid with a P20 and air-dry ~1 min.
+23. Off the magnet, resuspend in **15 µL Elution Buffer**, shake 5 min at 200 rpm, return to the magnet and transfer the clear eluate to labeled final tubes (sample, date, "lib", initials).
+
+::: {.callout-tip}
+## ⏸ Safe stopping point
+Libraries can go to −20 °C here if you're not doing QC the same day.
+:::
+
+## QC and expected results
+
+| Check | Method | Good result |
+|---|---|---|
+| Concentration | Qubit dsDNA BR, read twice and average | > 5 ng µL⁻¹ (re-amplify below that, see below) |
+| Size | D5000 TapeStation | Smooth peak in the same range as the other libraries; no library with a very different size profile |
+
+In the Thermal Transplant preps, libraries came out at about 3–22 ng µL⁻¹. An example of a good trace that was sequenced:
+
+![](/images/20210415_18-9.png){fig-alt="TapeStation D5000 trace of a good WGBS library" width=70%}
+
+### Rescue: re-amplify low-yield libraries (< 5 ng µL⁻¹)
+
+Repeat Amp 2 + bead cleanup with **4 cycles**: **12 µL library + 13 µL 2× Library Amp Mix + 1 µL combined i5/i7** (the **same** indexes as before), then a 1× bead cleanup. In 2021 this brought most low libraries to 7–27 ng µL⁻¹. A few libraries that read "too low" stayed too low and need to be re-prepped from DNA.
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+|---|---|---|
+| Library fails (Qubit "too low") | Unequal elution after conversion, or sample loss in the cleanups | Check volumes after step 8; elute slowly onto the membrane center |
+| Less than 15.5 µL after priming | Evaporation (priming program has a low lid temperature) | Expected; transfer everything into the binding buffer |
+| 0.3 µL polymerase doesn't leave the tip | Volume too small | Use the diluted polymerase (0.5 µL) |
+| Library yield < 5 ng µL⁻¹ | Low input or efficiency | Re-amplify with 4 cycles (above) |
+
+## References
+
+- Zymo Research. Pico Methyl-Seq Library Prep Kit manual and [video series](https://www.youtube.com/watch?v=4ar8d5NeSks&list=PLI8mZMNHcIVq9DFCOPksLhcch8UbJj4Pq&index=2)
+- Putnam Lab [WGBS Pico Methyl-Seq protocol](https://github.com/Putnam-Lab/Lab_Management/blob/master/Lab_Resourses/DNA_RNA-protocols/WGBS-PicoMethyl-Protocol.md) (M. Schedl, E. Strand), the basis for this version
+- [Qubit protocol](https://github.com/meschedl/PPP-Lab-Resources/blob/master/Protocols/Qubit-Assay-Protocol.md), [D5000 TapeStation protocol](https://meschedl.github.io/MESPutnam_Open_Lab_Notebook/DNA-Tapestation/)
+- Analysis: [DNA methylation central document](../notebook/2024-03-27-dna-methylation-central-document.md)
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-10-05 | 1.0 | Rewritten from the 2021 Thermal Transplant protocol and library-prep trials; re-amplification rescue added |
+| 2021-05 | – | Re-amplification of low libraries (4 cycles) |
+| 2021-04 | – | 10 ng input with reduced Amp 1/Amp 2 cycles; eight library-prep batches |

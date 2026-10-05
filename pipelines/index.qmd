@@ -1,0 +1,28 @@
+---
+title: "Pipelines"
+subtitle: "Complete workflows, maintained in place. Each page lists inputs, software, the full job script, known issues and a changelog. Individual runs are logged in the notebook and link back here."
+listing:
+  id: pipeline-list
+  contents: "*.qmd"
+  type: table
+  fields: [title, description, date-modified]
+  field-display-names:
+    date-modified: "Updated"
+  sort: "title"
+  date-format: "YYYY-MM-DD"
+---
+
+::: {#pipeline-list}
+:::
+
+### Older central documents
+
+These overview pages from the old notebook are being folded into pipelines:
+
+- [Single-cell RNA-seq](../notebook/2024-03-27-single-cell-rnaseq-central-document.md)
+- [Genome annotation](../notebook/2024-03-27-genome-annotation-central-document.md)
+- [Transcriptomics](../notebook/2024-03-27-transcriptomics-central-document.md)
+- [DNA methylation](../notebook/2024-03-27-dna-methylation-central-document.md)
+- [Metabolomics](../notebook/2024-03-27-metabolomics-central-document.md)
+- [ITS2](../notebook/2024-03-27-its2-central-document.md)
+- [16S](../notebook/2024-03-27-16s-central-document.md)

@@ -1,0 +1,53 @@
+# Controlled vocabulary for notebook posts.
+# new_post.sh offers these as menus and check_labels.py warns about anything else.
+# Add a label here first if you really need a new one (keep the list short!).
+
+types:
+  - Lab work
+  - Protocol
+  - Analysis
+  - Troubleshooting
+  - Central doc
+  - Planning
+
+organisms:
+  - Porites astreoides
+  - Galaxea fascicularis
+  - Mnemiopsis leidyi
+  - Nematostella vectensis
+  - Acropora cervicornis
+  - Pocillopora damicornis
+  - Montipora capitata
+  - Pocillopora acuta
+  - Astrangia poculata
+  - Geoduck
+  - Symbiodiniaceae
+
+methods:
+  - scRNA-seq
+  - Transcriptomics
+  - Genome annotation
+  - Functional annotation
+  - Comparative genomics
+  - DNA methylation
+  - ITS2
+  - 16S
+  - Metabolomics
+  - DNA/RNA extraction
+  - Tissue & cell prep
+  - Physiology assays
+  - Imaging
+  - Nanopore
+  - HPC & computing
+
+# Projects also need a section on projects.qmd to show up on the Projects page.
+projects:
+  - Cnidarian Stem Cells
+  - Mnemiopsis Phagocytes
+  - Dark Genes
+  - Porites astreoides Genome
+  - Porites July Bleaching
+  - Porites Thermal Transplant
+  - Symbiont Integration
+  - Porites Nutrition
+  - Astrangia Nutrition

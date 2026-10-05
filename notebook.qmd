@@ -1,0 +1,23 @@
+---
+title: "Notebook"
+subtitle: "Every dated entry: lab work, analyses, protocols and troubleshooting. Use the box to filter by any word (project, organism, tool…) or click a label on the right."
+listing:
+  id: all-posts
+  contents:
+    - "notebook/*.md"
+    - "notebook/*.qmd"
+  type: table
+  sort: "date desc"
+  fields: [date, title, type, project]
+  field-display-names:
+    type: "Type"
+    project: "Project"
+  sort-ui: [date, title, type, project]
+  filter-ui: true
+  categories: numbered
+  page-size: 50
+  date-format: "YYYY-MM-DD"
+page-layout: full
+title-block-banner: false
+toc: false
+---

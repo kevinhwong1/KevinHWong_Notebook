@@ -1,0 +1,126 @@
+---
+title: "Polar metabolite extraction for LC-MS"
+description: "Extract polar metabolites from snap-frozen coral larvae, juveniles or adult clippings in cold methanol:acetonitrile:water with formic acid, neutralize, and load LC-MS autosampler vials."
+date: 2026-10-05
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["Metabolomics", "Porites astreoides", "Montipora capitata"]
+protocol-id: metabolite-extraction
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "metabolite-extraction"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated 2026-10-05 · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | Snap-frozen larvae (≥ 20 per sample), juveniles on plugs, or an adult clipping (weighed), stored at −80 °C |
+| **Output** | Duplicate 100 µL LC-MS autosampler vials + the remaining extract, all at −80 °C |
+| **Time** | ~15 min per sample; plan around how many clean dounces you have (estimate) |
+| **Tested on** | *Porites astreoides* adults and larvae; *Montipora capitata* larvae, recruits and juveniles |
+
+## Materials
+
+**Equipment and consumables**
+
+- 2 mL glass dounce homogenizers (Sigma D8938), autoclaved between samples
+- 100 µm cell strainers and 50 mL tubes
+- 11 mm snap-cap autosampler vials and caps
+- Refrigerated centrifuge (4 °C), analytical balance (adults), dry ice
+- Sterile clippers or razor blades; fume hood
+
+**Reagents (LC-MS grade)**
+
+- Methanol, acetonitrile, water, formic acid
+- Ammonium bicarbonate
+- 10% bleach and alkaline lab soap for cleaning
+
+## Solutions to prepare
+
+| Solution | Recipe | Storage |
+|---|---|---|
+| **Extraction buffer**: 40:40:20 methanol:acetonitrile:water + 0.5% formic acid | 200 mL: 80 mL methanol + 80 mL acetonitrile + 40 mL water + 1 mL formic acid | 4 °C, flammables fridge |
+| **Saturated ammonium bicarbonate** ("100%", 220 g L⁻¹) | 55 g in 250 mL LC-MS water | 4 °C |
+| **15% ammonium bicarbonate** | 37.5 mL saturated stock + 212.5 mL LC-MS water | 4 °C |
+
+## Before you start
+
+- Autoclave all glassware (dounces, pestles). Wipe benches and the fume hood with 10% bleach.
+- Aliquot the day's extraction buffer and ammonium bicarbonate into 50 mL tubes and keep them cold.
+- Pre-cool the centrifuge to 4 °C. Get dry ice.
+- Label per sample: a weighing vial (adults), a temporary 1.5 mL tube, and two autosampler vials (A and B).
+
+## Procedure
+
+### A. Get the sample into extraction buffer
+
+**Larvae (in tubes)**
+
+1. Put a dounce on dry ice. Take the sample from −80 °C and remove any residual seawater.
+2. Add **500 µL** extraction buffer to the tube, pipette-mix, and transfer to the dounce. Rinse the tube with another **500 µL** and add it to the dounce.
+
+**Juveniles on plugs**
+
+3. Add **500 µL** extraction buffer to a 1.5 mL tube on dry ice. Scrape the juvenile off the plug with a sterile razor blade straight into the buffer (push stuck tissue down with a pipette tip). Transfer to the dounce and rinse with another **500 µL**.
+
+**Adult clippings**
+
+4. Weigh an empty vial, then the vial + **1 mL** extraction buffer. Clip a small piece of tissue (~0.5 cm) into it and weigh again (tissue mass = difference). Transfer to the dounce.
+
+### B. Homogenize and clear
+
+5. Incubate **5 min on dry ice** (or on ice).
+6. Homogenize with the glass pestle for ~1 min, until the liquid is visibly pigmented.
+7. If the sample is strongly pigmented and opaque, rinse the pestle with another **500 µL** buffer into the dounce. If it is faint (small samples), skip this to keep the extract concentrated, and record the total volume used.
+8. Pour through a **100 µm cell strainer** into a 50 mL tube, then transfer to a 1.5 mL tube.
+9. Vortex and spin **15,000 × g, 10 min, 4 °C**.
+
+### C. Neutralize and load
+
+10. Move **500 µL** of supernatant to a new tube and add **44 µL cold ammonium bicarbonate**. Vortex and spin down.
+11. Load **100 µL** into each of two autosampler vials (A, B) and cap.
+12. Store the vials and the remaining extract at **−80 °C**, in a labeled box (record the box and freezer).
+
+### Clean-up
+
+- Soak dounces in alkaline soap, rinse well, and autoclave. With 10 dounces, plan to autoclave after every ~5 samples or between lab days.
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+|---|---|---|
+| Residue or soap in a dounce | Not rinsed well before autoclaving | Don't use it; re-wash. Put the sample back at −80 °C if it hasn't touched buffer ([2020-10-06](../notebook/2020-10-07-20201006-adult-p-astreoides-metabolomic-extractions.md)) |
+| Low signal from small samples | Sample too diluted | Use less buffer for small larvae/recruit samples, and record the volume ([2021-03-25](../notebook/2021-04-16-symbiont-integration-metabolomics-processing-20210321-20210414.md)) |
+| Normalization unclear | Different buffer volumes between samples | Record buffer volume and larva number or tissue mass for every sample |
+
+::: {.callout-important}
+## Ammonium bicarbonate concentration
+The 2020 protocol used **15%** ammonium bicarbonate; the 2021 Symbiont Integration batches recorded **10%**. Use one concentration across a whole project. TODO: confirm which is current.
+:::
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-10-05 | 1.0 | Merged the 2020 protocol with the 2021 juvenile and dry-ice modifications |
+| 2021-03 | – | Juveniles on plugs; dry-ice incubation; skip the rinse step for faint samples (*M. capitata*) |
+| 2020-10 | – | Adult *P. astreoides* extractions (Porites July Bleaching) |
+| 2020-02 | – | Protocol developed on *P. astreoides* larvae and adults |

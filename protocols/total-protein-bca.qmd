@@ -1,0 +1,90 @@
+---
+title: "Total protein (alkaline digestion + Pierce BCA assay)"
+description: "Solubilize protein from coral homogenates or larvae with NaOH, neutralize, and quantify with the Pierce BCA microplate assay."
+date: 2026-10-05
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["Physiology assays", "Porites astreoides"]
+protocol-id: total-protein-bca
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "total-protein-bca"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated 2026-10-05 · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | 200 µL homogenate (holobiont, host or symbiont fraction) or larval homogenate |
+| **Output** | Total protein (mg mL⁻¹), normalized per larva or per cm² |
+| **Kit** | Thermo Scientific Pierce BCA Protein Assay Kit ([manual](/images/Pierce_BCA_Protein_Assay.pdf)) |
+| **Time** | 4 h digestion + ~1 h assay |
+| **Tested on** | *Porites astreoides* adults and larvae; *Astrangia poculata* |
+
+## Materials
+
+- Pierce BCA Protein Assay Kit (Reagent A, Reagent B, BSA standard)
+- 1 M NaOH, 0.1 M HCl, pH paper
+- Thermomixer or shaking incubator at 50 °C
+- 96-well flat-bottom plate, plate reader (562 nm), 37 °C incubator
+
+## Procedure
+
+### A. Alkaline digestion
+
+1. Thaw samples. For fractions, prepare them first ([tissue protocol](coral-tissue-removal-homogenization.qmd), Part B):
+   - **Holobiont:** 200 µL vortexed homogenate.
+   - **Host:** spin homogenate 15,000 × g, 3 min; use 200 µL of the supernatant.
+   - **Symbiont:** resuspend that pellet in 1 mL 1× PBS; use 200 µL.
+2. Add **10 µL 1 M NaOH** to each 200 µL sample (pH ~10). Spot a tiny drop on pH paper to check, since the vials are too small for a probe.
+3. Incubate **4 h at 50 °C, shaking at 300 rpm**. Prepare the BCA standards and working reagent during this time.
+4. Neutralize with **80 µL 0.1 M HCl**, added in small steps, checking with pH paper until pH ≈ 7. Don't continue until the pH is 7.
+   - 80 µL was enough in the [2021 pH test](../notebook/2021-06-30-20210629-total-protein-testing.md). The original 2018 protocol used up to 280 µL. Samples differ, so always check the pH.
+5. Record the final volume (e.g. 200 + 10 + 80 = **290 µL**, a dilution factor of 1.45).
+
+### B. BCA microplate assay (from the kit manual)
+
+6. Make **BSA standards** in the same diluent as your samples (PBS plus the NaOH/HCl), following the kit dilution table.
+7. Make **working reagent**: Reagent A : Reagent B = 50 : 1. You need 200 µL per well.
+8. Pipette **25 µL** of each standard and sample into the plate, in duplicate or triplicate.
+9. Add **200 µL** working reagent to each well and mix on a plate shaker for 30 s.
+10. Cover and incubate **30 min at 37 °C**. Cool to room temperature.
+11. Read absorbance at **562 nm**.
+
+### C. Calculate
+
+12. Subtract the blank, fit the standard curve (the BCA curve is usually slightly non-linear; a quadratic fit is fine), and calculate µg mL⁻¹.
+13. Multiply by the dilution factor from step 5, then normalize: × homogenate volume ÷ surface area, or ÷ number of larvae.
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+|---|---|---|
+| Purple color everywhere, values too high | Sample pH not neutralized, or too much HCl | Re-check the pH; BCA is sensitive to pH and reducing agents |
+| Values below the lowest standard | Sample too dilute | Use more homogenate, or a lower-range standard curve |
+| Replicates disagree | Particulates in the well | Spin samples briefly before pipetting into the plate |
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-10-05 | 1.0 | Rewritten from the 2018 protocol; neutralization volume updated from the 2021 pH test; BCA steps and calculation added |
+| 2021-06 | – | pH test: 80 µL 0.1 M HCl neutralizes 10 µL 1 M NaOH in 200 µL homogenate; host/symbiont/holobiont fractions |
+| 2018-10 | – | Original alkaline digestion for larval tissue |

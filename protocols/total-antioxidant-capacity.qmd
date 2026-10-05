@@ -1,0 +1,103 @@
+---
+title: "Total antioxidant capacity (OxiSelect TAC assay)"
+description: "Measure copper-reducing total antioxidant capacity of coral host tissue against a uric acid standard curve (Cell Biolabs OxiSelect STA-360)."
+date: 2026-10-05
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["Physiology assays", "Porites astreoides"]
+protocol-id: total-antioxidant-capacity
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "total-antioxidant-capacity"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated 2026-10-05 · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | 500 µL frozen airbrushed homogenate (host supernatant used) |
+| **Output** | TAC in µM copper-reducing equivalents (uric acid equivalents), normalized to protein |
+| **Kit** | Cell Biolabs OxiSelect Total Antioxidant Capacity Assay Kit, STA-360 ([manual](https://www.cellbiolabs.com/sites/default/files/STA-360-total-antioxidant-capacity-assay-kit.pdf)) |
+| **Time** | ~1 h for one plate (estimate) |
+| **Tested on** | *Porites astreoides* adults |
+
+Antioxidants in the sample reduce Cu²⁺ to Cu⁺, which forms a coloured complex read at 490 nm. Absorbance is read before and after copper is added; the difference is compared to uric acid standards.
+
+## Materials
+
+- OxiSelect TAC kit (reaction buffer, copper ion reagent, stop solution, uric acid)
+- 1 M NaOH, 1× PBS, DI water
+- Refrigerated centrifuge, 96-well plate, plate reader at 490 nm, orbital shaker, multichannel pipette
+
+## Solutions to prepare
+
+Store prepared reagents at 4 °C for up to 3 months.
+
+| Solution | Recipe |
+|---|---|
+| **1× reaction buffer** (1:100) | 400 µL reaction buffer + 39.6 mL 1× PBS |
+| **1× copper ion reagent** (1:100) | 1 mL copper ion reagent concentrate + 99 mL DI water |
+| **1× stop solution** (1:10) | 1.5 mL stop solution + 13.5 mL DI water |
+| **Uric acid, 2 mM** | Dissolve 10 mg uric acid in 1 mL 1 M NaOH (≈ 60 mM), then 100 µL + 2.9 mL DI water |
+
+Make the standard curve by serial dilution of the 2 mM uric acid, following the kit manual:
+
+![Uric acid standard dilutions used in the 2019 run](/images/TAC_Standard.png){fig-alt="Table of uric acid standard dilutions"}
+
+## Procedure
+
+### A. Samples
+
+1. Thaw 500 µL homogenates on ice.
+2. Spin **5,200 rpm, 5 min, 4 °C** to pellet symbionts.
+3. Split the supernatant: **100 µL for TAC**, **400 µL for protein** ([Total protein](total-protein-bca.qmd)). Keep on ice.
+
+### B. Assay
+
+4. Add **20 µL** standard or sample per well, in duplicate.
+5. Add **180 µL 1× reaction buffer** with a multichannel and pipette-mix.
+6. **Initial read** at **490 nm**.
+7. Add **50 µL 1× copper ion reagent**. Incubate **5 min** at room temperature on an orbital shaker.
+8. Add **50 µL 1× stop solution**.
+9. **Final read** at **490 nm**.
+
+### C. Calculate
+
+10. ΔA490 = final − initial for every well. Subtract the blank.
+11. Fit the uric acid standard curve and calculate µM uric acid equivalents. Convert to µM copper-reducing equivalents (CRE) with the conversion factor given in the kit manual.
+12. Normalize to protein from the same homogenate.
+
+## Plate layout
+
+In the 2019 run, 8 standards in duplicate filled row A and the start of row B, leaving room for 40 samples in duplicate. Two of the kit's standards were dropped to fit all samples on one plate ([2019-11-26](../notebook/2019-11-26-total-antioxidant-capacity-porites-june-patch-adult-tissues.md)).
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+|---|---|---|
+| Uric acid won't dissolve | Needs a basic solution | Dissolve in 1 M NaOH before diluting in water |
+| Sample above the top standard | High antioxidant content | Dilute in 1× PBS and re-run |
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-10-05 | 1.0 | Rewritten from the 2019 Porites Nutrition run |
+| 2019-11 | – | First run on *P. astreoides* adult homogenates |

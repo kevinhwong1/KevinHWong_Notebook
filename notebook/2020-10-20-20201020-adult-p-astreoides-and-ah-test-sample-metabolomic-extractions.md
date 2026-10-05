@@ -1,0 +1,46 @@
+---
+title: "20201020 Adult P.astreoides and AH test sample Metabolomic Extractions"
+date: 2020-10-20
+type: "Lab work"
+project: "Porites July Bleaching"
+categories: ["Lab work", "Porites astreoides", "Metabolomics"]
+protocols: ["metabolite-extraction"]
+aliases:
+  - "/20201020-Adult-P.astreoides-and-AH-test-sample-Metabolomic-Extractions/"
+---
+**Project:** [Porites Bleaching 2019](https://github.com/kevinhwong1/Porites_Rim_Bleaching_2019)
+
+**Metric and Protocol:** [Metabolomic extractions](/notebook/2020-02-03-metabolomics-p-astreoides-sample-prep.md)
+
+**Batch Number:** 6
+
+### Goal
+To prepare lab materials and process metabolomic extractions on adult *Porites astreoides* samples for the Porites Bleaching 2019 experiment using [this protocol](/notebook/2020-02-03-metabolomics-p-astreoides-sample-prep.md). Additionally I extracted 6 samples for AH using the [larval protocol](/notebook/2020-02-03-metabolomics-p-astreoides-sample-prep.md).
+
+### Laboratory preparation
+
+1. Autoclaved all glass ware.
+2. Wiped down all counter tops and fumehood with 10% bleach solution
+3. Sterilize clippers and forceps (10% bleach, DI water, ethanol)
+4. Used dry ice from Maggie
+
+### Samples
+
+KW samples were snap frozen in liquid nitrogen and stored at -80&deg;C.
+
+| Extraction # 	| Vial # 	| Fragment ID 	| Timepoint 	| Vial + Buffer (g) 	| Vial + Buffer + Coral (g) 	|
+|:------------:	|:------:	|:-----------:	|:---------:	|:-----------------:	|:-------------------------:	|
+|      43      	|   42   	|     R26     	|     A4    	|       1.9760      	|           2.2455          	|
+|      44      	|   41   	|     R11     	|     A4    	|       1.9704      	|           2.2177          	|
+|      45      	|   14   	|     R35     	|     A1    	|       1.7491      	|           2.2329          	|
+
+AH Samples that were snap frozen in liquid nitrogen and stored at -80&deg;C.
+
+| Original Tube Label 	| Sample Type 	| Final Tube Label 	|
+|:-------------------:	|:-----------:	|:----------------:	|
+|         F13         	|   Larvae 2  	|       AH-13      	|
+|         F14         	|   Larvae 2  	|       AH-14      	|
+|         F21         	|   Larvae 4  	|       AH-21      	|
+|         F22         	|   Larvae 4  	|       AH-22      	|
+|         F29         	|  Recruit 1  	|       AH-29      	|
+|         F30         	|  Recruit 1  	|       AH-30      	|

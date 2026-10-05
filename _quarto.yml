@@ -1,0 +1,70 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "*.qmd"
+    - "notebook/*.md"
+    - "notebook/*.qmd"
+    - "pipelines/*.qmd"
+    - "protocols/*.md"
+    - "protocols/*.qmd"
+  resources:
+    - "images/**"
+    - "protocols/*.pdf"
+    - "pipelines/scripts/**"
+
+website:
+  title: "Kevin H. Wong · Open Lab Notebook"
+  description: "Open lab notebook of Kevin H. Wong — marine invertebrate single-cell genomics, coral biology and bioinformatics."
+  site-url: "https://kevinhwong1.github.io/KevinHWong_Notebook/"
+  repo-url: "https://github.com/kevinhwong1/KevinHWong_Notebook"
+  repo-actions: [source, issue]
+  favicon: images/KevinWong_Headshot.jpg
+  search:
+    location: navbar
+    type: overlay
+  page-navigation: true
+  back-to-top-navigation: true
+  navbar:
+    left:
+      - text: Notebook
+        href: notebook.qmd
+      - text: Pipelines
+        href: pipelines/index.qmd
+      - text: Wet Lab Protocols
+        href: protocols/index.qmd
+      - text: Projects
+        href: projects.qmd
+    right:
+      - icon: github
+        href: https://github.com/kevinhwong1/KevinHWong_Notebook
+        aria-label: GitHub
+      - icon: globe
+        href: https://sites.google.com/view/kevin-h-wong/home/
+        aria-label: Personal website
+  sidebar:
+    - id: pipelines
+      title: Pipelines
+      style: docked
+      contents:
+        - pipelines/index.qmd
+        - auto: "pipelines/*.qmd"
+  page-footer:
+    left: "© Kevin H. Wong · Content licensed [MIT](https://github.com/kevinhwong1/KevinHWong_Notebook/blob/master/LICENSE)"
+    right: "Built with [Quarto](https://quarto.org)"
+
+format:
+  html:
+    theme:
+      light: [flatly, styles.scss]
+      dark: [darkly, styles.scss]
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    code-overflow: scroll
+    highlight-style: github
+    anchor-sections: true
+    smooth-scroll: true
+    link-external-newwindow: true
+    grid:
+      body-width: 900px

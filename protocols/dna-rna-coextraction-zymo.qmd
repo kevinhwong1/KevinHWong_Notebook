@@ -1,0 +1,185 @@
+---
+title: "DNA/RNA co-extraction from coral tissue (Zymo Quick-DNA/RNA Miniprep Plus)"
+description: "Extract DNA and RNA from the same small piece of snap-frozen coral (adult fragment or larvae) using bead-beating lysis and Zymo's paired DNA and RNA spin columns."
+date: 2026-10-05
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["DNA/RNA extraction", "Porites astreoides"]
+protocol-id: dna-rna-coextraction-zymo
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "dna-rna-coextraction-zymo"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated 2026-10-05 · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | Snap-frozen adult fragment (small clipping of tissue + skeleton) **or** one vial of larvae (20 larvae), stored at −80 °C |
+| **Output** | ~100 µL genomic DNA (in 10 mM Tris) **and** ~100 µL total RNA (in water) from the same sample |
+| **Kit** | Zymo Quick-DNA/RNA Miniprep Plus (D7003) |
+| **Time** | ~2 h for 6–10 samples, plus QC (estimate; TODO: confirm) |
+| **Tested on** | *Porites astreoides* adults and larvae; geoduck tissue (one run) |
+
+The sample is lysed in DNA/RNA Shield by bead beating and digested with Proteinase K. It is then passed over a yellow column that binds DNA. The flow-through, which contains the RNA, goes onto a green column with an on-column DNase step. Both columns use the same wash buffers, so the DNA and RNA preps can run side by side.
+
+## Materials
+
+**Kits and reagents**
+
+- Zymo Quick-DNA/RNA Miniprep Plus kit (D7003): DNA/RNA Shield, Proteinase K + PK Digestion Buffer, DNA/RNA Lysis Buffer, DNA/RNA Prep Buffer, DNA/RNA Wash Buffer, DNase I + DNA Digestion Buffer, yellow (DNA) and green (RNA) spin columns. [Kit manual (PDF)](/images/Zymo_quick-dna-rna_miniprep_plus_kit.pdf)
+- 100% ethanol (molecular grade)
+- 10 mM Tris-HCl, pH 8.0, made with RNase-free water (DNA elution)
+- RNase-free water (RNA elution)
+- RNase Away
+- For sterilizing clippers: 10% bleach, DI water, 70–90% ethanol, RNase-free water
+
+**Equipment and consumables**
+
+- Bead tubes: 2 mL tubes with 0.5 mm glass beads ([Fisher 15340152](https://www.fishersci.com/shop/products/bead-tube-2ml-0-5mm-glass-50pk/15340152)), or ~0.25 mL loose 0.5 mm glass beads per tube
+- Vortexer with a tube adapter (max speed)
+- Microcentrifuge capable of 16,000 × g
+- Heat block or Thermomixer at 70 °C (pre-warming elution liquids)
+- Sterile clippers, dry ice, 1.5 mL tubes, 0.5 mL PCR tubes for QC aliquots
+- A designated RNase-free bench area
+
+## Solutions to prepare (first use of a kit)
+
+| Reagent | Preparation | Storage |
+|---|---|---|
+| DNA/RNA Wash Buffer | If supplied as concentrate, add 96 mL 100% ethanol (or 104 mL 95%) to the 24 mL concentrate. The D7003 kit wash buffer is usually ready to use; check the label. | Room temp |
+| DNase I | Reconstitute the lyophilized enzyme as indicated on the vial; mix by inversion, don't vortex. | Aliquot, −20 °C |
+| Proteinase K | 20 mg vial + 1,040 µL PK Storage Buffer (or 5 mg + 260 µL); vortex to dissolve. | −20 °C |
+
+## Before you start
+
+- Wipe the bench, pipettes and racks with RNase Away. Keep the spray bottle and Kimwipes handy.
+- Pre-warm the **10 mM Tris-HCl** and **RNase-free water** to 70 °C.
+- Thaw the DNase I aliquot on ice (you'll need it about 30 min in).
+- Label for each sample: one bead tube, one 1.5 mL "lysate" tube, one 1.5 mL "RNA flow-through" tube, two elution tubes (DNA, RNA), and two QC tubes.
+- Keep samples on dry ice until the moment you add Shield.
+- Sterilize the clippers between samples: 10% bleach → DI water → ethanol → RNase-free water.
+
+## Procedure
+
+### A. Lysis and bead beating
+
+1. Add ~0.25 mL of 0.5 mm glass beads and **500 µL DNA/RNA Shield** to each bead tube.
+2. Add the sample:
+   - **Adult:** clip a small piece of tissue and skeleton (TODO: confirm the size you aim for) straight from dry ice into the tube.
+   - **Larvae:** add the whole vial (20 larvae) to the tube.
+3. Vortex at maximum speed: **1 min for adult fragments**, **30 s for larvae**.
+4. Transfer **400 µL** of the supernatant to a labeled 1.5 mL tube. Avoid mucus clumps and skeleton.
+
+::: {.callout-tip}
+## ⏸ Safe stopping point
+The leftover bead-tube material can go back to −80 °C as a backup. Samples in DNA/RNA Shield are stable, but continue the same day if you can.
+:::
+
+### B. Proteinase K digestion
+
+5. Add **40 µL PK Digestion Buffer** and **20 µL Proteinase K** to the 400 µL lysate. (Ratios: sample : digestion buffer = 10 : 1; digestion buffer : PK = 2 : 1. Scale if you use a different volume.)
+6. Vortex briefly and spin down.
+7. Add an equal volume (**460 µL**) of **DNA/RNA Lysis Buffer**. Mix by flicking or brief vortexing.
+
+### C. DNA (yellow column)
+
+8. Load **700 µL** of lysate onto the **yellow** DNA column. Centrifuge 16,000 × g, 30 s.
+9. **Keep the flow-through.** Transfer it to the labeled "RNA" tube. It contains the RNA (go to part D).
+10. Load the rest of the lysate onto the same yellow column, spin again, and add that flow-through to the RNA tube as well.
+11. Add **400 µL DNA/RNA Prep Buffer**. Spin 30 s. Discard the flow-through.
+12. Add **700 µL DNA/RNA Wash Buffer**. Spin 30 s. Discard the flow-through.
+13. Add **400 µL DNA/RNA Wash Buffer**. Spin **2 min** to dry the membrane completely.
+14. Move the column to a labeled 1.5 mL elution tube.
+15. Drip **50 µL warm 10 mM Tris-HCl** slowly onto the center of the membrane. Wait **5 min**, then spin 30 s.
+16. Add a second **50 µL warm Tris-HCl**. Wait **15 min**, then spin 30 s. Discard the column (final volume ~100 µL).
+
+### D. RNA (green column)
+
+You can start this right after step 9, while the DNA columns are washing.
+
+17. Add an equal volume of **100% ethanol** to the RNA flow-through (≈ 920 µL for a 400 µL starting lysate). Vortex briefly and spin down.
+18. Load **700 µL** onto the **green** RNA column. Spin 30 s and discard the flow-through. Repeat until all the liquid has passed through.
+19. Add **400 µL DNA/RNA Wash Buffer**. Spin 30 s. Discard the flow-through.
+20. Make the DNase I master mix: **75 µL DNA Digestion Buffer + 5 µL DNase I** per sample, plus one extra.
+21. Add **80 µL** of the master mix directly onto the membrane. Incubate **15 min** at room temperature.
+22. Add **400 µL DNA/RNA Prep Buffer**. Spin 30 s. Discard the flow-through.
+23. Add **700 µL DNA/RNA Wash Buffer**. Spin 30 s. Discard the flow-through.
+24. Add **400 µL DNA/RNA Wash Buffer**. Spin **2 min**.
+25. Move the column to a labeled RNase-free 1.5 mL tube.
+26. Drip **50 µL warm RNase-free water** onto the membrane, wait **5 min**, and spin 30 s. Repeat once (final volume ~100 µL).
+
+### E. Aliquot and store
+
+27. Take QC aliquots: **10 µL DNA** (Qubit + gel) and **5 µL RNA** (Qubit + TapeStation) into 0.5 mL tubes.
+28. Store **DNA at −20 °C** (4 °C if you're running QC within a day) and **RNA at −80 °C**.
+
+### Clean-up
+
+- Collect all Zymo buffer waste and tissue in the labeled *Zymo extraction waste* container. The lysis buffer contains guanidine salts, so don't mix it with bleach.
+- Wipe the RNase-free area with RNase Away and restock tips.
+
+## QC and expected results
+
+| Check | Method |
+|---|---|
+| DNA and RNA concentration | Qubit **Broad Range** DNA and RNA assays (1 µL sample) |
+| DNA integrity | 1% agarose gel: expect a high-molecular-weight band with little smear |
+| RNA integrity | TapeStation RNA ScreenTape (RIN) |
+
+Typical yields from the notebook (100 µL elutions):
+
+| Sample type | DNA (ng/µL) | RNA (ng/µL) | Source |
+|---|---|---|---|
+| *P. astreoides* adult fragment, bead beating | 7–23 | 22–38 | [2020-10-22, n = 6](../notebook/2020-10-23-20201022-dna-rna-extractions-porites-july-bleaching-experiment.md) |
+| *P. astreoides* larvae (20 per vial), bead beating | 14–48 | 34–57 | [2020-08-12, n = 6](../notebook/2020-08-12-dna-rna-extractions-on-p-astreoides-larvae-bead-beating.md) |
+| *P. astreoides* larvae, PK digestion only (no beads) | 19–56 | 24–75 | [2020-08-06, n = 10](../notebook/2020-08-06-dna-rna-extractions-porites-thermal-transplant-larvae-batch-1.md) |
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+|---|---|---|
+| RNA degraded (low RIN) but DNA fine | Sample was an **airbrushed homogenate**; RNA from homogenates came out too degraded in the first test. | Use airbrushed homogenates for DNA only. For RNA, bead-beat a clipping taken straight from −80 °C ([2019-02-13](../notebook/2019-02-13-zymo-dna-rna-extraction-protocol.md)). |
+| Hard to pipette the supernatant; column clogs | Mucus clumps or skeleton fragments | Spin the bead tube briefly (8,000 × g, 30 s) and take the supernatant from the top ([2020-08-06](../notebook/2020-08-06-dna-rna-extractions-porites-thermal-transplant-larvae-batch-1.md)). |
+| Very dilute lysate, low yield from fragments | Too much Shield for a small clipping (1,000 µL was too much) | Use 500 µL Shield per bead tube. |
+| DNA contamination in RNA | DNase step skipped or too short | Use the full 15 min on-column DNase with fresh master mix. |
+| Low DNA yield | Membrane not fully dry, or elution not warm | Do the 2 min dry spin. Use Tris pre-warmed to 70 °C and the 15 min second incubation. |
+
+## Notes by sample type
+
+- **Larvae.** Bead beating (30 s) replaced the original 1.5 h Proteinase K digestion at 55 °C (1,000 µL Shield + 100 µL PK buffer + 50 µL PK). Bead beating is faster and gave similar yields.
+- **Adult fragments.** Bead-beat for 1 min. Airbrushed homogenates work for DNA but not RNA (see Troubleshooting).
+- **Other species.** One run included geoduck tissue alongside *Porites* ([2020-07-30](../notebook/2020-07-30-dna-rna-extractions-thermal-transplant-porites-and-geoduck.md)).
+
+## References
+
+- Zymo Research. *Quick-DNA/RNA Miniprep Plus Kit (D7003) instruction manual.* [PDF](/images/Zymo_quick-dna-rna_miniprep_plus_kit.pdf)
+- E. Strand. [Soft and hard homogenization protocol](https://emmastrand.github.io/EmmaStrand_Notebook/Soft-and-Hard-Homogenization-Protocol/) (basis of the original workflow).
+- Downstream QC protocols (E. Strand): [Qubit](https://github.com/emmastrand/EmmaStrand_Notebook/blob/master/_posts/2019-05-31-Qubit-Protocol.md), [TapeStation](https://github.com/emmastrand/EmmaStrand_Notebook/blob/master/_posts/2019-05-31-TapeStation-Protocol.md), [Gel electrophoresis](https://github.com/emmastrand/EmmaStrand_Notebook/blob/master/_posts/2019-07-16-Gel-Electrophoresis-Protocol.md)
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-10-05 | 1.0 | Written up as a standalone protocol from the notebook entries below |
+| 2020-10 | – | Bead-beating lysis applied to adult fragments (Porites July Bleaching) |
+| 2020-08 | – | Bead beating replaced the 1.5 h Proteinase K digestion for larvae |
+| 2019-12 | – | Shield + glass-bead "soft homogenization" and the paired DNA/RNA column workflow (Thermal Transplant trials) |
+| 2019-02 | – | First test of the kit on airbrushed homogenates vs. fragments |

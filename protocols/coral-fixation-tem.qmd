@@ -1,0 +1,102 @@
+---
+title: "Coral fixation and decalcification for TEM"
+description: "Fix whole coral fragments in zinc formalin, decalcify in HCl, and post-fix single polyps in glutaraldehyde for transmission electron microscopy, keeping the remaining polyps for symbiont counts."
+date: 2026-10-05
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["Imaging", "Galaxea fascicularis"]
+protocol-id: coral-fixation-tem
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "coral-fixation-tem"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated 2026-10-05 · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | Live coral fragments (on tiles) |
+| **Output** | One glutaraldehyde-fixed, decalcified polyp per fragment for TEM, plus a homogenate of the remaining polyps for symbiont density |
+| **Time** | Fixation ≥ 24 h (up to 6 months) → decalcification hours to days → polyp dissection |
+| **Tested on** | *Galaxea fascicularis* |
+| **Imaging** | Processed and imaged by the University of Miami Miami Project to Cure Paralysis TEM Core |
+
+::: {.callout-warning}
+## Safety
+Z-fix (10% aqueous buffered zinc formalin) is **toxic**. Work in a fume hood with full PPE (goggles, lab coat, gloves, closed shoes). The stock container is heavy, so move it with two people. Read the Z-fix [product information](http://www.anatechltdusa.com/files/130912398.pdf) and [SDS](http://www.anatechltdusa.com/files/114169364.pdf) first. When diluting acid, always add **acid to water**.
+:::
+
+## Materials
+
+- Z-fix concentrate (Anatech); glutaraldehyde (provided by the TEM core, store at 4 °C)
+- Concentrated HCl; DI water
+- 0.2 µm filtered seawater (FSW): vacuum filter unit + pump
+- 15 mL and 50 mL tubes, specimen containers, glass bottles, funnel
+- Labeled plastic jugs/bins for formalin and acid waste
+- Ruler or scale bar, camera; scalpel, Petri dish; parafilm
+
+## Solutions to prepare
+
+| Solution | Recipe | Notes |
+|---|---|---|
+| **0.2 µm FSW** | Vacuum-filter seawater into a glass bottle | ~1 L per filter run |
+| **Diluted Z-fix** | 1 part Z-fix : 4 parts FSW | Mix in a labeled jug in the fume hood. TODO: the original labels say "25% zinc formalin", which would be 1:3. Confirm the ratio. |
+| **10% HCl** | 900 mL DI water, then add 100 mL HCl | Acid into water, never the reverse |
+
+## Procedure
+
+### A. Plan and label
+
+1. Randomly choose the fragments to fix (e.g. one per tank) and record their tile IDs.
+2. Label tubes or containers with tile ID, tank, treatment, species, initials, date **and** the chemical ("Z-fix in FSW").
+3. Volumes: **30–40 mL** fixative per 50 mL tube, or **350–450 mL** per specimen container. Pre-fill before sampling.
+
+### B. Fix
+
+4. Photograph each fragment in seawater with a scale bar.
+5. Remove the coral from the tile and lower it gently into the fixative without splashing. Top up until it is fully covered.
+6. Store cool and dark (flammables fridge) for **at least 24 h**. Samples can stay in Z-fix for **up to 6 months**.
+
+### C. Decalcify
+
+7. Pour the Z-fix into the formalin waste container.
+8. Refill with the **same volume of 10% HCl**. Leave the cap **off** (CO₂ is released).
+9. Replace the HCl every **24 h** until the skeleton is completely dissolved (hours to days, depending on size).
+
+### D. Dissect and post-fix
+
+10. Pour off the HCl, put the tissue in a plastic Petri dish, and photograph it with a scale bar. Note which polyp you take.
+11. With a scalpel, cut out **one polyp** and put it in a 15 mL tube with **2 mL glutaraldehyde**, fully submerged. Cap, parafilm and store at **4 °C** until delivery to the TEM core.
+12. Count the remaining polyps, put them in a 15 mL tube with **5 mL FSW**, homogenize, and store at 4 °C for [symbiont density](symbiont-density-hemocytometer.qmd).
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+|---|---|---|
+| Fragment not fully covered | Container too small or fragment too large | Add fixative until covered, or use a specimen container |
+| Decalcification very slow | HCl spent | Replace the acid every 24 h; larger fragments take days |
+| Tissue too fragile to dissect | Over-long acid exposure | Check daily and stop as soon as the skeleton is gone |
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-10-05 | 1.0 | Rewritten from the 2023 notebook protocol |
+| 2023-01 | – | Protocol developed for *G. fascicularis* with the UM TEM core |

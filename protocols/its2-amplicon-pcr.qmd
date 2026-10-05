@@ -1,0 +1,119 @@
+---
+title: "ITS2 amplicon PCR for Symbiodiniaceae (incl. touchdown options)"
+description: "Amplify the Symbiodiniaceae ITS2 region from coral DNA for amplicon sequencing, with high-annealing and touchdown cycling options for low-symbiont (e.g. bleached) samples."
+date: 2026-10-05
+version: "1.0"
+author: "Kevin H. Wong"
+categories: ["ITS2", "Symbiodiniaceae", "Porites astreoides"]
+protocol-id: its2-amplicon-pcr
+listing:
+  id: used-in
+  contents: ["../notebook/*.md", "../notebook/*.qmd"]
+  include: {protocols: "its2-amplicon-pcr"}
+  type: table
+  fields: [date, title, project]
+  field-display-names: {project: "Project"}
+  sort: "date desc"
+  date-format: "YYYY-MM-DD"
+  filter-ui: true
+  sort-ui: false
+---
+
+::: {.callout-note appearance="simple" icon="false"}
+**Version 1.0** · last updated 2026-10-05 · Used in [[ ]{.protocol-count} notebook entries ↓](#used-in-notebook)
+:::
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | Coral holobiont DNA diluted to **4 ng µL⁻¹** |
+| **Output** | ITS2 amplicons with Illumina overhangs, checked on a gel, ready for indexing/sequencing |
+| **Reaction** | 25 µL, Phusion master mix, in duplicate |
+| **Time** | ~2 h PCR + 1 h gel (estimate) |
+| **Tested on** | *Porites astreoides* (healthy, partially dead and bleached); *Montipora capitata* |
+
+This page covers the **PCR and gel check**. Primer sequences, pooling and sequencing submission follow the Putnam Lab [ITS2 sequencing protocol](https://github.com/emmastrand/EmmaStrand_Notebook/blob/master/_posts/2020-01-31-ITS2-Sequencing-Protocol.md).
+
+::: {.callout-warning}
+## Low-symbiont samples
+When symbiont density is very low (e.g. bleached corals), the standard PCR can amplify **coral** DNA instead of ITS2: faint bands, or bands of the wrong size. The cycling options below raise annealing stringency to fix this.
+:::
+
+## Materials
+
+- Phusion High-Fidelity PCR Master Mix (2×)
+- ITS2 forward and reverse primers with Illumina adapter overhangs, 10 µM
+- Ultrapure water; DNA at 4 ng µL⁻¹
+- Positive control (DNA that amplified before) and a no-template negative control
+- Thermocycler; agarose gel equipment (1% gel)
+
+## Procedure
+
+### A. Master mix
+
+1. Number of reactions = (samples + 1 positive + 1 negative + 1 spare) × **2** (duplicate wells).
+2. Per well:
+
+   | Reagent | µL |
+   |---|---|
+   | Phusion Master Mix (2×) | 12.5 |
+   | F primer (10 µM) | 0.5 |
+   | R primer (10 µM) | 0.5 |
+   | Ultrapure water | 10.5 |
+   | **Master mix total** | **24** |
+   | DNA (4 ng µL⁻¹) | 1 |
+
+   e.g. 4 samples + controls + spare = 7 × 2 = 14 wells → 175 µL Phusion, 7 µL each primer, 147 µL water.
+3. Add **24 µL** master mix per well, then **1 µL** DNA (water for the negative). Seal, mix, and spin down.
+
+### B. Cycling: choose one
+
+| Program | Use when | Cycling |
+|---|---|---|
+| **High-annealing** | Primers with Illumina adapter tails (used Apr 2022) | 95 °C 3 min → **35 ×** (95 °C 30 s, **71 °C** 30 s, 72 °C 30 s) → 72 °C 2 min → 4 °C |
+| **TD-1** (Korbie & Mattick 2008, Tm 52 °C) | Low-symbiont samples | 95 °C 3 min → **11 cycles** of 95 °C 30 s / anneal 45 s stepping **62 → 52 °C** (−1 °C per cycle) / 72 °C 60 s → **25 ×** at 52 °C → 72 °C 5 min |
+| **TD-2** | Low-symbiont samples | As TD-1, but step down **62 → 47 °C** (Tm − 5) over 16 cycles, then **20 ×** at 47 °C |
+| **TD-3** (modified from H. Putnam) | Low-symbiont samples | 95 °C 7 min → **20 ×** (94 °C 30 s, 62 °C 30 s, −0.5 °C per cycle, 72 °C 1 min) → **12 ×** at 52 °C → 72 °C 7 min |
+
+The 71 °C annealing is the calculated Tm of the primers *including* the Illumina adapter tails, which is why it is more specific than the original program.
+
+::: {.callout-important}
+## Which program to use
+In March 2022, TD-1 did **not** give clean bands; TD-2 and TD-3 were compared on a gel ([2022-03-16](../notebook/2022-03-16-touchdown-pcr-for-its2.md)). In April 2022, the high-annealing (71 °C) program was used for the Porites July Bleaching re-sequencing ([2022-03-19](../notebook/2022-03-21-20220319-pjb-its2-re-seq.md)). TODO: record which program gave the best bands and make it the default here.
+:::
+
+### C. Gel check
+
+4. Run an aliquot of each reaction (e.g. 5 µL) on a **1% agarose gel** (75–100 V) with a ladder.
+5. Expect one clean band at the ITS2 amplicon size (TODO: add expected size with adapters) in samples and the positive control, and **nothing** in the negative.
+6. Pool duplicate wells and continue with cleanup/indexing per the Putnam Lab protocol.
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+|---|---|---|
+| Faint or no band in bleached samples | Very few symbiont templates; coral DNA out-competes | Use a touchdown or 71 °C program; check DNA concentration |
+| Band at the wrong size | Off-target (coral) amplification | Raise annealing stringency (71 °C or touchdown) |
+| One sample much brighter than the rest | Uneven template | Re-check the 4 ng µL⁻¹ dilution |
+| Band in the negative control | Contamination | New water and primer aliquots; clean the PCR area |
+
+## References
+
+- Korbie DJ & Mattick JS 2008. Touchdown PCR for increased specificity and sensitivity in PCR amplification. *Nature Protocols* 3:1452–1456. [Link](https://www.nature.com/articles/nprot.2008.133)
+- Putnam Lab / E. Strand. [ITS2 sequencing protocol](https://github.com/emmastrand/EmmaStrand_Notebook/blob/master/_posts/2020-01-31-ITS2-Sequencing-Protocol.md)
+- Analysis: [ITS2 central document](../notebook/2024-03-27-its2-central-document.md)
+
+## Notebook entries using this protocol {#used-in-notebook}
+
+::: {#used-in}
+:::
+
+## Changelog
+
+| Date | Version | Change |
+|---|---|---|
+| 2026-10-05 | 1.0 | Written up from the 2021–2022 ITS2 runs and touchdown tests |
+| 2022-04 | – | 71 °C annealing (Tm with adapters) for the Porites July Bleaching re-sequencing |
+| 2022-03 | – | Touchdown programs TD-1 to TD-3 tested on low-symbiont samples |
+| 2021 | – | Original Putnam Lab ITS2 PCR on Thermal Transplant and Porites July Bleaching samples |

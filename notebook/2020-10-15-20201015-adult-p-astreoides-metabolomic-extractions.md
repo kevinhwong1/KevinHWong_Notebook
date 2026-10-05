@@ -1,0 +1,42 @@
+---
+title: "20201015 Adult P.astreoides Metabolomic Extractions"
+date: 2020-10-15
+type: "Lab work"
+project: "Porites July Bleaching"
+categories: ["Lab work", "Porites astreoides", "Metabolomics"]
+protocols: ["metabolite-extraction"]
+aliases:
+  - "/20201015-Adult-P.astreoides-Metabolomic-Extractions/"
+---
+**Project:** [Porites Bleaching 2019](https://github.com/kevinhwong1/Porites_Rim_Bleaching_2019)
+
+**Metric and Protocol:** [Metabolomic extractions](/notebook/2020-02-03-metabolomics-p-astreoides-sample-prep.md)
+
+**Batch Number:** 5
+
+### Goal
+To prepare lab materials and process metabolomic extractions on adult *Porites astreoides* samples for the Porites Bleaching 2019 experiment using [this protocol](/notebook/2020-02-03-metabolomics-p-astreoides-sample-prep.md).
+
+### Laboratory preparation
+
+1. Autoclaved all glass ware on the Wednesday before (10/14)
+2. Wiped down all counter tops and fumehood with 10% bleach solution
+3. Sterilize clippers and forceps (10% bleach, DI water, ethanol)
+4. Used dry ice from Maggie
+
+### Samples
+
+All samples were snap frozen in liquid nitrogen and stored at -80&deg;C.
+
+| Extraction # 	| Vial # 	| Fragment ID 	| Timepoint 	| Vial + Buffer (g) 	| Vial + Buffer + Coral (g) 	|
+|:------------:	|:------:	|:-----------:	|:---------:	|:-----------------:	|:-------------------------:	|
+|      33      	|   26   	|     R11     	|     A2    	|       1.9659      	|           2.2951          	|
+|      34      	|   11   	|     R11     	|     A1    	|       1.9620      	|           2.1927          	|
+|      35      	|    8   	|     R23     	|     A1    	|       1.9775      	|           2.2875          	|
+|      36      	|   33   	|     R20     	|     A4    	|       1.9717      	|           2.2642          	|
+|      37      	|   13   	|     R28     	|     A1    	|       1.9672      	|           2.2181          	|
+|      38      	|   27   	|     R26     	|     A2    	|       1.9673      	|           2.1960          	|
+|      39      	|   43   	|     R28     	|     A4    	|       1.9731      	|           2.2287          	|
+|      40      	|   19   	|     R29     	|     A2    	|       1.9648      	|           2.4178          	|
+|      41      	|   18   	|     R20     	|     A2    	|       1.9772      	|           2.2537          	|
+|      42      	|    9   	|     R32     	|     A1    	|       1.9622      	|           2.2235          	|

@@ -1,4 +1,8 @@
-# Steps for QC and Analysis of Bisulfite Sequencing Data
+---
+title: "Steps for QC and Analysis of Bisulfite Sequencing Data"
+aliases:
+  - "/protocols/BS_DNA_Methylation_Analysis_Overview/"
+---
 
 1. Download data from raw data repository
 	* Bisulfite converted sequence files

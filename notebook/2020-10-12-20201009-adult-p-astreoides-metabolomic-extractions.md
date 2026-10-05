@@ -1,0 +1,45 @@
+---
+title: "20201009 Adult P.astreoides Metabolomic Extractions"
+date: 2020-10-12
+type: "Lab work"
+project: "Porites July Bleaching"
+categories: ["Lab work", "Porites astreoides", "Metabolomics"]
+protocols: ["metabolite-extraction"]
+aliases:
+  - "/20201009-Adult-P.astreoides-Metabolomic-Extractions/"
+---
+**Project:** [Porites Bleaching 2019](https://github.com/kevinhwong1/Porites_Rim_Bleaching_2019)
+
+**Metric and Protocol:** [Metabolomic extractions](/notebook/2020-02-03-metabolomics-p-astreoides-sample-prep.md)
+
+**Batch Number:** 3
+
+### Goal
+To prepare lab materials and process metabolomic extractions on adult *Porites astreoides* samples for the Porites Bleaching 2019 experiment using [this protocol](/notebook/2020-02-03-metabolomics-p-astreoides-sample-prep.md).
+
+### Laboratory preparation
+
+1. Autoclaved all glass ware
+2. Wiped down all counter tops and fumehood with 10% bleach solution
+3. Sterilize clippers and forceps (10% bleach, DI water, ethanol)
+4. Got more dry ice
+
+### Samples
+
+All samples were snap frozen in liquid nitrogen and stored at -80&deg;C.
+
+| Extraction # 	| Vial # 	| Fragment ID 	| Timepoint 	| Vial + Buffer (g) 	| Vial + Buffer + Coral (g) 	|
+|:------------:	|:------:	|:-----------:	|:---------:	|:-----------------:	|:-------------------------:	|
+|      13      	|   23   	|     R23     	|     A2    	|       1.9616      	|           2.2285          	|
+|      14      	|   17   	|     R19     	|     A2    	|       2.0015      	|           2.2592          	|
+|      15      	|    4   	|     R29     	|     A1    	|       1.9574      	|           2.3254          	|
+|      16      	|    7   	|     R17     	|     A1    	|       1.9583      	|           2.2258          	|
+|      17      	|   37   	|     R17     	|     A4    	|       1.9812      	|           2.2642          	|
+|      18      	|   21   	|      R7     	|     A2    	|       1.9732      	|           2.3900          	|
+|      19      	|    2   	|     R19     	|     A1    	|       1.9530      	|           2.1588          	|
+|      20      	|   31   	|      R8     	|     A4    	|       1.9634      	|           2.2368          	|
+|      21      	|   30   	|     R36     	|     A2    	|       1.9872      	|           2.4290          	|
+|      22      	|   45   	|     R36     	|     A4    	|       1.9816      	|           2.2090          	|
+
+### Notes
+* Extracted R19-A2 from PHYS fragment because the pestle broke in the douce during initial extraction

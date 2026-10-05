@@ -1,0 +1,164 @@
+---
+title: "10x scRNA-seq: Cell Ranger → GeneExt → CellBender"
+description: "From FASTQs to ambient-RNA-corrected count matrices for non-model invertebrates, with GeneExt-extended gene models. Runs as an LSF job chain on an HPC cluster."
+date: 2026-05-07
+date-modified: last-modified
+type: "Pipeline"
+categories: ["scRNA-seq", "Genome annotation", "HPC & computing"]
+tools: ["Cell Ranger 8.0.0", "samtools", "GeneExt", "CellBender"]
+filters:
+  - ../_filters/post-meta.lua
+---
+
+## Overview
+
+10x Genomics 3' chemistries capture the 3' end of transcripts. In non-model genomes the gene models usually have short or missing 3' UTRs, so many reads land just downstream of the annotated gene and are thrown away. [GeneExt](https://github.com/sebepedroslab/GeneExt) uses the reads themselves to extend gene models at the 3' end. More reads are then assigned to genes, giving more UMIs and genes per cell. (Background and first tests: [GeneExt on scRNA-seq data](../notebook/2024-09-10-geneextend-on-scrnaseq-data.md).)
+
+The pipeline runs Cell Ranger twice: once with the original annotation (only to get BAMs for GeneExt), and once with the extended annotation (the counts you analyze). CellBender then removes ambient RNA.
+
+```{mermaid}
+flowchart LR
+  F[FASTQs<br/>per library] --> C1[1. cellranger count<br/>original ref]
+  C1 --> M[2. samtools merge<br/>all BAMs]
+  M --> G[3. GeneExt<br/>extend 3' ends]
+  G --> R[4. cellranger mkref<br/>extended GTF]
+  R --> C2[5. cellranger count<br/>extended ref]
+  F --> C2
+  C2 --> B[6. CellBender<br/>ambient RNA]
+  B --> O[(filtered .h5<br/>for Seurat / scanpy)]
+```
+
+Every step is submitted as an LSF job that waits (`#BSUB -w "done(...)"`) on the step before it. You submit the whole chain once and get an email as each job finishes.
+
+## Inputs
+
+All of these go in your config file (see [Run it](#run-it)).
+
+| Input | Config setting | Notes |
+|---|---|---|
+| Genome FASTA | `FASTA` | |
+| Gene models (GTF) | `GTF` | Exon-only, validated GTF. Cell Ranger and GeneExt both need consistent `gene_id`/`transcript_id` attributes. |
+| Cell Ranger reference built from the original GTF | `REF_ORIG` | Reuse one if it exists; otherwise set `RUN_MKREF_ORIG=true` and the pipeline builds it. |
+| FASTQ folder per library | `LIB_FASTQS` | One folder per library |
+| FASTQ sample prefix per library | `LIB_SAMPLES` | The start of the FASTQ file names, passed to `cellranger count --sample` |
+| Library IDs | `LIB_IDS` | Short names used for output folders, e.g. `lib-001` |
+
+## Software
+
+| Tool | How it's loaded (defaults in the config; change them for your cluster) |
+|---|---|
+| Cell Ranger 8.0.0 | `module load cellranger/8.0.0` |
+| samtools | conda env `samtools_env` (keep it up to date, see [Known issues](#known-issues)) |
+| GeneExt | git clone of [GeneExt](https://github.com/sebepedroslab/GeneExt) (`GENEEXT_INSTALL`) + conda env `geneext` ([install notes](../notebook/2024-09-10-geneextend-on-scrnaseq-data.md)) |
+| CellBender | conda env `CellBender` |
+
+How the conda environments were set up on the University of Miami Pegasus cluster: [Pegasus conda environments](../notebook/2024-10-30-pegasus-conda-environments.md).
+
+Default resources for every step: queue `bigmem`, 16 cores, `rusage[mem=15000]`, 24–120 h walltime. Change `QUEUE`, `CORES` and `MEM_MB` in the config for your cluster.
+
+## Run it {#run-it}
+
+The script never needs editing. Everything specific to your run (paths, library names, email, LSF project) goes in a small config file.
+
+1. **Make a config file** on the cluster login node:
+
+   ```bash
+   bash scrnaseq_10x_geneext_cellbender.sh --init my_run.config
+   ```
+
+2. **Fill it in.** Open `my_run.config` (`nano my_run.config`) and replace every `<fill in: ...>` value. Use absolute paths. Software settings (module names, conda env names) have defaults you can change.
+
+   ```bash
+   RUN="<fill in: short run name, used in job and reference names, e.g. species_runID>"
+   EMAIL="<fill in: email for LSF job notifications>"
+   FASTA="<fill in: /path/to/genome.fa>"
+   LIB_IDS=(     "<fill in: library ID 1, e.g. lib-001>"     "<fill in: library ID 2>" )
+   # ...
+   ```
+
+3. **Submit the chain:**
+
+   ```bash
+   bash scrnaseq_10x_geneext_cellbender.sh my_run.config
+   bjobs -w | grep <your RUN name>        # check progress
+   ```
+
+   Before submitting anything, the script stops if any `<fill in>` value is left, if the library lists have different lengths, or if the FASTA, GTF, reference, FASTQ folders or GeneExt install can't be found.
+
+4. **If a step fails**, fix the problem, `bkill` the jobs still waiting, and resume from that step. Earlier outputs are reused:
+
+   ```bash
+   START_AT=3 bash scrnaseq_10x_geneext_cellbender.sh my_run.config   # 2 = merge, 3 = GeneExt, 5 = second count, 6 = CellBender
+   ```
+
+The exact job file for every step is saved in `<OUTDIR>/logs/` next to its `.out`/`.err` logs, so each run keeps a record of what was submitted. Keep the config file with your project notes: it is the full record of a run's settings.
+
+### Full script
+
+[Download `scrnaseq_10x_geneext_cellbender.sh`](scripts/scrnaseq_10x_geneext_cellbender.sh){.btn .btn-sm .btn-outline-primary}
+
+```{.bash filename="scrnaseq_10x_geneext_cellbender.sh"}
+{{< include scripts/scrnaseq_10x_geneext_cellbender.sh >}}
+```
+
+## Outputs
+
+For each library `<lib>`, in `${OUTDIR}/<lib>_geneext/`:
+
+| File | What it is |
+|---|---|
+| `outs/web_summary.html` | Cell Ranger QC report (compare with the step-1 report in `${OUTDIR}/<lib>/outs/`) |
+| `<lib>_geneext_cellbender_output_filtered.h5` | **The matrix to analyze**: CellBender-corrected, cell barcodes only |
+| `<lib>_geneext_cellbender_output_metrics.csv` | CellBender summary metrics |
+| `<lib>_geneext_cellbender_output_report.html` / `.pdf` | CellBender training and QC report |
+
+Plus `${OUTDIR}/<run>_GeneExt.gtf` (the extended annotation), with `.extension_length.pdf` and `.peak_coverage.pdf` plots from GeneExt.
+
+Copy them back to your laptop:
+
+```bash
+H=<fill in: user@cluster.address>
+D=<fill in: OUTDIR from your config>
+for lib in <fill in: your LIB_IDS, space-separated>; do
+  scp $H:$D/${lib}/outs/web_summary.html            ./${lib}_web_summary.html
+  scp $H:$D/${lib}_geneext/outs/web_summary.html    ./${lib}_web_summary_geneext.html
+  for f in .pdf _filtered.h5 _metrics.csv _report.html; do
+    scp $H:$D/${lib}_geneext/${lib}_geneext_cellbender_output${f} ./
+  done
+done
+```
+
+## Known issues {#known-issues}
+
+::: {.callout-warning collapse="false"}
+## GeneExt must run from its install directory, with no old `tmp/`
+GeneExt writes intermediate files to `./tmp` and calls its plotting scripts with relative paths (`Rscript geneext/plot_extensions.R …`). Run it from anywhere else and those steps fail. A `tmp/` left over from a crashed run also breaks the next run. The script `cd`s into `GENEEXT_INSTALL` and runs `rm -rf tmp` first. Because of the shared `tmp/`, **don't run two GeneExt jobs at the same time** from the same install.
+:::
+
+::: {.callout-warning collapse="false"}
+## `samtools merge` failed with the old samtools in `samtools_env`
+The first full run ([Pdam 31298](../notebook/2026-05-07-pdam-31298-cellranger-geneext-cellbender-run.md)) failed at the merge step. Updating samtools in the environment fixed it. The job now prints `samtools --version` and runs `samtools quickcheck` on the merged BAM, so a bad merge stops the chain before GeneExt.
+<!-- TODO: paste the exact error message here so it shows up in search -->
+:::
+
+::: {.callout-note collapse="true"}
+## A failed step leaves the rest of the chain stuck in `PEND`
+LSF never satisfies `done(<jobid>)` for a job that exited with an error, so the downstream jobs wait forever. Check with `bjobs -l <jobid>` ("dependency condition invalid or never satisfied"), `bkill` them, fix the problem, and resubmit with `START_AT=<step>`.
+:::
+
+::: {.callout-note collapse="true"}
+## Checking BAMs: use samtools, not `wc -l`
+BAMs are compressed binary files, so `wc -l` doesn't count reads. Use `samtools quickcheck file.bam` (is the file intact?) or `samtools view -c file.bam` (how many reads?).
+:::
+
+## Example run
+
+- [Pdam 31298 (all cells + ALDH+), May 2026](../notebook/2026-05-07-pdam-31298-cellranger-geneext-cellbender-run.md). GeneExt extended **13,283 / 25,422** genes, median extension **1,297 bp**.
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-10-05 | Run settings moved to a config file (`--init` writes a template with placeholders; the script checks inputs before submitting). |
+| 2026-10-05 | Turned the Pdam 31298 scripts into this pipeline page: one script for any number of libraries, `START_AT` to resume, job files kept in `logs/`, merge checks, GeneExt `tmp/` fix. |
+| 2026-05-07 | First full run on Pdam 31298 (three separate scripts: full, post-count, post-merge). |
