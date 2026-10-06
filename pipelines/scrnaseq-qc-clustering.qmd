@@ -60,9 +60,9 @@ Step 2 is the memory-hungry part (SCTransform + anchor integration). If it runs 
 2. **Fill in the Configuration chunk** of step 1. Replace every `<fill in: ...>` value; the next chunk stops if any are left:
 
    ```r
-   SPECIES        <- "<fill in: species code, e.g. Pdam>"
+   SPECIES        <- "<fill in: species code, e.g. Gfas>"
    cellbender_dir <- here("<fill in: folder with CellBender .h5 files>")
-   qc_out_dir     <- here("<fill in: output folder, e.g. output/Pdam/QC>")
+   qc_out_dir     <- here("<fill in: output folder, e.g. output/Gfas/QC>")
    sample_config  <- tribble(
      ~sample_id,               ~covariate,                    ~file,
      "<fill in: sample ID 1>", "<fill in: e.g. genotype 1>",  "<fill in: sample1_..._filtered.h5>",
@@ -70,9 +70,9 @@ Step 2 is the memory-hungry part (SCTransform + anchor integration). If it runs 
    )
    ```
 
-   Also set `fix_feature_ids()` (if your gene IDs need reformatting) and `MITO_GENES` (a pattern or list of mitochondrial gene IDs as they appear in the matrix; leave `NULL` if your reference has none). The template prints the mito genes it found and stops if it found none.
+   Also set `fix_feature_ids()` (if your gene IDs need reformatting) and `MITO_GENES` (a pattern or list of mitochondrial gene IDs as they appear in the matrix; leave `NULL` if your reference has none). The template prints the mito genes it found and stops if it found none. `SYMBIONT_GENES` works the same way but only tracks the percentage (e.g. Symbiodiniaceae reads), it doesn't filter.
 
-3. **Run the pre-filter plots, then set thresholds.** Look at `QC_Plots_<sample>.jpeg` before trusting the default `qcMetricsThresholds`; the defaults are the *P. damicornis* values.
+3. **Run the pre-filter plots, then set thresholds.** Look at `QC_Plots_<sample>.jpeg` before trusting the default `qcMetricsThresholds`; the defaults are the values used for *G. fascicularis* (and *P. damicornis*).
 
 4. **Run the filter chunk** and check `QC_Filtered_Summary_<SPECIES>.csv` (see [checks](#checks)).
 
@@ -90,7 +90,7 @@ Step 2 is the memory-hungry part (SCTransform + anchor integration). If it runs 
 
 ### Step 2: cluster calling
 
-1. **SCTransform** each sample (`glmGamPoi`), regressing out percent_mito only if it exists. It also reports how many variable features the samples share.
+1. **SCTransform** each sample (`glmGamPoi`). percent_mito is *not* regressed out unless you set `REGRESS_MITO <- TRUE`; filtering high-mito cells in step 1 is the default. It also reports how many variable features the samples share.
 2. **Integrate** with `SelectIntegrationFeatures` → `PrepSCTIntegration` → `FindIntegrationAnchors` → `IntegrateData` (3,000 features; automatic retry at 2,000 if it runs out of memory).
 3. **PCs (decision 1)**: elbow plot, cumulative variance table, and PC gene-loading heatmaps in blocks of 9. Set `DIMS_FINAL`.
 4. **UMAP settings (decision 2)**: a grid of `n.neighbors` × `min.dist` with neighborhood preservation, Calinski–Harabasz, Davies–Bouldin, silhouette and covariate-mixing entropy. Set `NN_FINAL` and `MDIST_FINAL`.
@@ -101,65 +101,76 @@ Step 2 is the memory-hungry part (SCTransform + anchor integration). If it runs 
 ## Checks before moving on {#checks}
 
 - **Doublet rate** roughly 0.5–10% for 10x data. Much higher usually means scDblFinder got unfiltered droplets, not that the data are bad.
-- **Doublet score histogram**: ideally the singlet/doublet cut sits in a trough. In low-UMI data like the Pdam example below there is often no clear second peak, and the cut falls in the right tail; that's acceptable if the rate is reasonable, but don't over-interpret individual calls.
+- **Doublet score histogram**: ideally the singlet/doublet cut sits in a trough. In low-UMI coral data there is often no clear second peak, and the cut falls in the right tail; that's acceptable if the rate is reasonable, but don't over-interpret individual calls.
 - **percent_mito actually varies** (if you set `MITO_GENES`). A column of zeros means the pattern matched nothing; see [known issues](#known-issues).
 - **Clusters flagged > 90% one sample**: could be real biology (a genotype-specific state) or a batch effect. Look at their markers before naming them.
 - Write down *why* you chose each decision value in your notebook entry. `00_Finalised_Parameters.csv` only records *what* was chosen.
 
-## Example QC: *Pocillopora damicornis*
+## Example: *Galaxea fascicularis* whole atlas
 
-Two genotypes, one 10x sample each (18114-001 and 31298-001), August 2026.
+Three control colonies, each a different genotype and its own 10x lane (19876-001, 22901-001, 23362-001), August–September 2026. The CellBender reference combined the Galaxea nuclear genome, the published Galaxea mitogenome (Lu et al. 2024, GenBank ON341021) and *Symbiodinium microadriaticum*, so this dataset has real mitochondrial reads and symbiont reads to track.
 
-| Sample | Droplets in | After thresholds | Doublets removed | Cells kept | Median genes | Median UMIs |
-|---|---|---|---|---|---|---|
-| 18114-001 | 17,444 | 6,774 | 440 (6.5%) | 6,334 | 623 | 1,021 |
-| 31298-001 | 22,381 | 9,696 | 1,063 (11.0%) | 8,633 | 532 | 913 |
+### QC
 
-Thresholds: 300–6,000 genes and 400–35,000 UMIs per cell; no mitochondrial filter (no mito genes in the Pdam reference). Median log10GenesPerUMI ≈ 0.92 for both.
+| Sample | Droplets in | After thresholds + mito | Doublets removed | Cells kept | Median genes | Median UMIs | Median % mito |
+|---|---|---|---|---|---|---|---|
+| 19876-001 | 27,481 | 9,202 | 915 (9.9%) | 8,287 | 509 | 741 | 3.4 |
+| 22901-001 | 15,201 | 2,878 | 160 (5.6%) | 2,718 | 541 | 805 | 3.8 |
+| 23362-001 | 14,701 | 3,914 | 256 (6.5%) | 3,658 | 503 | 752 | 2.0 |
+| **Total** | 57,383 | | | **14,663** | | | |
 
-::: {layout-ncol=2}
-![Pre-filter QC (31298-001), red lines = thresholds](../images/pipelines/pdam_qc/qc_violins_sample2.jpg)
+- **Thresholds:** 300–6,000 genes, 400–35,000 UMIs and ≤ 10% mito reads per cell. The gene and UMI bounds are the template defaults. The mito cap removed a further 0.3–7.5% of cells per sample on top of them.
+- **Mito genes:** the mitogenome genes ended up with anonymous `gene_N` IDs in the reference, so the 5 mito genes were identified from the data. They are highly expressed, detected in 33–89% of cells, tightly co-expressed with each other (r = 0.52–0.93) and consistent across samples. See [Known issues](#known-issues).
+- **Symbiont reads** (`percent_smic`) were tracked but not used to filter: 0.2–0.4% of library UMIs per sample.
+- **Doublets:** scDblFinder on the filtered cells, per sample, called 5.6–9.9%.
+- **Complexity:** median log10GenesPerUMI 0.95 in all three samples.
 
-![scDblFinder score after threshold filtering (31298-001)](../images/pipelines/pdam_qc/doublet_score_sample2.jpg)
-:::
+![Pre-filter QC for 19876-001; red lines = thresholds](../images/pipelines/gfas_scrnaseq/qc_violins_19876-001.jpg)
 
-## Example cluster calling: *Galaxea fascicularis* bleaching atlas
+![scDblFinder score after filtering (19876-001, 9.9% doublets)](../images/pipelines/gfas_scrnaseq/doublet_score_19876-001.jpg){width=65%}
 
-Six samples: three genotypes (Green, Red, White) × Control and Heated, June 2026. **27,124 cells** after QC, integrated at 3,000 features. A control-only atlas of the same colonies, already annotated with 19 cell types, served as a reference to check the final clusters.
+### Cluster calling
+
+**14,663 cells**, integrated at 3,000 features. Shared variable features between sample pairs: Jaccard 0.43–0.50. The PC count was compared at 25 and 30, with the UMAP sweep run at both before one was chosen.
 
 | Decision | Chosen | Why |
 |---|---|---|
-| PCs | 30 | ~90% cumulative variance (25 PCs ≈ 86%, 35 ≈ 93%); a conservative middle for 6 samples with genotype and treatment variation |
-| UMAP | n.neighbors 30, min.dist 0.3 | Neighborhood preservation barely changed across the grid (0.21–0.23), so the same settings as the control-only atlas were kept to make the two comparable |
-| Resolution | 0.4 → **21 clusters** | Silhouette is highest at 0.2–0.3 (0.29, 0.28) and flat from 0.4 up (0.23–0.25). Against the reference atlas, 0.3 left five clusters mixed (including Gland_Mucous at 55% purity) while 0.4 left four; 0.5 added clusters by splitting Epidermis further, not by resolving the mixed ones |
+| PCs | **25** | No sharp elbow (steep drop through PC8, then a long taper). PC25 sits on the 85% cumulative-variance line (85.5%); PC30 (89.8%) was the first choice and was kept as a comparison. PC heatmaps showed nothing important lost by trimming to 25 |
+| UMAP | **n.neighbors 50, min.dist 0.3** | Neighborhood preservation was within 0.006 across the top settings (0.49–0.50). n.neighbors 50 gave the cleanest, best-separated layout in the 3 × 3 grid, while 20 looked fragmented |
+| Resolution | **0.4 → 20 clusters** | Silhouette peaks at 0.4 (0.354; 0.348 at 0.3, 0.304 at 0.5). Clustree shows 0.3 → 0.4 as mostly clean 1:1 refinements, while 0.4 → 0.5 brings several multi-way splits. The cluster count rises steadily (18 at 0.2 → 32 at 1.0) with no plateau |
 
 ::: {layout-ncol=2}
-![Cumulative variance (dashed lines at 25, 30 and 35 PCs)](../images/pipelines/gfas_clustering/cumvar.jpg)
+![PCA elbow](../images/pipelines/gfas_scrnaseq/elbow.jpg)
 
-![PCA elbow](../images/pipelines/gfas_clustering/elbow.jpg)
-
-![Clusters vs. resolution](../images/pipelines/gfas_clustering/clustercount_vs_res.jpg)
-
-![Silhouette vs. resolution](../images/pipelines/gfas_clustering/silhouette.jpg)
+![Cumulative variance; PC25 = 85.5%](../images/pipelines/gfas_scrnaseq/cumvar.jpg)
 :::
 
-![Clustree, resolution 0.2 (top) to 1.0 (bottom)](../images/pipelines/gfas_clustering/clustree.jpg){width=80%}
-
-![Resolutions 0.3–0.5 (left) vs. cell types in the annotated control-only atlas (right)](../images/pipelines/gfas_clustering/res_vs_reference.jpg){width=90%}
-
-**Checking against the reference atlas.** At resolution 0.4, 17 of 21 clusters were ≥ 85% one reference cell type (e.g. Neuron_Pou4 99%, Algal-hosting 98.5%, Cnidocyte 98.6%). Four were mixed: cluster 3 (53% Neuron_Isl_Nkx6), cluster 9 (74% Neuron_Atoh8_1), cluster 5 (75% Progenitor) and cluster 12 (79% Epidermis); these needed the closest look during annotation. Epidermis split into three clusters (0, 12, 17), and 18 of the 19 reference types were the main type of at least one cluster (Neuron_Atoh8_2, 204 cells in the reference, had no cluster of its own).
+![UMAP sweep at 25 PCs: n.neighbors 20/30/50 × min.dist 0.1/0.3/0.5, same clusters in every panel](../images/pipelines/gfas_scrnaseq/umap_sweep_grid.jpg){width=85%}
 
 ::: {layout-ncol=2}
-![Final UMAP coloured by treatment](../images/pipelines/gfas_clustering/umap_final.jpg)
+![Clusters vs. resolution](../images/pipelines/gfas_scrnaseq/clustercount_vs_res.jpg)
 
-![Genotype composition per cluster](../images/pipelines/gfas_clustering/genotype_proportion.jpg)
+![Silhouette vs. resolution (peak at 0.4)](../images/pipelines/gfas_scrnaseq/silhouette.jpg)
 :::
 
-![UMAP split by genotype](../images/pipelines/gfas_clustering/umap_split.jpg)
+![Clustree, resolution 0.2 (top) to 1.0 (bottom)](../images/pipelines/gfas_scrnaseq/clustree.jpg){width=80%}
 
-![nFeature, nCount and percent_mito per cluster. percent_mito is 0 in every cluster; see Known issues](../images/pipelines/gfas_clustering/qc_per_cluster.jpg){width=80%}
+::: {layout-ncol=2}
+![Final clusters, resolution 0.4](../images/pipelines/gfas_scrnaseq/umap_res0.4.jpg)
 
-Control and heated cells mix throughout the UMAP, and no cluster is > 90% one genotype (the highest is cluster 12, 74% White; the White colony contributed the most cells overall). The smallest cluster (20) has 94 cells.
+![Genotype composition per cluster](../images/pipelines/gfas_scrnaseq/covariate_stackedbar.jpg)
+:::
+
+![UMAP split by genotype](../images/pipelines/gfas_scrnaseq/umap_split.jpg)
+
+**Cluster QC.** No cluster was flagged: the smallest (cluster 19) has 69 cells, and the most genotype-skewed (cluster 17) is 82.7% one genotype. Clusters 0 and 1 carry higher mito (median ~4–5% vs ~2–3% elsewhere). Clusters 10 and 19 have long nCount tails (up to ~22,000 and ~18,000 UMIs), so they're worth checking for doublets or stressed cells during annotation.
+
+![Per-cluster nFeature, nCount, percent_mito and percent_smic](../images/pipelines/gfas_scrnaseq/cluster_qc_violins.jpg){width=80%}
+
+::: {.callout-note}
+## One library per genotype
+Each genotype is a single 10x lane, so genotype and batch are confounded. A genotype-skewed cluster is a hypothesis to check against marker genes, not evidence of a genotype effect.
+:::
 
 ## Known issues {#known-issues}
 
@@ -170,16 +181,23 @@ scDblFinder's expected doublet rate grows with the number of cells it is given (
 
 ::: {.callout-warning collapse="false"}
 ## Check that your mitochondrial genes are actually counted
-The *G. fascicularis* reference was built with the mitogenome (GenBank ON341021) added, and QC used `percent_mito_pattern <- "^agat-gene-|^gene-rrn|^gene-trn|^ON341021.2:1..18751"`. But `percent_mito` came out **0 in every cell** of all six samples (see the per-cluster violins above), so the 5% mito filter and the `vars.to.regress = "percent_mito"` in SCTransform did nothing. The pattern matches no feature names in the GeneExt/CellBender matrices. Either the mitogenome genes aren't in the reference used for that run, or their names changed (GeneExt and Seurat both rewrite IDs). The same is true of `percent_sym`.
+In the first Galaxea QC run, `percent_mito` was **0 in every cell**, so the mito filter silently did nothing, and the symbiont counts were all zero too. The mito gene IDs had been written with underscores (`gene_36687`), but Seurat converts underscores to dashes on load (`gene-36687`), so the list matched no features. The same thing happened earlier with a pattern-based mito definition in an older Galaxea analysis.
 
-Before trusting a mito filter, list the genes it matches: `grep(MITO_GENES, rownames(obj), value = TRUE)`. If that list is empty, the metric is meaningless. The step 1 template stops if `MITO_GENES` is set but matches nothing.
+Two fixes are now built into the step 1 template:
 
-*P. damicornis* has no annotated mito genes at all, so the Pdam example skips the filter. `log10GenesPerUMI` is plotted as a mito-independent check for damaged or low-complexity droplets (reference line at 0.80, not used as a filter).
+- write `MITO_GENES` in the form the IDs take *in the Seurat object* (after `fix_feature_ids()` and Seurat's own `_` → `-` conversion);
+- the template prints the mito genes it found and **stops if it found none**.
+
+A flat zero `percent_mito` violin is the giveaway.
+
+If the mitogenome genes have uninformative IDs (Galaxea's became `gene_N` when the references were combined), look for a small set of highly expressed, near-universally detected, tightly co-expressed features. Animal mitochondrial genes are transcribed together, so they correlate strongly. For Galaxea, 5 genes stood out, with a sharp drop in correlation after them (next best r = 0.27). 10x 3′ chemistry captures only some of the ~15 mitochondrial transcripts, so finding just a few is expected.
+
+If your reference has no mito genes (e.g. *P. damicornis*), leave `MITO_GENES <- NULL`. `log10GenesPerUMI` is plotted as a mito-independent check for damaged or low-complexity droplets (reference line at 0.80, not used as a filter).
 :::
 
 ::: {.callout-note collapse="true"}
 ## Gene IDs: underscores vs dashes
-Seurat swaps `_` for `-` in feature names and warns about it. Pdam IDs from GeneExt/CellBender are `pdam_00025168`, while some annotation tables use `pdam-00025168`. Fix it once at load time with `fix_feature_ids()` so the IDs match your [functional annotation](functional-annotation.qmd) and [ortholog](orthofinder-multispecies.qmd) tables.
+Seurat swaps `_` for `-` in feature names and warns about it, so IDs like `pdam_00025168` from GeneExt/CellBender become `pdam-00025168`. Pdam IDs are converted once at load time with `fix_feature_ids()` so the IDs match your [functional annotation](functional-annotation.qmd) and [ortholog](orthofinder-multispecies.qmd) tables.
 :::
 
 ::: {.callout-note collapse="true"}
@@ -189,12 +207,12 @@ With Seurat v5 and 3,000 features this can fail with a memory error. The templat
 
 ::: {.callout-note collapse="true"}
 ## The UMAP sweep doesn't change the clusters
-`n.neighbors` and `min.dist` only change the 2D picture; clusters come from the PCA neighbor graph. So in the sweep (both Pdam and Galaxea), silhouette, Calinski–Harabasz, Davies–Bouldin and entropy were identical for every UMAP setting, and only neighborhood preservation varies. Treat this as a visualization choice.
+`n.neighbors` and `min.dist` only change the 2D picture; clusters come from the PCA neighbor graph. So in the Galaxea sweep, silhouette, Calinski–Harabasz, Davies–Bouldin and entropy were identical for every UMAP setting, and only neighborhood preservation varies. Treat this as a visualization choice.
 :::
 
 ::: {.callout-note collapse="true"}
 ## Low silhouette widths are normal here
-Average silhouettes of 0.18–0.29 (Pdam, Galaxea) look low but are typical for integrated scRNA-seq with many related cell states. Use it to compare resolutions (look for a peak or plateau), not as an absolute quality score.
+Average silhouettes of 0.25–0.35 (Galaxea) look low but are typical for integrated scRNA-seq with many related cell states. Use it to compare resolutions (look for a peak or plateau), not as an absolute quality score.
 :::
 
 ## How it connects
@@ -230,7 +248,8 @@ Average silhouettes of 0.18–0.29 (Pdam, Galaxea) look low but are typical for 
 
 | Date | Change |
 |---|---|
-| 2026-10-05 | Generic templates (config chunk, covariate column, optional mito) and this page; Galaxea cluster-calling example |
+| 2026-10-06 | Galaxea whole atlas (3 genotypes) used as the worked example for QC and cluster calling; mito-gene check; optional mito regression and symbiont tracking |
+| 2026-10-05 | Generic templates (config chunk, covariate column, optional mito) and this page |
 | 2026-08-27 | *P. damicornis* whole atlas: decision-point workflow, cluster QC flags |
 | 2026-06 | *G. fascicularis* 6-sample integrated atlas (genotype × treatment), checked against the control-only atlas |
 | 2026-08 | scDblFinder moved after threshold filtering |

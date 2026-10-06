@@ -18,7 +18,7 @@ HOW TO USE THIS FILE
 Run interactively, chunk by chunk -- do not knit start-to-finish. Several chunks are DECISION
 POINTS: they save diagnostic plots/tables, then you set a parameter (DIMS_FINAL, NN_FINAL,
 MDIST_FINAL, RES_FINAL) by reading those outputs. Later chunks stop with a clear message until the
-parameter is set. Values used for the G. fascicularis atlas (6 samples, 27k cells) are given in comments as an
+parameter is set. Values used for the G. fascicularis atlas (3 samples, 14.7k cells) are given in comments as an
 example, not a default.
 -->
 
@@ -53,16 +53,21 @@ set.seed(1234)
 # Configuration
 
 ```{r config}
-SPECIES <- "<fill in: species code, same as in scrnaseq_1_QC.Rmd, e.g. Pdam>"
+SPECIES <- "<fill in: species code, same as in scrnaseq_1_QC.Rmd, e.g. Gfas>"
 
-qc_rds_dir <- here("<fill in: QC output folder from step 1, e.g. output/Pdam/QC>", "QC_Files")
-out_base   <- here("<fill in: output folder for clustering, e.g. output/Pdam/Seurat>")
+qc_rds_dir <- here("<fill in: QC output folder from step 1, e.g. output/Gfas/QC>", "QC_Files")
+out_base   <- here("<fill in: output folder for clustering, e.g. output/Gfas/Seurat>")
 
 # Sample IDs exactly as in step 1 (files are QC_Files/SeuratObjectFiltered_<SPECIES>_<sample_id>.rds)
 sample_ids <- c("<fill in: sample ID 1>", "<fill in: sample ID 2>")
 COVARIATE_NAME <- "genotype"   # what the covariate column from step 1 means (plot labels only)
 
 N_VARIABLE_FEATURES <- 3000    # SCTransform / integration features (falls back to 2000 on memory errors)
+
+# Regress percent_mito out in SCTransform? Default FALSE: filter high-mito cells in step 1 instead, so
+# real biology correlated with mito content (e.g. metabolically active cell types) isn't removed.
+# Consider TRUE if a cluster later looks mito-driven rather than biological.
+REGRESS_MITO <- FALSE
 ```
 
 ```{r check-config}
@@ -95,13 +100,13 @@ map_int(sample.list, ncol)
 # Per-sample SCTransform
 
 ```{r sctransform}
-# Regress out percent_mito only if step 1 computed it (MITO_GENES set).
+# percent_mito is regressed only if REGRESS_MITO = TRUE and step 1 computed it.
 sample.list <- map(sample.list, function(obj) {
   SCTransform(
     obj,
     method              = "glmGamPoi",
     variable.features.n = N_VARIABLE_FEATURES,
-    vars.to.regress     = if ("percent_mito" %in% colnames(obj@meta.data)) "percent_mito" else NULL,
+    vars.to.regress     = if (REGRESS_MITO && "percent_mito" %in% colnames(obj@meta.data)) "percent_mito" else NULL,
     verbose             = FALSE
   )
 })
@@ -217,7 +222,7 @@ pc_variance_table
 # ---- DECISION POINT ----
 # Review 01_ElbowPlot.jpeg, 02_CumulativeVariance.jpeg/csv and the 03_PCHeatmaps_* blocks, then set
 # DIMS_FINAL. Ignore the "algorithmic elbow" if it lands on PC1-2 (common with a steep PC1 drop).
-# Galaxea example: DIMS_FINAL = 30 (~90% cumulative variance).
+# Galaxea example: DIMS_FINAL = 25 (85.5% cumulative variance; 30 was also tested).
 DIMS_FINAL <- NA   # <-- SET ME
 
 stopifnot("Set DIMS_FINAL above before continuing." = !is.na(DIMS_FINAL))
@@ -301,7 +306,7 @@ umap_sweep_metrics
 # metrics disagree, then prefer clean, round (not smeared) clusters. n.neighbors / min.dist only change
 # the 2D layout -- clusters come from the PCA graph -- so this is a visualization choice. With few
 # samples, don't over-weight mean covariate entropy.
-# Galaxea example: NN_FINAL = 30, MDIST_FINAL = 0.3.
+# Galaxea example: NN_FINAL = 50, MDIST_FINAL = 0.3 (cleanest layout; preservation within 0.006 of the top).
 NN_FINAL    <- NA   # <-- SET ME
 MDIST_FINAL <- NA   # <-- SET ME
 
@@ -374,7 +379,7 @@ cluster_counts
 # Review the plateau in 05_ClusterCount_vs_Resolution.jpeg, stable ("quiet") levels in 06_Clustree.jpeg,
 # the peak/plateau in 07_Silhouette_vs_Resolution.jpeg, and whether clusters in Resolution_UMAPs/ look
 # biologically sensible. Resolutions tested: 0.2-1.0 in steps of 0.1.
-# Galaxea example: RES_FINAL = 0.4 (21 clusters).
+# Galaxea example: RES_FINAL = 0.4 (20 clusters; silhouette peak, clean 1:1 splits from 0.3).
 RES_FINAL <- NA   # <-- SET ME
 
 stopifnot("Set RES_FINAL above before continuing." = !is.na(RES_FINAL))
@@ -419,7 +424,7 @@ if (any(cluster_flags$flag_low_n | cluster_flags$flag_covariate_skew)) {
   print(filter(cluster_flags, flag_low_n | flag_covariate_skew))
 }
 
-qc_feats <- intersect(c("nFeature_RNA", "nCount_RNA", "log10GenesPerUMI", "percent_mito"), colnames(combined@meta.data))
+qc_feats <- intersect(c("nFeature_RNA", "nCount_RNA", "log10GenesPerUMI", "percent_mito", "percent_symbiont"), colnames(combined@meta.data))
 p_qc_violin <- VlnPlot(combined, features = qc_feats, group.by = "seurat_clusters", pt.size = 0, ncol = 1)
 ggsave(file.path(qc_out, "cluster_qc_violins.jpeg"), p_qc_violin, width = 10, height = 8)
 

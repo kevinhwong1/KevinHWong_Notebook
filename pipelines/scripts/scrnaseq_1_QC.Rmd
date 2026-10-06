@@ -17,13 +17,13 @@ What this does, per sample:
   1. Load the CellBender-filtered .h5 (ambient RNA removed, empty droplets already dropped).
   2. Optionally fix feature IDs so they match your annotation tables.
   3. Plot nFeature / nCount / log10GenesPerUMI (and percent_mito if you have mitochondrial genes).
-  4. Filter on nFeature / nCount (and percent_mito).
+  4. Filter on nFeature / nCount (and percent_mito). Symbiont reads, if set, are tracked only.
   5. Detect doublets with scDblFinder ON THE FILTERED CELLS (see the note in that chunk), drop them.
   6. Save one filtered .rds per sample + a QC summary table.
 
 Fill in every "<fill in: ...>" in the Configuration chunk. The first chunk after it stops if any
 are left. Set thresholds AFTER looking at the pre-filter plots: the defaults are the values used
-for Pocillopora damicornis, not universal numbers.
+for Galaxea fascicularis and Pocillopora damicornis, not universal numbers.
 -->
 
 # Setup
@@ -51,12 +51,12 @@ conflicts_prefer(
 # Configuration
 
 ```{r config}
-SPECIES <- "<fill in: species code, e.g. Pdam>"
+SPECIES <- "<fill in: species code, e.g. Gfas>"
 
 # Folder with the CellBender *_filtered.h5 files, and where QC outputs should go
 # (paths are relative to the project root found by here::here()).
-cellbender_dir <- here("<fill in: folder with CellBender .h5 files, e.g. cellbender_output/Pdam>")
-qc_out_dir     <- here("<fill in: output folder, e.g. output/Pdam/QC>")
+cellbender_dir <- here("<fill in: folder with CellBender .h5 files, e.g. cellbender_output/Gfas>")
+qc_out_dir     <- here("<fill in: output folder, e.g. output/Gfas/QC>")
 
 # One row per sample. `covariate` is whatever distinguishes samples biologically or technically
 # (genotype, treatment, batch...); it is carried into the clustering step to check mixing.
@@ -76,12 +76,17 @@ fix_feature_ids <- function(x) gsub("_", "-", x)
 # Otherwise a regex matching mitochondrial gene IDs AS THEY APPEAR IN THE MATRIX (after fix_feature_ids),
 # e.g. "^mt-", or a character vector of IDs. The load step stops if this matches no features --
 # a pattern that silently matches nothing gives percent_mito = 0 for every cell.
+# Galaxea example: c("gene-36687", "gene-24515", "gene-32266", "gene-5386", "gene-10331")
 MITO_GENES <- NULL
-max_percent_mito <- 20   # only used when MITO_GENES is set
+max_percent_mito <- 10   # only used when MITO_GENES is set (10% for Galaxea)
+
+# Optional symbiont (or other contaminant/organism) genes to TRACK, not filter: adds percent_symbiont
+# per cell, a pre-filter plot panel and a column in the summary. Same format as MITO_GENES. NULL = skip.
+SYMBIONT_GENES <- NULL
 
 # QC thresholds -- check them against the pre-filter plots below before trusting them.
-# Defaults = values used for P. damicornis (cross-checked against Cole et al. 2024 and
-# Valadez-Ingersoll et al. 2025 for other cnidarians).
+# Defaults = values used for G. fascicularis and P. damicornis (cross-checked against Cole et al.
+# 2024 and Valadez-Ingersoll et al. 2025 for other cnidarians).
 qcMetricsThresholds <- c(
   "min_nFeature_RNA" = 300,
   "max_nFeature_RNA" = 6000,
@@ -107,7 +112,13 @@ qc_rds_dir <- file.path(qc_out_dir, "QC_Files")
 dir.create(qc_rds_dir, recursive = TRUE, showWarnings = FALSE)
 
 qcMetrics.tmp <- c("nFeature_RNA", "nCount_RNA", "log10GenesPerUMI",
-                   if (!is.null(MITO_GENES)) "percent_mito")
+                   if (!is.null(MITO_GENES)) "percent_mito",
+                   if (!is.null(SYMBIONT_GENES)) "percent_symbiont")
+
+# Resolve a pattern (length 1) or an ID list against the features actually in the object.
+match_features <- function(genes, obj) {
+  if (length(genes) == 1) grep(genes, rownames(obj), value = TRUE) else intersect(genes, rownames(obj))
+}
 sample_config
 ```
 
@@ -128,8 +139,7 @@ sample.list <- pmap(sample_config, function(sample_id, covariate, file, path) {
   obj$log10GenesPerUMI <- log10(obj$nFeature_RNA) / log10(obj$nCount_RNA)
 
   if (!is.null(MITO_GENES)) {
-    mito_hits <- if (length(MITO_GENES) == 1) grep(MITO_GENES, rownames(obj), value = TRUE)
-                 else intersect(MITO_GENES, rownames(obj))
+    mito_hits <- match_features(MITO_GENES, obj)
     if (length(mito_hits) == 0) {
       stop("MITO_GENES matches no features in ", sample_id, ". Check the pattern against ",
            "head(rownames(obj)), or set MITO_GENES <- NULL if your reference has no mito genes.")
@@ -137,6 +147,12 @@ sample.list <- pmap(sample_config, function(sample_id, covariate, file, path) {
     message("  ", length(mito_hits), " mitochondrial features: ", paste(head(mito_hits, 5), collapse = ", "),
             if (length(mito_hits) > 5) ", ...")
     obj$percent_mito <- PercentageFeatureSet(obj, features = mito_hits)
+  }
+
+  if (!is.null(SYMBIONT_GENES)) {
+    sym_hits <- match_features(SYMBIONT_GENES, obj)
+    if (length(sym_hits) == 0) stop("SYMBIONT_GENES matches no features in ", sample_id, ".")
+    obj$percent_symbiont <- PercentageFeatureSet(obj, features = sym_hits)
   }
   obj
 })
@@ -232,7 +248,9 @@ qc_summary <- pmap_dfr(sample_config, function(sample_id, covariate, file, path)
     median_nFeature             = median(obj_filtered$nFeature_RNA),
     median_nCount               = median(obj_filtered$nCount_RNA),
     median_log10GenesPerUMI     = round(median(obj_filtered$log10GenesPerUMI), 3),
-    pct_below_novelty_reference = round(100 * mean(obj_filtered$log10GenesPerUMI < noveltyReferenceThreshold), 1)
+    pct_below_novelty_reference = round(100 * mean(obj_filtered$log10GenesPerUMI < noveltyReferenceThreshold), 1),
+    median_percent_mito         = if (!is.null(MITO_GENES)) round(median(obj_filtered$percent_mito), 2) else NA,
+    median_percent_symbiont     = if (!is.null(SYMBIONT_GENES)) round(median(obj_filtered$percent_symbiont), 3) else NA
   )
 })
 
