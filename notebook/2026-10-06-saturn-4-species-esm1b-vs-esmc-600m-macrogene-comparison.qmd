@@ -50,6 +50,17 @@ The vector length (L2 norm) of a gene embedding is not biologically meaningful b
 
 This matters here because SATURN's macrogene initialization uses Euclidean distance on the raw vectors (Results, sections 3–4): if lengths vary a lot, genes get grouped partly by length.
 
+## This is a known issue in language-model embeddings
+
+Length and outlier-dimension effects distorting similarity are well documented, mostly outside biology:
+
+- In BERT and GPT-2, 1–3 "rogue dimensions" dominate cosine similarity and Euclidean distance without dominating model behaviour; simple standardization of each dimension fixes the comparisons (Timkey & van Schijndel 2021).
+- Large language models carry "massive activations": a few hidden-state values >10,000× the median, in fixed dimensions and tied to tokens like the start token (Sun et al. 2024). Hidden states taken before a model's final normalization can therefore have very large lengths.
+- In protein language models, start/end tokens of ESM-2 and Ankh have a "much larger norm" than residue vectors and had to be excluded from analysis (Beshkov & Malthe-Sørenssen 2025); some PLMs use only a handful of their embedding dimensions effectively (Hakim et al. 2025); and how residue vectors are pooled changes downstream results (Pool PaRTI; optimal-transport pooling).
+- Vector length can also carry information: in word embeddings it tracks word frequency/importance (Schakel & Wilson 2015), consistent with ESMC length following protein similarity here (Results, section 4).
+
+The standard response is to normalize or standardize embeddings before comparing them. I found no published report of this specific case, where SATURN feeds unnormalized gene embeddings into Euclidean KMeans and a PLM with highly variable vector lengths reshapes the macrogenes.
+
 # Approach: macrogene-only runs
 
 Which genes go into which macrogene is fixed during SATURN's pretraining step
@@ -121,6 +132,8 @@ Checked the exact `.pt` files SATURN used, on the same genes.
 | ESMC-600M (1152-dim) | 3,659 | 3,297 | 3,630 | 2,833 |
 
 : Mean embedding vector length per species. ESMC range across genes: ~1,700–8,900. {#tbl-norm}
+
+*L2 norm* = the length of a vector, √(v₁² + v₂² + … + vₙ²) over all its dimensions (e.g. the vector (3, 4) has length 5). The mean L2 norm is that length averaged over all genes of a species. An embedding's **direction** carries the protein information (similar proteins point the same way); its **length** mostly reflects how it was extracted. Euclidean distance, which SATURN's KMeans uses, depends on both.
 
 ![PCA of the raw gene embeddings (HV genes), coloured by species. ESMC's PC1 spans thousands of units, reflecting vector-length differences.](/images/20261006_ESM1b_vs_ESMC_embedding_PCA.png){#fig-pca}
 
@@ -224,4 +237,11 @@ About the FANTASIA v4 ESMC-600M embeddings (HDF5 files, `type_5/layer_0/embeddin
 - Rives A. et al. (2021) Biological structure and function emerge from scaling unsupervised learning to 250 million protein sequences. *PNAS* 118:e2016239118.
 - ESM Team / EvolutionaryScale (2024) ESM Cambrian. Model card: <https://huggingface.co/multimolecule/esmc-600m>
 - FANTASIA: <https://github.com/CBBIO/FANTASIA> (release notes: <https://github.com/CBBIO/FANTASIA/releases>)
+- Timkey W., van Schijndel M. (2021) All bark and no bite: rogue dimensions in transformer language models obscure representational quality. *EMNLP 2021*. <https://aclanthology.org/2021.emnlp-main.372>
+- Sun M., Chen X., Kolter J.Z., Liu Z. (2024) Massive activations in large language models. *COLM 2024*. <https://arxiv.org/abs/2402.17762>
+- Beshkov K., Malthe-Sørenssen A. (2025) Towards understanding the shape of representations in protein language models. <https://arxiv.org/abs/2509.24895>
+- Hakim et al. (2025) A look at the isotropy of pretrained protein language models. <https://arxiv.org/abs/2510.10655>
+- Pool PaRTI: a PageRank-based pooling method for protein sequence representations. <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11956911/>
+- Aggregating residue-level protein language model embeddings with optimal transport. <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11961220/>
+- Schakel A.M.J., Wilson B.J. (2015) Measuring word significance using distributed representations of words. <https://arxiv.org/abs/1508.02297>
 - Rosen Y. et al. (2024) Toward universal cell embeddings: integrating single-cell RNA-seq datasets across species with SATURN. *Nature Methods* 21:1492–1500.
