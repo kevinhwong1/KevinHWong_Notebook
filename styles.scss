@@ -59,3 +59,14 @@ $code-color: #b5446e;
   max-width: 300px;
   scroll-snap-align: start;
 }
+
+/* Mermaid subgraph boxes: the Bootswatch themes fill them with a dark gray that hides node labels */
+svg.mermaid-js .cluster rect {
+  fill: rgba(127, 127, 127, 0.08) !important;
+  stroke: rgba(127, 127, 127, 0.5) !important;
+}
+svg.mermaid-js .cluster-label, svg.mermaid-js .cluster-label span, svg.mermaid-js .cluster-label p,
+svg.mermaid-js .cluster text {
+  color: var(--bs-body-color) !important;
+  fill: var(--bs-body-color) !important;
+}

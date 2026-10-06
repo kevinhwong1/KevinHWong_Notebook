@@ -31,23 +31,22 @@ All scripts live in the public GitHub repository **[kevinhwong1/coral-func-annot
 ## How it runs
 
 ```{mermaid}
-flowchart LR
-  P[(Proteome FASTA<br/>+ GFF3)] --> A
-  subgraph A [Phase 1: submitted together, run in parallel]
-    direction TB
+flowchart TB
+  P[(Proteome FASTA + GFF3)] --> A
+  P --> J5
+  subgraph A [Phase 1: all run in parallel]
     J1[01 eggNOG-mapper<br/>orthology, GO, KEGG]
     J2[02 OrthoFinder<br/>vs human, mouse, Nvec]
     J3[03 InterProScan<br/>domains]
     J4[04 DIAMOND RBH<br/>vs SwissProt]
-    J5[05 SignalP 6]
     J6[06 HMMER<br/>179 custom HMMs]
     J7[07 DIAMOND<br/>curated coral refs]
   end
-  J5 --> T[05b DeepTMHMM<br/>2,000-seq chunks]
-  T --> M{{Phase 2: merge<br/>DeepTMHMM chunks<br/>manual}}
+  J5[05 SignalP 6] --> T[05b DeepTMHMM<br/>2,000-seq chunks]
+  T --> M{{Phase 2: merge DeepTMHMM<br/>chunks, manual}}
   A --> F[08 merge_annotate.py]
   M --> F
-  F --> O[(Master annotation<br/>table + gene lists)]
+  F --> O[(Master annotation table + gene lists)]
 ```
 
 | Job | Tool | Purpose | Queue | Walltime |

@@ -72,8 +72,10 @@ COVARIATE_NAME <- "genotype"   # what the covariate column means (used in plot l
 # Use identity (function(x) x) to leave IDs unchanged.
 fix_feature_ids <- function(x) gsub("_", "-", x)
 
-# Optional mitochondrial filter. NULL = no mito genes in your reference (true for Pdam and Gfas).
-# Otherwise a regex matching mitochondrial gene IDs (e.g. "^mt-") or a character vector of IDs.
+# Optional mitochondrial filter. NULL = no mito genes in your reference (true for Pdam).
+# Otherwise a regex matching mitochondrial gene IDs AS THEY APPEAR IN THE MATRIX (after fix_feature_ids),
+# e.g. "^mt-", or a character vector of IDs. The load step stops if this matches no features --
+# a pattern that silently matches nothing gives percent_mito = 0 for every cell.
 MITO_GENES <- NULL
 max_percent_mito <- 20   # only used when MITO_GENES is set
 
@@ -126,11 +128,15 @@ sample.list <- pmap(sample_config, function(sample_id, covariate, file, path) {
   obj$log10GenesPerUMI <- log10(obj$nFeature_RNA) / log10(obj$nCount_RNA)
 
   if (!is.null(MITO_GENES)) {
-    if (length(MITO_GENES) == 1) {
-      obj$percent_mito <- PercentageFeatureSet(obj, pattern = MITO_GENES)
-    } else {
-      obj$percent_mito <- PercentageFeatureSet(obj, features = intersect(MITO_GENES, rownames(obj)))
+    mito_hits <- if (length(MITO_GENES) == 1) grep(MITO_GENES, rownames(obj), value = TRUE)
+                 else intersect(MITO_GENES, rownames(obj))
+    if (length(mito_hits) == 0) {
+      stop("MITO_GENES matches no features in ", sample_id, ". Check the pattern against ",
+           "head(rownames(obj)), or set MITO_GENES <- NULL if your reference has no mito genes.")
     }
+    message("  ", length(mito_hits), " mitochondrial features: ", paste(head(mito_hits, 5), collapse = ", "),
+            if (length(mito_hits) > 5) ", ...")
+    obj$percent_mito <- PercentageFeatureSet(obj, features = mito_hits)
   }
   obj
 })

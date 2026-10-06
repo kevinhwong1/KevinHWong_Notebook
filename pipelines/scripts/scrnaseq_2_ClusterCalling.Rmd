@@ -18,7 +18,8 @@ HOW TO USE THIS FILE
 Run interactively, chunk by chunk -- do not knit start-to-finish. Several chunks are DECISION
 POINTS: they save diagnostic plots/tables, then you set a parameter (DIMS_FINAL, NN_FINAL,
 MDIST_FINAL, RES_FINAL) by reading those outputs. Later chunks stop with a clear message until the
-parameter is set. Values used for P. damicornis are given in comments as an example, not a default.
+parameter is set. Values used for the G. fascicularis atlas (6 samples, 27k cells) are given in comments as an
+example, not a default.
 -->
 
 # Setup
@@ -94,7 +95,7 @@ map_int(sample.list, ncol)
 # Per-sample SCTransform
 
 ```{r sctransform}
-# Regress out percent_mito only if step 1 computed it (no mito genes for Pdam/Gfas -> nothing to regress).
+# Regress out percent_mito only if step 1 computed it (MITO_GENES set).
 sample.list <- map(sample.list, function(obj) {
   SCTransform(
     obj,
@@ -216,7 +217,7 @@ pc_variance_table
 # ---- DECISION POINT ----
 # Review 01_ElbowPlot.jpeg, 02_CumulativeVariance.jpeg/csv and the 03_PCHeatmaps_* blocks, then set
 # DIMS_FINAL. Ignore the "algorithmic elbow" if it lands on PC1-2 (common with a steep PC1 drop).
-# Pdam example: DIMS_FINAL = 30 (85% cumulative variance; PC heatmaps still coherent through ~PC36).
+# Galaxea example: DIMS_FINAL = 30 (~90% cumulative variance).
 DIMS_FINAL <- NA   # <-- SET ME
 
 stopifnot("Set DIMS_FINAL above before continuing." = !is.na(DIMS_FINAL))
@@ -300,7 +301,7 @@ umap_sweep_metrics
 # metrics disagree, then prefer clean, round (not smeared) clusters. n.neighbors / min.dist only change
 # the 2D layout -- clusters come from the PCA graph -- so this is a visualization choice. With few
 # samples, don't over-weight mean covariate entropy.
-# Pdam example: NN_FINAL = 30, MDIST_FINAL = 0.3.
+# Galaxea example: NN_FINAL = 30, MDIST_FINAL = 0.3.
 NN_FINAL    <- NA   # <-- SET ME
 MDIST_FINAL <- NA   # <-- SET ME
 
@@ -373,7 +374,7 @@ cluster_counts
 # Review the plateau in 05_ClusterCount_vs_Resolution.jpeg, stable ("quiet") levels in 06_Clustree.jpeg,
 # the peak/plateau in 07_Silhouette_vs_Resolution.jpeg, and whether clusters in Resolution_UMAPs/ look
 # biologically sensible. Resolutions tested: 0.2-1.0 in steps of 0.1.
-# Pdam example: RES_FINAL = 0.5 (26 clusters).
+# Galaxea example: RES_FINAL = 0.4 (21 clusters).
 RES_FINAL <- NA   # <-- SET ME
 
 stopifnot("Set RES_FINAL above before continuing." = !is.na(RES_FINAL))

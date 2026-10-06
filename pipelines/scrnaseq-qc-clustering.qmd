@@ -49,7 +49,7 @@ install.packages(c("tidyverse", "here", "Seurat", "scCustomize", "conflicted", "
 BiocManager::install(c("scDblFinder", "SingleCellExperiment", "glmGamPoi"))
 ```
 
-Integration of two ~10k-cell samples ran fine on a laptop with 32 GB RAM. With more or larger samples, run step 2 on the cluster.
+Step 2 is the memory-hungry part (SCTransform + anchor integration). If it runs out of memory locally, run it on the cluster.
 
 ## Run it {#run-it}
 
@@ -70,7 +70,7 @@ Integration of two ~10k-cell samples ran fine on a laptop with 32 GB RAM. With m
    )
    ```
 
-   Also set `fix_feature_ids()` (if your gene IDs need reformatting) and `MITO_GENES` (leave `NULL` if your reference has no mitochondrial genes).
+   Also set `fix_feature_ids()` (if your gene IDs need reformatting) and `MITO_GENES` (a pattern or list of mitochondrial gene IDs as they appear in the matrix; leave `NULL` if your reference has none). The template prints the mito genes it found and stops if it found none.
 
 3. **Run the pre-filter plots, then set thresholds.** Look at `QC_Plots_<sample>.jpeg` before trusting the default `qcMetricsThresholds`; the defaults are the *P. damicornis* values.
 
@@ -102,14 +102,13 @@ Integration of two ~10k-cell samples ran fine on a laptop with 32 GB RAM. With m
 
 - **Doublet rate** roughly 0.5–10% for 10x data. Much higher usually means scDblFinder got unfiltered droplets, not that the data are bad.
 - **Doublet score histogram**: ideally the singlet/doublet cut sits in a trough. In low-UMI data like the Pdam example below there is often no clear second peak, and the cut falls in the right tail; that's acceptable if the rate is reasonable, but don't over-interpret individual calls.
+- **percent_mito actually varies** (if you set `MITO_GENES`). A column of zeros means the pattern matched nothing; see [known issues](#known-issues).
 - **Clusters flagged > 90% one sample**: could be real biology (a genotype-specific state) or a batch effect. Look at their markers before naming them.
 - Write down *why* you chose each decision value in your notebook entry. `00_Finalised_Parameters.csv` only records *what* was chosen.
 
-## Example: *Pocillopora damicornis* whole atlas
+## Example QC: *Pocillopora damicornis*
 
 Two genotypes, one 10x sample each (18114-001 and 31298-001), August 2026.
-
-### QC
 
 | Sample | Droplets in | After thresholds | Doublets removed | Cells kept | Median genes | Median UMIs |
 |---|---|---|---|---|---|---|
@@ -124,37 +123,43 @@ Thresholds: 300–6,000 genes and 400–35,000 UMIs per cell; no mitochondrial f
 ![scDblFinder score after threshold filtering (31298-001)](../images/pipelines/pdam_qc/doublet_score_sample2.jpg)
 :::
 
-### Cluster calling
+## Example cluster calling: *Galaxea fascicularis* bleaching atlas
 
-14,967 cells; the two samples shared 1,672 variable features (Jaccard 0.39), and integration ran at 3,000 features.
+Six samples: three genotypes (Green, Red, White) × Control and Heated, June 2026. **27,124 cells** after QC, integrated at 3,000 features. A control-only atlas of the same colonies, already annotated with 19 cell types, served as a reference to check the final clusters.
 
 | Decision | Chosen | Why |
 |---|---|---|
-| PCs | 30 | ~86% cumulative variance; PC heatmaps still coherent into the mid-30s |
-| UMAP | n.neighbors 30, min.dist 0.3 | Neighborhood preservation was nearly flat (0.50–0.53) across the grid; 0.3 gave round, well-separated clusters |
-| Resolution | 0.5 → **26 clusters** | Cluster count rises steadily (18 at 0.2 → 36 at 1.0) with no clear plateau, and silhouette is nearly flat (0.18–0.19, small peak at 0.8), so the choice rested on clustree stability and interpretable clusters in the UMAPs |
+| PCs | 30 | ~90% cumulative variance (25 PCs ≈ 86%, 35 ≈ 93%); a conservative middle for 6 samples with genotype and treatment variation |
+| UMAP | n.neighbors 30, min.dist 0.3 | Neighborhood preservation barely changed across the grid (0.21–0.23), so the same settings as the control-only atlas were kept to make the two comparable |
+| Resolution | 0.4 → **21 clusters** | Silhouette is highest at 0.2–0.3 (0.29, 0.28) and flat from 0.4 up (0.23–0.25). Against the reference atlas, 0.3 left five clusters mixed (including Gland_Mucous at 55% purity) while 0.4 left four; 0.5 added clusters by splitting Epidermis further, not by resolving the mixed ones |
 
 ::: {layout-ncol=2}
-![PCA elbow](../images/pipelines/pdam_qc/elbow.jpg)
+![Cumulative variance (dashed lines at 25, 30 and 35 PCs)](../images/pipelines/gfas_clustering/cumvar.jpg)
 
-![Cumulative variance](../images/pipelines/pdam_qc/cumvar.jpg)
+![PCA elbow](../images/pipelines/gfas_clustering/elbow.jpg)
 
-![Clusters vs. resolution](../images/pipelines/pdam_qc/clustercount_vs_res.jpg)
+![Clusters vs. resolution](../images/pipelines/gfas_clustering/clustercount_vs_res.jpg)
 
-![Silhouette vs. resolution](../images/pipelines/pdam_qc/silhouette.jpg)
+![Silhouette vs. resolution](../images/pipelines/gfas_clustering/silhouette.jpg)
 :::
 
-![Clustree, resolution 0.2 (top) to 1.0 (bottom)](../images/pipelines/pdam_qc/clustree.jpg){width=80%}
+![Clustree, resolution 0.2 (top) to 1.0 (bottom)](../images/pipelines/gfas_clustering/clustree.jpg){width=80%}
+
+![Resolutions 0.3–0.5 (left) vs. cell types in the annotated control-only atlas (right)](../images/pipelines/gfas_clustering/res_vs_reference.jpg){width=90%}
+
+**Checking against the reference atlas.** At resolution 0.4, 17 of 21 clusters were ≥ 85% one reference cell type (e.g. Neuron_Pou4 99%, Algal-hosting 98.5%, Cnidocyte 98.6%). Four were mixed: cluster 3 (53% Neuron_Isl_Nkx6), cluster 9 (74% Neuron_Atoh8_1), cluster 5 (75% Progenitor) and cluster 12 (79% Epidermis); these needed the closest look during annotation. Epidermis split into three clusters (0, 12, 17), and 18 of the 19 reference types were the main type of at least one cluster (Neuron_Atoh8_2, 204 cells in the reference, had no cluster of its own).
 
 ::: {layout-ncol=2}
-![Final UMAP, resolution 0.5](../images/pipelines/pdam_qc/umap_res0.5.jpg)
+![Final UMAP coloured by treatment](../images/pipelines/gfas_clustering/umap_final.jpg)
 
-![Genotype composition per cluster](../images/pipelines/pdam_qc/covariate_stackedbar.jpg)
+![Genotype composition per cluster](../images/pipelines/gfas_clustering/genotype_proportion.jpg)
 :::
 
-![UMAP split by genotype](../images/pipelines/pdam_qc/umap_split.jpg)
+![UMAP split by genotype](../images/pipelines/gfas_clustering/umap_split.jpg)
 
-Two clusters (11 and 21) were > 99% from one genotype and were flagged for a closer look during annotation. Every cluster had > 80 cells.
+![nFeature, nCount and percent_mito per cluster. percent_mito is 0 in every cluster; see Known issues](../images/pipelines/gfas_clustering/qc_per_cluster.jpg){width=80%}
+
+Control and heated cells mix throughout the UMAP, and no cluster is > 90% one genotype (the highest is cluster 12, 74% White; the White colony contributed the most cells overall). The smallest cluster (20) has 94 cells.
 
 ## Known issues {#known-issues}
 
@@ -163,9 +168,13 @@ Two clusters (11 and 21) were > 99% from one genotype and were flagged for a clo
 scDblFinder's expected doublet rate grows with the number of cells it is given (~1% per 1,000 cells). On the unfiltered CellBender output (which still contains many marginal droplets) it called 20–39% of Pdam cells doublets. Run on the threshold-filtered cells it called a realistic 6.5–11%.
 :::
 
-::: {.callout-note collapse="true"}
-## No mitochondrial genes in some coral references
-The *P. damicornis* and *G. fascicularis* references have no annotated mitochondrial genes, so there's no percent_mito filter or regression. `log10GenesPerUMI` is plotted as a mito-independent check for damaged or low-complexity droplets (reference line at 0.80, not used as a filter). Set `MITO_GENES` if your reference has them; both templates then use it automatically.
+::: {.callout-warning collapse="false"}
+## Check that your mitochondrial genes are actually counted
+The *G. fascicularis* reference was built with the mitogenome (GenBank ON341021) added, and QC used `percent_mito_pattern <- "^agat-gene-|^gene-rrn|^gene-trn|^ON341021.2:1..18751"`. But `percent_mito` came out **0 in every cell** of all six samples (see the per-cluster violins above), so the 5% mito filter and the `vars.to.regress = "percent_mito"` in SCTransform did nothing. The pattern matches no feature names in the GeneExt/CellBender matrices. Either the mitogenome genes aren't in the reference used for that run, or their names changed (GeneExt and Seurat both rewrite IDs). The same is true of `percent_sym`.
+
+Before trusting a mito filter, list the genes it matches: `grep(MITO_GENES, rownames(obj), value = TRUE)`. If that list is empty, the metric is meaningless. The step 1 template stops if `MITO_GENES` is set but matches nothing.
+
+*P. damicornis* has no annotated mito genes at all, so the Pdam example skips the filter. `log10GenesPerUMI` is plotted as a mito-independent check for damaged or low-complexity droplets (reference line at 0.80, not used as a filter).
 :::
 
 ::: {.callout-note collapse="true"}
@@ -180,12 +189,12 @@ With Seurat v5 and 3,000 features this can fail with a memory error. The templat
 
 ::: {.callout-note collapse="true"}
 ## The UMAP sweep doesn't change the clusters
-`n.neighbors` and `min.dist` only change the 2D picture; clusters come from the PCA neighbor graph. So in the sweep, silhouette, Calinski–Harabasz, Davies–Bouldin and entropy are identical for every UMAP setting, and only neighborhood preservation varies. Treat this as a visualization choice.
+`n.neighbors` and `min.dist` only change the 2D picture; clusters come from the PCA neighbor graph. So in the sweep (both Pdam and Galaxea), silhouette, Calinski–Harabasz, Davies–Bouldin and entropy were identical for every UMAP setting, and only neighborhood preservation varies. Treat this as a visualization choice.
 :::
 
 ::: {.callout-note collapse="true"}
 ## Low silhouette widths are normal here
-Average silhouette of ~0.18 looks low but is typical for integrated scRNA-seq with many related cell states. Use it to compare resolutions (look for a peak or plateau), not as an absolute quality score.
+Average silhouettes of 0.18–0.29 (Pdam, Galaxea) look low but are typical for integrated scRNA-seq with many related cell states. Use it to compare resolutions (look for a peak or plateau), not as an absolute quality score.
 :::
 
 ## How it connects
@@ -221,6 +230,7 @@ Average silhouette of ~0.18 looks low but is typical for integrated scRNA-seq wi
 
 | Date | Change |
 |---|---|
-| 2026-10-05 | Generic templates (config chunk, covariate column, optional mito) and this page |
+| 2026-10-05 | Generic templates (config chunk, covariate column, optional mito) and this page; Galaxea cluster-calling example |
 | 2026-08-27 | *P. damicornis* whole atlas: decision-point workflow, cluster QC flags |
+| 2026-06 | *G. fascicularis* 6-sample integrated atlas (genotype × treatment), checked against the control-only atlas |
 | 2026-08 | scDblFinder moved after threshold filtering |
