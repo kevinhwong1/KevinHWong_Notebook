@@ -15,6 +15,7 @@ tools: ["SATURN", "ESM-1b", "ESMC-600M (FANTASIA v4)", "eggNOG-mapper", "Python"
 - **Fixing ESMC's vector lengths did not help.** Other standard fixes improved ESMC but improved ESM-1b just as much, so the gap remained (@tbl-std).
 - **What changes:** ESMC separates zebrafish genes from their invertebrate homologs (@tbl-jaccard, @tbl-status).
 - **What stays the same:** macrogene sharing among the three invertebrates, and deeply conserved gene families (@tbl-jaccard, @tbl-stable).
+- **What ESMC adds:** its new cross-species links rarely share even a protein domain (12% vs 49% for links only ESM-1b makes); a small set group protein superfamilies (@tbl-gained).
 :::
 
 This entry follows [the 2026-10-06 entry](2026-10-06-saturn-4-species-esm1b-vs-esmc-600m-macrogene-comparison.qmd), which found that the ESMC vectors vary ~5-fold in length and that SATURN does not normalize them. Here: the length-normalized ESMC run, an ortholog benchmark across all runs, a test of standard embedding fixes, and what changes (and what doesn't) in the macrogenes of each species.
@@ -194,9 +195,33 @@ For each gene we compared its **cross-species partners** (genes from other speci
 
 ![COG categories of genes that lose vs keep their cross-species partners (ESM-1b → ESMC rescaled), per species. * = BH-adjusted Fisher test < 0.05.](/images/20261008_SATURN_COG_lost_vs_kept.png){#fig-cog}
 
+## 5. What does ESMC gain?
+
+The ortholog benchmark can only reward links that eggNOG already knows, so a model that finds **distant** homologs could be under-scored. If ESMC does this, it should show up in the cross-species gene pairs that **only ESMC** puts together. We checked those pairs with evidence that does not depend on orthologous groups:
+
+- **Shared Pfam domain**: the two proteins contain at least one protein domain in common (domain-level relatedness; weaker than orthology, but it can catch distant relationships).
+- **Same COG category**: same broad functional class (unknown-function genes excluded).
+- **Same gene-name family**: gene names share a family root (e.g. KLHL7 and KLHL10).
+
+| Cross-species pairs in the same macrogene | Pairs | Same OG | Share a Pfam domain | Same COG category | Same name family |
+|---|---|---|---|---|---|
+| found by both models | 18,790 | 35% | 81% | 87% | 54% |
+| found only by ESM-1b | 115,658 | 9% | 49% | 65% | 20% |
+| **found only by ESMC** | 130,890 | **1%** | **12%** | **36%** | **4%** |
+| random cross-species pairs (baseline) | 239,926 | 0% | 0.5% | 13% | 0.2% |
+
+: Evidence for cross-species gene pairs, by which model placed them in the same macrogene (% of pairs where both genes have that annotation; ESMC = rescaled run). {#tbl-gained}
+
+- **Most ESMC-only links have no supporting evidence.** Only 12% share even a protein domain, vs 49% of ESM-1b-only links. They are better than random (0.5%), so they are not pure noise, but about 4× weaker than what ESM-1b adds.
+- **The same holds for *Mnemiopsis*** (11% vs 45% sharing a domain), where distant homologs would matter most, and for invertebrate-only pairs (13% vs 50%).
+- **Gained genes are not mainly unannotated genes.** Genes that gain cross-species partners under ESMC are annotated about as often as other genes (e.g. *Mnemiopsis* 46% vs 51%), so ESMC is not filling in eggNOG's blind spots.
+- **A minority of ESMC-only macrogenes do have strong domain support.** Of the 952 ESMC macrogenes whose cross-species links are ≥80% new, most have little support (median 4% of pairs share a domain), but some group genes by **protein superfamily** rather than orthology, e.g. rhodopsin-like GPCRs (7tm_1; mostly *Mnemiopsis* with *Ciona*), Ig-domain adhesion proteins, claudins, MFS transporters, WD40 proteins, C-type lectins with TNF receptors (oyster + *Ciona*), TRIM/PML/NLRC5 and PARP14/DTX3L (interferon-related in vertebrates). These are plausible family-level links worth a closer look, e.g. with structural comparison (Foldseek).
+
+![Evidence for cross-species gene pairs placed in the same macrogene, by which model found them. Panels: all pairs, pairs involving *Mnemiopsis*, invertebrate-only pairs, pairs involving zebrafish.](/images/20261008_esmc_gained_pair_evidence.png){#fig-gained}
+
 # Interpretation
 
-1. **ESMC does not find a different but equally valid set of homologs; it finds fewer.** Its new cross-species links rarely share an OG (1.3%), while the links it drops include many real ones.
+1. **ESMC does not find a different but equally valid set of homologs; it finds fewer.** Its new cross-species links rarely share an OG (1%) or even a protein domain (12%, @tbl-gained), while the links it drops include many real ones. A small set of ESMC-only macrogenes group protein superfamilies (GPCRs, lectins, Ig-domain proteins) and may be worth following up.
 2. **The losses fall hardest on zebrafish**, our only vertebrate and the best-annotated immune reference. That matters for annotating immune cell types across phyla.
 3. **What is robust to model choice**: invertebrate–invertebrate sharing, conserved housekeeping and structural families (dyneins, tubulins, actins, tektins, T-box factors, annexins), and the canonical-run structure when urchin is dropped. Conclusions resting on these are not sensitive to the embedding choice.
 
@@ -226,6 +251,7 @@ All in [`pipelines/scripts/saturn_embedding_comparison/`](../pipelines/scripts/s
 | [`05i_embedding_standardization_check.py`](../pipelines/scripts/saturn_embedding_comparison/05i_embedding_standardization_check.py) | embedding fixes (rescaling, z-score, top-PC removal) |
 | [`05j_shared_macrogenes_by_species.py`](../pipelines/scripts/saturn_embedding_comparison/05j_shared_macrogenes_by_species.py) | shared and single-species macrogenes per run |
 | [`05k_kept_lost_crossspecies_genes.py`](../pipelines/scripts/saturn_embedding_comparison/05k_kept_lost_crossspecies_genes.py) | per-gene kept/lost status, eggNOG annotation, COG tests, stable macrogenes |
+| [`05m_esmc_gained_links.py`](../pipelines/scripts/saturn_embedding_comparison/05m_esmc_gained_links.py) | evidence (shared OG, Pfam domain, COG, name family) for links each model adds |
 | [`05l_macrogene_sharing_plots.Rmd`](../pipelines/scripts/saturn_embedding_comparison/05l_macrogene_sharing_plots.Rmd) | R Markdown reproducing the sharing and kept/lost figures |
 
 : Scripts used in this entry. {#tbl-scripts}
