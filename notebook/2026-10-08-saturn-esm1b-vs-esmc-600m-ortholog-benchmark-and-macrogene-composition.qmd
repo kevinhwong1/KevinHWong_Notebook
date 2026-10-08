@@ -1,0 +1,240 @@
+---
+title: "SATURN: ESM-1b vs ESMC-600M, ortholog benchmark and macrogene composition across species"
+date: 2026-10-08
+type: "Analysis"
+project: "Mnemiopsis Phagocytes"
+categories: ["Analysis", "Mnemiopsis leidyi", "scRNA-seq", "Comparative genomics"]
+tools: ["SATURN", "ESM-1b", "ESMC-600M (FANTASIA v4)", "eggNOG-mapper", "Python", "R"]
+---
+
+::: {.callout-important}
+## Summary
+
+- **ESM-1b groups orthologs across species about twice as well as the ESMC-600M embeddings we received** (@tbl-bench).
+- **The difference is already in the embeddings themselves**, before SATURN runs (@tbl-std).
+- **Fixing ESMC's vector lengths did not help.** Other standard fixes improved ESMC but improved ESM-1b just as much, so the gap remained (@tbl-std).
+- **What changes:** ESMC separates zebrafish genes from their invertebrate homologs (@tbl-jaccard, @tbl-status).
+- **What stays the same:** macrogene sharing among the three invertebrates, and deeply conserved gene families (@tbl-jaccard, @tbl-stable).
+:::
+
+This entry follows [the 2026-10-06 entry](2026-10-06-saturn-4-species-esm1b-vs-esmc-600m-macrogene-comparison.qmd), which found that the ESMC vectors vary ~5-fold in length and that SATURN does not normalize them. Here: the length-normalized ESMC run, an ortholog benchmark across all runs, a test of standard embedding fixes, and what changes (and what doesn't) in the macrogenes of each species.
+
+# Key terms
+
+| Term | Meaning here |
+|---|---|
+| **Protein embedding** | A list of numbers (1,280 for ESM-1b, 1,152 for ESMC) that a protein language model produces for each protein. Similar proteins get similar lists. SATURN uses one per gene. |
+| **Macrogene** | A group of genes, from any species, that SATURN treats as one feature. Built by clustering the protein embeddings, then refined with expression data. 3,000 per run. |
+| **Cross-species macrogene** | A macrogene containing genes from ≥2 species. These are what let SATURN compare cell types across species. |
+| **Single-species macrogene** | A macrogene with genes from only one species. Useful within that species, but it cannot link species. |
+| **eggNOG Metazoa OG** | An orthologous group from eggNOG-mapper at the animal level: genes in the same OG descend from one ancestral animal gene (orthologs plus some paralogs). Used here as an independent reference that no embedding model saw. |
+| **Recall** | Of all the true ortholog pairs between two species (same OG), the share that SATURN put in the same macrogene. *Does SATURN find the orthologs?* |
+| **Precision** | Of all the cross-species gene pairs that SATURN put in the same macrogene, the share that are true orthologs (same OG). *When SATURN groups genes from two species, how often is it right?* Low precision means macrogenes mix in many unrelated genes. |
+| **Most-similar-gene test** | For a gene in species A, find the gene in species B with the most similar embedding, and check whether the two share an OG. Tests the embeddings directly, without SATURN. |
+| **Vector length (L2 norm)** | √(sum of squared values) of an embedding. The *direction* carries protein information; the *length* mostly reflects how it was extracted. |
+| **Rescaling (length-normalization)** | Dividing every vector by its own length (then multiplying by a constant), so all genes have equal length and only direction differs. |
+| **z-score per dimension** | For each of the 1,152 dimensions, subtract its mean and divide by its standard deviation across all genes, so no single dimension dominates distances. |
+| **Top-PC removal ("all-but-the-top")** | Remove the 1–3 strongest directions shared by nearly all proteins (principal components), leaving the directions that distinguish proteins. A standard fix for language-model embeddings. |
+| **COG category** | A broad functional class assigned by eggNOG (e.g. K = transcription, E = amino-acid metabolism, S = unknown function). |
+
+: Terms used in this entry. {#tbl-terms}
+
+# Runs compared
+
+All four runs use the same settings (3,000 macrogenes, 8,000 highly variable genes per species, seed 42) and are compared on the **31,702 genes present in all of them**. Macrogene membership is fixed during SATURN's pretraining, so the 4-species runs ran pretraining only ("macrogene-only").
+
+| Run | Embeddings | Vector length (range across genes) | Notes |
+|---|---|---|---|
+| Canonical 5sp ESM-1b | ESM-1b | 16.3–19.6 | June 2026 canonical run (with sea urchin); urchin genes removed for comparison |
+| ESM-1b 4sp | ESM-1b | 16.3–19.6 | 4 species |
+| ESMC raw 4sp | ESMC-600M as delivered (FANTASIA v4, Ingrid Miranda Perez) | 1,718–8,902 | vector lengths vary ~5-fold between genes |
+| ESMC rescaled 4sp | ESMC-600M, length-normalized | 17.7 (all genes) | every vector set to the average ESM-1b length; directions unchanged |
+
+: The four SATURN runs. {#tbl-runs}
+
+# Results
+
+## 1. ESM-1b recovers about twice as many orthologs
+
+| Run | Recall | Precision | Recall, *Mnemiopsis* pairs | OGs with ≥1 cross-species pair together |
+|---|---|---|---|---|
+| Canonical 5sp ESM-1b | 0.29 | 0.132 | 0.26 | 0.54 |
+| **ESM-1b 4sp** | **0.30** | **0.134** | **0.26** | **0.54** |
+| ESMC raw 4sp | 0.15 | 0.054 | 0.13 | 0.28 |
+| ESMC rescaled 4sp | 0.16 | 0.058 | 0.14 | 0.31 |
+| Random (shuffled macrogenes) | 0.0004 | 0.0002 | | |
+
+: eggNOG ortholog benchmark, pooled over the 6 species pairs (21,674 of the 31,702 genes have a Metazoa OG). {#tbl-bench}
+
+- **Recall:** ESM-1b puts 30% of true ortholog pairs in the same macrogene; ESMC 15–16%.
+- **Precision:** of every 100 cross-species gene pairs that share a macrogene, about 13 are true orthologs with ESM-1b and about 6 with ESMC. The rest are unrelated or only distantly related genes.
+- ESM-1b is about **2× better on both**, for every species pair (@fig-bench), including all *Mnemiopsis* pairs.
+- Length-normalizing ESMC barely helps (recall 0.15 → 0.16): vector length was not the main problem.
+- Dropping sea urchin did not hurt: ESM-1b 4sp matches the canonical run.
+
+![eggNOG ortholog benchmark per species pair. Left: recall; middle: precision; right: share of OGs with at least one cross-species pair in the same macrogene. Black ticks: shuffled-label null.](/images/20261008_SATURN_ortholog_benchmark.png){#fig-bench}
+
+## 2. Is it SATURN, or the embeddings?
+
+A fair objection is that ESMC might be fine and SATURN, or the vector-length problem, is what hurts it. We tested this directly on the embeddings, **without running SATURN**: for each gene, find the most similar gene in another species, and check whether it is a true ortholog (same OG). We then repeated the test after applying standard fixes for embeddings, to **both** models.
+
+| Embeddings | ESM-1b | ESMC |
+|---|---|---|
+| as delivered | 53% | 34% |
+| length-normalized (as in the rescaled SATURN run) | 53% | 36% |
+| best fix (top 3 dominant directions removed) | 61% | 49% |
+
+: Share of genes whose most similar gene in another species is a true ortholog (mean over species pairs). {#tbl-std}
+
+- **ESM-1b is ahead before SATURN is involved**, so the gap comes from the embeddings, not from SATURN.
+- **Fixing vector length changes almost nothing** for ESMC (34% → 36%).
+- **The best fix helps ESMC (→ 49%) but helps ESM-1b equally (→ 61%)**, so ESMC never catches up. Its best version only reaches unprocessed ESM-1b.
+
+![Same test for each fix tried. raw = as delivered; unit = length-normalized; center = average vector subtracted; zscore = each dimension standardized; abtt1–3 = top 1–3 dominant directions removed.](/images/20261008_embedding_standardization.png){#fig-std}
+
+## 3. How macrogene composition across species changes
+
+### Shared macrogenes between species pairs
+
+![Macrogenes shared by each species pair (off-diagonal) and all macrogenes containing each species (diagonal, "total"); a species counts if it has ≥1 gene in the macrogene.](/images/20261008_SATURN_pair_heatmaps.png){#fig-pairs}
+
+Raw counts depend on how many macrogenes each species occupies, so the fairer comparison is the **Jaccard index**: shared macrogenes ÷ macrogenes containing either species (1 = identical sets).
+
+| Species pair | Canonical ESM-1b | ESM-1b 4sp | ESMC raw | ESMC rescaled |
+|---|---|---|---|---|
+| *Mnemiopsis*–oyster | 0.50 | 0.51 | 0.50 | 0.49 |
+| *Mnemiopsis*–*Ciona* | 0.55 | 0.53 | 0.50 | 0.54 |
+| oyster–*Ciona* | 0.55 | 0.55 | 0.50 | 0.53 |
+| ***Mnemiopsis*–zebrafish** | 0.39 | 0.36 | **0.25** | **0.22** |
+| **oyster–zebrafish** | 0.42 | 0.40 | **0.33** | **0.29** |
+| ***Ciona*–zebrafish** | 0.44 | 0.43 | **0.27** | **0.28** |
+
+: Jaccard index of the two species' macrogene sets (≥1 gene per species). {#tbl-jaccard}
+
+- **Stays the same:** sharing among the three invertebrates (Jaccard 0.49–0.55 in every run).
+- **Changes:** every zebrafish pair drops by about a third with ESMC.
+- Macrogenes containing all four species fall from 552 (ESM-1b) to 412 (raw) and 391 (rescaled) (@fig-combos).
+
+![Macrogenes per exact species combination (≥1 gene per species). Dots below show which species each bar contains.](/images/20261008_SATURN_species_combinations.png){#fig-combos}
+
+### Single-species macrogenes
+
+| Species | Canonical ESM-1b | ESM-1b 4sp | ESMC raw | ESMC rescaled |
+|---|---|---|---|---|
+| *Mnemiopsis* | 93 | 105 | 242 | 134 |
+| oyster | 97 | 97 | 169 | 161 |
+| *Ciona* | 98 | 98 | 376 | 103 |
+| zebrafish | 344 | 409 | 401 | **852** |
+| % of zebrafish genes in them | 29% | 32% | 43% | **49%** |
+
+: Macrogenes containing genes from only one species. {#tbl-single}
+
+- With ESM-1b, each invertebrate has ~100 single-species macrogenes; zebrafish (the only vertebrate) has more, as expected.
+- Raw ESMC inflates the invertebrate counts, many as one-gene macrogenes (a vector-length artifact; removed by rescaling).
+- Rescaled ESMC returns the invertebrates to near ESM-1b levels but **doubles zebrafish to 852**: half of all zebrafish genes then sit in macrogenes with no other species (@fig-single).
+
+![Single-species macrogenes per species (left) and share of each species' genes in them (right).](/images/20261008_SATURN_single_species_macrogenes.png){#fig-single}
+
+## 4. Which genes keep or lose their cross-species partners
+
+For each gene we compared its **cross-species partners** (genes from other species in the same macrogene) between ESM-1b 4sp and ESMC:
+
+- **kept**: has cross-species partners in both runs, at least one the same
+- **moved**: has cross-species partners in both runs, but different ones
+- **lost**: has cross-species partners with ESM-1b, none with ESMC
+- **gained**: none with ESM-1b, some with ESMC
+- **species-specific**: no cross-species partners in either run
+
+| % of genes (ESM-1b → ESMC rescaled) | kept | moved | lost | gained | species-specific |
+|---|---|---|---|---|---|
+| *Mnemiopsis* | 44 | 42 | 6 | 4 | 3 |
+| oyster | 45 | 36 | 9 | 3 | 7 |
+| *Ciona* | 45 | 40 | 4 | 5 | 6 |
+| **zebrafish** | **15** | 26 | **27** | 9 | 22 |
+
+: Fate of each gene's cross-species partners. {#tbl-status}
+
+![Fate of cross-species partners per species, ESM-1b vs rescaled (top) and raw (bottom) ESMC.](/images/20261008_SATURN_partner_status.png){#fig-status}
+
+### What stays the same
+
+- **Most invertebrate genes keep cross-species partners** under either model (81–86% kept or moved).
+- **Kept links are the trustworthy ones.** Zebrafish–invertebrate gene pairs found by **both** models share an eggNOG OG 39% of the time, vs 8.8% for pairs found only by ESM-1b and **1.3%** for pairs found only by ESMC.
+- **Kept genes are conserved housekeeping families** (@fig-cog). In zebrafish and oyster, kept genes are enriched for amino-acid and carbohydrate metabolism, protein modification/chaperones and DNA replication/repair (plus cytoskeleton in zebrafish). In *Mnemiopsis*, kept genes are enriched for signal transduction.
+- **Whole macrogenes that survive** (best-match Jaccard ≥ 0.5): 645 of 2,997 ESM-1b macrogenes (22%). The largest stable 4-species examples are deeply conserved families:
+
+| ESM-1b macrogene | Genes (Mle / Cgi / Cro / Dre) | Gene family (eggNOG names) |
+|---|---|---|
+| MG136 | 29 (11/2/15/1) | axonemal dyneins (DNAH2/5/6/8/9/10…) |
+| MG138 | 22 (8/5/8/1) | actins (ACTB, ACTG1/2) |
+| MG14 | 20 (9/2/4/5) | α/β-tubulins |
+| MG125 | 20 (1/5/7/7) | SLC5 sodium/glucose transporters |
+| MG512 | 16 (4/4/4/4) | tektins (TEKT1–4); identical in both models |
+| MG415 | 14 (4/6/1/3) | T-box transcription factors (TBX2/3/20, EOMES, T) |
+| MG668 | 11 (1/4/2/4) | transglutaminases (F13A1, TGM1/2/5/6) |
+| MG329 | 11 (2/2/1/6) | annexins (ANXA1/2/3/5/7/13) |
+
+: Examples of 4-species macrogenes that are the same in ESM-1b and ESMC rescaled. {#tbl-stable}
+
+### What changes
+
+- **Losses are concentrated in zebrafish.** 27% of zebrafish genes lose all invertebrate partners under ESMC (vs 4–9% for invertebrates). Of the 1,526 ESM-1b macrogenes joining zebrafish with invertebrates, ESMC fully separates the zebrafish genes in 874 and keeps them together in 239.
+- **Often the invertebrates stay together and only zebrafish splits off**, e.g. calmodulin-like (CALML3/CABP2), kelch-like (KLHL7/8/10/12), zinc-finger (ZNF/ZBTB), SLCO transporters and short-chain dehydrogenases (HSD17B/DHRS) macrogenes.
+- **Lost genes are enriched for fast-evolving or poorly characterized families** (@fig-cog): transcription regulators (COG K; zebrafish 11% of lost vs 5% of kept; also *Ciona*) and unknown-function genes (COG S; zebrafish 34% vs 27%; oyster 39% vs 23%).
+- **Immune genes.** 1,194 zebrafish genes carry an immune or defense GO term; 305 of them lose their invertebrate links under ESMC (vs 5–47 per invertebrate), e.g. *il6* and *epoa/b* (cytokines), *cd63* (with oyster and *Ciona* tetraspanins), *calcr* (with oyster class B GPCRs), *siva1* (with oyster BIRC3). Not every lost link was correct under ESM-1b (e.g. *mavs* grouped with unrelated TACC3/NUP153).
+
+| Immune-annotated genes | kept | moved | lost | gained | species-specific |
+|---|---|---|---|---|---|
+| *Mnemiopsis* | 193 | 186 | 25 | 14 | 9 |
+| oyster | 411 | 246 | 47 | 18 | 36 |
+| *Ciona* | 335 | 272 | 5 | 10 | 9 |
+| zebrafish | 213 | 265 | **305** | 120 | 291 |
+
+: Immune-annotated genes (GO:0002376 immune system process or GO:0006952 defense response) by fate, ESM-1b → ESMC rescaled. {#tbl-immune}
+
+![COG categories of genes that lose vs keep their cross-species partners (ESM-1b → ESMC rescaled), per species. * = BH-adjusted Fisher test < 0.05.](/images/20261008_SATURN_COG_lost_vs_kept.png){#fig-cog}
+
+# Interpretation
+
+1. **ESMC does not find a different but equally valid set of homologs; it finds fewer.** Its new cross-species links rarely share an OG (1.3%), while the links it drops include many real ones.
+2. **The losses fall hardest on zebrafish**, our only vertebrate and the best-annotated immune reference. That matters for annotating immune cell types across phyla.
+3. **What is robust to model choice**: invertebrate–invertebrate sharing, conserved housekeeping and structural families (dyneins, tubulins, actins, tektins, T-box factors, annexins), and the canonical-run structure when urchin is dropped. Conclusions resting on these are not sensitive to the embedding choice.
+
+# Caveats
+
+- **eggNOG is sequence-based.** It may favour a model whose similarity tracks sequence; a model capturing more remote structural similarity could be under-scored. A 2× gap that is already present before SATURN, and that survives standard fixes, is hard to explain this way.
+- **This tests the embeddings as delivered**, not ESMC in general. If they come from before the final normalization layer, re-extraction could change the result. To be preferred, it would need to beat ESM-1b on @tbl-bench and @tbl-std (61% after the best fix).
+- **Macrogene-only runs.** Cell-level integration was not compared; it requires full training.
+- eggNOG OG coverage is uneven (*Mnemiopsis* 50%, oyster and *Ciona* 63%, zebrafish 99% of genes), which lowers absolute scores for *Mnemiopsis* but affects all models equally.
+
+# Next steps
+
+- [ ] Decide: full SATURN training with standard ESM-1b, or first a macrogene-only test of ESM-1b with the top 2 PCs removed (~6 h + benchmark)
+- [ ] Share this entry with Ingrid; ask for the questions in the [previous entry](2026-10-06-saturn-4-species-esm1b-vs-esmc-600m-macrogene-comparison.qmd) (which layer `layer_0` is; before or after the final normalization)
+- [ ] If a re-extracted ESMC arrives, run it through `05f`, `05i` and (if it beats ESM-1b) a macrogene-only run + `05g`
+
+# Scripts
+
+All in [`pipelines/scripts/saturn_embedding_comparison/`](../pipelines/scripts/saturn_embedding_comparison/).
+
+| Script | What it does |
+|---|---|
+| [`05e_rescale_esmc_embeddings.py`](../pipelines/scripts/saturn_embedding_comparison/05e_rescale_esmc_embeddings.py) | length-normalizes ESMC |
+| [`05b2_macrogene_only_ESMC600M_rescaled_4sp.sh`](../pipelines/scripts/saturn_embedding_comparison/05b2_macrogene_only_ESMC600M_rescaled_4sp.sh) | macrogene-only SATURN run on rescaled ESMC |
+| [`05f_embedding_descriptives.py`](../pipelines/scripts/saturn_embedding_comparison/05f_embedding_descriptives.py) | embedding statistics, nearest-neighbour ortholog recovery |
+| [`05g_compare_runs_orthology.py`](../pipelines/scripts/saturn_embedding_comparison/05g_compare_runs_orthology.py) | 4-run comparison + eggNOG ortholog benchmark |
+| [`05i_embedding_standardization_check.py`](../pipelines/scripts/saturn_embedding_comparison/05i_embedding_standardization_check.py) | embedding fixes (rescaling, z-score, top-PC removal) |
+| [`05j_shared_macrogenes_by_species.py`](../pipelines/scripts/saturn_embedding_comparison/05j_shared_macrogenes_by_species.py) | shared and single-species macrogenes per run |
+| [`05k_kept_lost_crossspecies_genes.py`](../pipelines/scripts/saturn_embedding_comparison/05k_kept_lost_crossspecies_genes.py) | per-gene kept/lost status, eggNOG annotation, COG tests, stable macrogenes |
+| [`05l_macrogene_sharing_plots.Rmd`](../pipelines/scripts/saturn_embedding_comparison/05l_macrogene_sharing_plots.Rmd) | R Markdown reproducing the sharing and kept/lost figures |
+
+: Scripts used in this entry. {#tbl-scripts}
+
+# References
+
+- Rives A. et al. (2021) Biological structure and function emerge from scaling unsupervised learning to 250 million protein sequences. *PNAS* 118:e2016239118.
+- ESM Team / EvolutionaryScale (2024) ESM Cambrian. <https://huggingface.co/multimolecule/esmc-600m>
+- Rosen Y. et al. (2024) Toward universal cell embeddings: integrating single-cell RNA-seq datasets across species with SATURN. *Nature Methods* 21:1492–1500.
+- Timkey W., van Schijndel M. (2021) All bark and no bite: rogue dimensions in transformer language models obscure representational quality. *EMNLP 2021*. <https://aclanthology.org/2021.emnlp-main.372>
+- Mu J., Viswanath P. (2018) All-but-the-top: simple and effective postprocessing for word representations. *ICLR 2018*. <https://arxiv.org/abs/1702.01417>
+- Cantalapiedra C.P. et al. (2021) eggNOG-mapper v2. *Molecular Biology and Evolution* 38:5825–5829.

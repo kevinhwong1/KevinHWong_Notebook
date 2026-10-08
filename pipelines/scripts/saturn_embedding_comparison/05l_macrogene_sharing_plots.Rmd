@@ -1,0 +1,306 @@
+---
+title: "05l: Cross-species macrogene sharing across embedding models"
+author: "Kevin Wong"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align = "center")
+```
+
+# Introduction
+
+Plots comparing how the four SATURN macrogene runs share macrogenes between species:
+
+| Run | Embeddings | Notes |
+|---|---|---|
+| `canon5sp_ESM1b` | ESM-1b | canonical 2026-06-17 run, Spur genes dropped |
+| `ESM1b_4sp` | ESM-1b | 4-species macrogene-only run |
+| `ESMC600M_raw_4sp` | ESMC-600M as delivered | vector lengths ~1,700-8,900 |
+| `ESMC600M_resc_4sp` | ESMC-600M, length-normalized (05e) | all vectors the same length |
+
+**Inputs** are the tables written by the Python scripts (run those first):
+
+- `05j_shared_macrogenes_by_species.py` -> `20261008_shared_macrogenes_by_species/` (J1, J2, J3, J5)
+- `05k_kept_lost_crossspecies_genes.py` -> `20261008_kept_lost_crossspecies_genes/` (K1, K4)
+
+All counts use the genes present in all four runs (31,702). A species "is in" a macrogene if it
+contributes >= 1 gene (or >= 3, where stated). Figures are saved as PNG and PDF to `rmd_figures/`
+inside the comparison folder.
+
+```{r libraries}
+library(dplyr)
+library(tidyr)
+library(readr)
+library(ggplot2)
+library(patchwork)
+library(scales)
+```
+
+```{r paths-and-colours}
+# Paths are relative to this Rmd (scripts/SATURN/); knit from RStudio or rmarkdown::render()
+cmp_dir <- file.path("..", "..", "output", "SATURN", "20261002_macrogene_comparison_ESM1b_vs_ESMC600M")
+j_dir   <- file.path(cmp_dir, "20261008_shared_macrogenes_by_species")
+k_dir   <- file.path(cmp_dir, "20261008_kept_lost_crossspecies_genes")
+fig_dir <- file.path(cmp_dir, "rmd_figures")
+dir.create(fig_dir, showWarnings = FALSE, recursive = TRUE)
+
+sp_levels <- c("Mlei", "Cgig", "Crob", "Drer")
+runs    <- c("canon5sp_ESM1b", "ESM1b_4sp", "ESMC600M_raw_4sp", "ESMC600M_resc_4sp")
+run_labels <- c(canon5sp_ESM1b = "Canonical 5sp ESM-1b", ESM1b_4sp = "ESM-1b 4sp",
+                ESMC600M_raw_4sp = "ESMC raw 4sp", ESMC600M_resc_4sp = "ESMC rescaled 4sp")
+run_cols <- c(canon5sp_ESM1b = "#2a78d6", ESM1b_4sp = "#eb6834",
+              ESMC600M_raw_4sp = "#1baf7a", ESMC600M_resc_4sp = "#eda100")
+# project species colours (same as GO_enrichment_topGO.Rmd and scripts 6-9)
+species_cols <- c(Mlei = "#E69F00", Cgig = "#56B4E9", Crob = "#D55E00", Drer = "#CC79A7")
+status_levels <- c("kept", "moved", "lost", "gained", "species-specific")
+status_cols <- c(kept = "#2a78d6", moved = "#9ec5f4", lost = "#e34948",
+                 gained = "#1baf7a", `species-specific` = "#d3d1c7")
+pairs <- c("Mlei-Cgig", "Mlei-Crob", "Mlei-Drer", "Cgig-Crob", "Cgig-Drer", "Crob-Drer")
+
+theme_set(theme_classic(base_size = 11) +
+            theme(plot.title = element_text(face = "bold", size = 11),
+                  legend.title = element_blank(), strip.background = element_blank(),
+                  strip.text = element_text(face = "bold")))
+
+save_fig <- function(p, name, w, h) {
+  ggsave(file.path(fig_dir, paste0(name, ".png")), p, width = w, height = h, dpi = 300)
+  ggsave(file.path(fig_dir, paste0(name, ".pdf")), p, width = w, height = h)
+  p
+}
+```
+
+```{r load}
+J1 <- read_csv(file.path(j_dir, "J1_species_pair_shared_mg.csv")) %>%
+  mutate(pair = factor(paste(species_1, species_2, sep = "-"), levels = pairs),
+         run = factor(run, levels = runs))
+J2 <- read_csv(file.path(j_dir, "J2_species_combination_counts.csv")) %>% mutate(run = factor(run, levels = runs))
+J3 <- read_csv(file.path(j_dir, "J3_per_species_sharing.csv")) %>%
+  mutate(run = factor(run, levels = runs), species = factor(species, levels = sp_levels))
+J5 <- read_csv(file.path(j_dir, "J5_single_species_macrogenes.csv")) %>%
+  mutate(run = factor(run, levels = runs), species = factor(species, levels = sp_levels))
+K1 <- read_csv(file.path(k_dir, "K1_gene_status.csv"))
+K4 <- read_csv(file.path(k_dir, "K4_COG_enrichment.csv"))
+```
+
+# 1. Macrogenes shared by each species pair
+
+## 1a. Pair heatmaps
+
+Off-diagonal: macrogenes containing both species. Diagonal: all macrogenes containing that species.
+
+```{r pair-heatmaps, fig.width=13, fig.height=4}
+pair_heatmap <- function(min_g) {
+  d <- J1 %>% filter(min_genes == min_g)
+  diag_n <- J3 %>% filter(min_genes == min_g) %>%
+    transmute(run, a = as.character(species), b = as.character(species), n = mg_with_species, diag = TRUE)
+  off <- bind_rows(
+    d %>% transmute(run, a = species_1, b = species_2, n = shared_mg),
+    d %>% transmute(run, a = species_2, b = species_1, n = shared_mg)) %>% mutate(diag = FALSE)
+  m <- bind_rows(off, diag_n) %>%
+    mutate(a = factor(a, levels = rev(sp_levels)), b = factor(b, levels = sp_levels))
+  vmax <- max(off$n)
+  ggplot(m, aes(b, a)) +
+    geom_tile(data = filter(m, !diag), aes(fill = n), colour = "white", linewidth = 1) +
+    geom_tile(data = filter(m, diag), fill = "white", colour = "grey85") +
+    geom_text(data = filter(m, !diag), aes(label = n, colour = n > 0.55 * vmax), size = 3.3) +
+    geom_text(data = filter(m, diag), aes(label = paste0(n, "\n(total)")), size = 2.6, colour = "grey45") +
+    scale_fill_gradient(low = "#cde2fb", high = "#0d366b", limits = c(0, vmax), name = "Shared\nmacrogenes") +
+    scale_colour_manual(values = c(`TRUE` = "white", `FALSE` = "#222222"), guide = "none") +
+    facet_wrap(~ run, nrow = 1, labeller = as_labeller(run_labels)) +
+    labs(x = NULL, y = NULL,
+         title = sprintf("Macrogenes shared by each species pair (species counted if >= %d gene%s)",
+                         min_g, ifelse(min_g > 1, "s", ""))) +
+    theme(axis.line = element_blank(), axis.ticks = element_blank(), legend.title = element_text(size = 9))
+}
+save_fig(pair_heatmap(1), "L1a_pair_heatmaps_ge1gene", 13, 4)
+save_fig(pair_heatmap(3), "L1b_pair_heatmaps_ge3genes", 13, 4)
+```
+
+## 1b. Shared macrogenes and Jaccard per species pair
+
+Jaccard = shared macrogenes / macrogenes containing either species (corrects for how many
+macrogenes each species is in).
+
+```{r pair-bars, fig.width=12, fig.height=4.2}
+pair_bars <- function(min_g) {
+  d <- J1 %>% filter(min_genes == min_g)
+  p1 <- ggplot(d, aes(pair, shared_mg, fill = run)) +
+    geom_col(position = position_dodge(0.85), width = 0.8) +
+    scale_fill_manual(values = run_cols, labels = run_labels) +
+    labs(x = NULL, y = "Shared macrogenes", title = "Shared macrogenes")
+  p2 <- ggplot(d, aes(pair, jaccard, fill = run)) +
+    geom_col(position = position_dodge(0.85), width = 0.8) +
+    scale_fill_manual(values = run_cols, labels = run_labels) +
+    labs(x = NULL, y = "Jaccard", title = "Jaccard of the two species' macrogene sets")
+  (p1 | p2) + plot_layout(guides = "collect") +
+    plot_annotation(title = sprintf("Species counted if >= %d gene%s", min_g, ifelse(min_g > 1, "s", ""))) &
+    theme(legend.position = "bottom", axis.text.x = element_text(angle = 30, hjust = 1))
+}
+save_fig(pair_bars(1), "L2a_pair_bars_ge1gene", 12, 4.5)
+save_fig(pair_bars(3), "L2b_pair_bars_ge3genes", 12, 4.5)
+```
+
+# 2. Share of each species' genes in cross-species macrogenes
+
+```{r per-species, fig.width=7, fig.height=4}
+p <- J3 %>% filter(min_genes == 1) %>%
+  ggplot(aes(species, pct_genes_in_shared_mg, fill = run)) +
+  geom_col(position = position_dodge(0.85), width = 0.8) +
+  scale_fill_manual(values = run_cols, labels = run_labels) +
+  scale_y_continuous(limits = c(0, 100), expand = expansion(mult = c(0, 0.02))) +
+  labs(x = NULL, y = "% of the species' genes", title = "Genes in macrogenes shared with >= 1 other species") +
+  theme(legend.position = "bottom") + guides(fill = guide_legend(nrow = 2))
+save_fig(p, "L3_per_species_shared_genes", 7, 4.2)
+```
+
+# 3. Single-species macrogenes
+
+Macrogenes containing genes from **only one species** (no other species present at all).
+
+```{r single-species-table}
+J5 %>% select(run, species, n_single_species_mg) %>%
+  pivot_wider(names_from = run, values_from = n_single_species_mg) %>%
+  knitr::kable(caption = "Single-species macrogenes per species and run")
+J5 %>% select(run, species, pct_species_genes) %>%
+  mutate(pct_species_genes = round(pct_species_genes, 1)) %>%
+  pivot_wider(names_from = run, values_from = pct_species_genes) %>%
+  knitr::kable(caption = "% of each species' genes that sit in single-species macrogenes")
+```
+
+```{r single-species-plot, fig.width=11, fig.height=4}
+p1 <- ggplot(J5, aes(species, n_single_species_mg, fill = run)) +
+  geom_col(position = position_dodge(0.85), width = 0.8) +
+  scale_fill_manual(values = run_cols, labels = run_labels) +
+  labs(x = NULL, y = "Macrogenes", title = "Macrogenes containing only one species")
+p2 <- ggplot(J5, aes(species, pct_species_genes, fill = run)) +
+  geom_col(position = position_dodge(0.85), width = 0.8) +
+  scale_fill_manual(values = run_cols, labels = run_labels) +
+  labs(x = NULL, y = "% of the species' genes", title = "Genes in single-species macrogenes")
+p <- (p1 | p2) + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+save_fig(p, "L4_single_species_macrogenes", 11, 4.3)
+```
+
+# 4. Macrogenes per exact species combination (UpSet-style)
+
+```{r upset, fig.width=13, fig.height=6}
+upset_plot <- function(min_g) {
+  d <- J2 %>% filter(min_genes == min_g)
+  ord <- d %>% group_by(combination, n_species) %>% summarise(m = mean(n_macrogenes), .groups = "drop") %>%
+    arrange(desc(n_species), desc(m)) %>% pull(combination)
+  d <- d %>% mutate(combination = factor(combination, levels = ord))
+  bars <- ggplot(d, aes(combination, n_macrogenes, fill = run)) +
+    geom_col(position = position_dodge(0.85), width = 0.8) +
+    scale_fill_manual(values = run_cols, labels = run_labels) +
+    labs(x = NULL, y = "Macrogenes",
+         title = sprintf("Macrogenes per exact species combination (>= %d gene%s per species)",
+                         min_g, ifelse(min_g > 1, "s", ""))) +
+    theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), legend.position = "top")
+  mat <- expand_grid(combination = factor(ord, levels = ord), species = sp_levels) %>%
+    mutate(member = mapply(function(c, s) s %in% strsplit(as.character(c), "+", fixed = TRUE)[[1]],
+                           combination, species),
+           species = factor(species, levels = rev(sp_levels)))
+  segs <- mat %>% filter(member) %>% group_by(combination) %>%
+    summarise(lo = min(as.integer(species)), hi = max(as.integer(species)), .groups = "drop")
+  dots <- ggplot(mat, aes(combination, species)) +
+    geom_point(aes(colour = member), size = 3) +
+    geom_segment(data = segs, aes(x = combination, xend = combination, y = lo, yend = hi),
+                 inherit.aes = FALSE, linewidth = 0.9, colour = "#222222") +
+    scale_colour_manual(values = c(`TRUE` = "#222222", `FALSE` = "#e1e0d9"), guide = "none") +
+    labs(x = NULL, y = NULL) +
+    theme(axis.text.x = element_blank(), axis.ticks = element_blank(), axis.line = element_blank())
+  bars / dots + plot_layout(heights = c(3, 1.2))
+}
+save_fig(upset_plot(1), "L5a_species_combinations_ge1gene", 13, 6)
+save_fig(upset_plot(3), "L5b_species_combinations_ge3genes", 13, 6)
+```
+
+# 5. Which genes keep or lose their cross-species partners
+
+Per gene, ESM-1b 4sp -> each ESMC run:
+
+- **kept**: cross-species partners in both runs, at least one the same
+- **moved**: cross-species partners in both runs, but none the same
+- **lost**: cross-species partners with ESM-1b, none with ESMC
+- **gained**: none with ESM-1b, some with ESMC
+- **species-specific**: no cross-species partners in either run
+
+```{r status, fig.width=9, fig.height=4.5}
+status_long <- K1 %>%
+  select(species, `ESMC rescaled` = status_ESMC600M_resc_4sp, `ESMC raw` = status_ESMC600M_raw_4sp) %>%
+  pivot_longer(-species, names_to = "comparison", values_to = "status") %>%
+  count(comparison, species, status) %>%
+  group_by(comparison, species) %>% mutate(pct = 100 * n / sum(n)) %>% ungroup() %>%
+  mutate(status = factor(status, levels = rev(status_levels)),
+         species = factor(species, levels = rev(sp_levels)),
+         comparison = factor(comparison, levels = c("ESMC rescaled", "ESMC raw"),
+                             labels = c("ESM-1b -> ESMC rescaled", "ESM-1b -> ESMC raw")))
+status_long %>% select(-n) %>% mutate(pct = round(pct, 1)) %>%
+  pivot_wider(names_from = status, values_from = pct) %>% arrange(comparison, desc(species)) %>%
+  knitr::kable(caption = "% of each species' genes in each status")
+p <- ggplot(status_long, aes(pct, species, fill = status)) +
+  geom_col(width = 0.75, colour = "white", linewidth = 0.4) +
+  facet_wrap(~ comparison, ncol = 1) +
+  scale_fill_manual(values = status_cols, breaks = status_levels) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.01))) +
+  labs(x = "% of the species' genes", y = NULL, title = "Cross-species macrogene partners by species") +
+  theme(legend.position = "bottom")
+save_fig(p, "L6_status_by_species", 9, 4.8)
+```
+
+## 5a. COG categories of genes that lose vs keep partners (all species)
+
+ESM-1b -> ESMC rescaled. One-sided Fisher tests per COG category (lost vs kept), BH-corrected
+within species; * = BH < 0.05 in either direction. Categories with < 20 genes are hidden.
+
+```{r cog, fig.width=13, fig.height=10}
+cog_names <- c(A = "RNA processing", B = "Chromatin", C = "Energy production", D = "Cell cycle",
+               E = "Amino acid metab.", F = "Nucleotide metab.", G = "Carbohydrate metab.",
+               H = "Coenzyme metab.", I = "Lipid metab.", J = "Translation", K = "Transcription",
+               L = "Replication/repair", M = "Cell wall/membrane", N = "Motility", O = "PTM/chaperones",
+               P = "Inorganic ion transport", Q = "Secondary metab.", S = "Unknown function",
+               T = "Signal transduction", U = "Trafficking/secretion", V = "Defense",
+               W = "Extracellular structures", Y = "Nuclear structure", Z = "Cytoskeleton")
+cog <- K4 %>% filter(species %in% sp_levels, lost_with + kept_with >= 20) %>%
+  mutate(label = paste(COG, coalesce(cog_names[COG], COG)),
+         sig = padj_enriched_in_lost < 0.05 | padj_enriched_in_kept < 0.05,
+         species = factor(species, levels = sp_levels)) %>%
+  group_by(species) %>% mutate(label = reorder(label, pct_lost)) %>% ungroup()
+cog_long <- cog %>% select(species, label, sig, kept = pct_kept, lost = pct_lost) %>%
+  pivot_longer(c(kept, lost), names_to = "status", values_to = "pct") %>%
+  mutate(status = factor(status, levels = c("lost", "kept")))
+star <- cog %>% filter(sig) %>% mutate(x = pmax(pct_lost, pct_kept) + 0.8)
+p <- ggplot(cog_long, aes(pct, label, fill = status)) +
+  geom_col(position = position_dodge(0.8), width = 0.75) +
+  geom_text(data = star, aes(x = x, y = label, label = "*"), inherit.aes = FALSE, size = 5, vjust = 0.75) +
+  facet_wrap(~ species, scales = "free_y") +
+  scale_fill_manual(values = c(kept = "#2a78d6", lost = "#e34948"), breaks = c("kept", "lost")) +
+  labs(x = "% of the group's genes in the COG category", y = NULL,
+       title = "Genes losing vs keeping cross-species partners (ESM-1b -> ESMC rescaled), by COG category") +
+  theme(legend.position = "bottom", axis.text.y = element_text(size = 8))
+save_fig(p, "L7_COG_lost_vs_kept_all_species", 13, 10)
+```
+
+## 5b. Immune-annotated genes
+
+Genes with GO:0002376 (immune system process) or GO:0006952 (defense response) among their
+eggNOG GO terms.
+
+```{r immune}
+K1 %>% filter(immune) %>%
+  count(species, status = status_ESMC600M_resc_4sp) %>%
+  pivot_wider(names_from = status, values_from = n, values_fill = 0) %>%
+  select(species, any_of(status_levels)) %>%
+  knitr::kable(caption = "Immune-annotated genes by status (ESM-1b -> ESMC rescaled)")
+```
+
+```{r session}
+sessionInfo()
+```
