@@ -50,7 +50,7 @@ This notebook is where I share my work: lab work, analyses, troubleshooting, fix
 
 ## Pipelines
 
-Here are my completed bioinformatic pipelines that work on. 
+Here are my completed bioinformatic pipelines that I work on. 
 
 ::: {.scroll-row}
 ::: {#pipelines}
