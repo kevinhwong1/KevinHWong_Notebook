@@ -1,0 +1,240 @@
+---
+title: "SATURN: OrthoFinder orthogroups, and how six gene groupings place species together"
+date: 2026-10-15
+type: "Analysis"
+project: "Mnemiopsis Phagocytes"
+categories: ["Analysis", "Mnemiopsis leidyi", "scRNA-seq", "Comparative genomics"]
+tools: ["OrthoFinder 3.1.0", "SATURN", "ESM-1b", "ESMC-600M (FANTASIA v4)", "eggNOG-mapper", "Python"]
+---
+
+::: {.callout-important}
+## Summary
+
+- **OrthoFinder** placed 83.3% of the 91,104 proteins (one per gene, four species) in 12,254 orthogroups; 4,987 contain all four species and 2,577 of those are single-copy. Zebrafish genes often come in pairs relative to the other species (teleost genome duplication), so zebrafish has the fewest 1:1 orthologs. OrthoFinder did **not** write Metazoa-level hierarchical orthogroups (section 1).
+- **The two orthology references agree on how much cross-species signal there is.** Only about a third (*Mnemiopsis*, oyster) to a half (*Ciona*, zebrafish) of SATURN genes share a group with another species' SATURN gene, whether eggNOG or OrthoFinder is used (@tbl-perspecies).
+- **Macrogenes put almost everything with another species:** 84–92% of invertebrate and *Ciona* genes, and 51–71% of zebrafish genes, sit in multi-species macrogenes (@fig-perspecies).
+- **Macrogenes over-group the three non-vertebrates and set zebrafish apart.** *Mnemiopsis* + oyster + *Ciona* groups hold 12–17% of genes in macrogenes vs 3.6–5.3% in orthogroups, while *Ciona* + zebrafish groups, the closest pair by orthology, are under-represented (@fig-combos, @tbl-pairs). This is strongest with ESMC.
+- **Agreement on gene pairs is low everywhere.** The two orthology references share 33–49% of their cross-species pairs; ESM-1b macrogenes recover 30–43% of orthology pairs (ESMC 15–21%); and two ESM-1b runs on different species sets share only ~42% of their pairs (@fig-agree).
+- **How orthogroups sit in macrogenes does not depend on the reference:** ESM-1b mostly merges whole orthogroups or cuts across them (5% match, 29–33% merged); ESMC cuts across them for three-quarters of genes (@fig-nest).
+:::
+
+This entry follows [Oct 9](2026-10-09-saturn-esmc-extraction-macrogenes-vs-orthogroups-k-sweep.qmd) (section 6 of which summarizes the OrthoFinder benchmark scores). Here: what OrthoFinder produced, then a side-by-side of six ways of grouping the same SATURN genes — two orthology references and four macrogene sets — asking which species end up together and how orthogroups split or merge.
+
+# Key terms
+
+| Term | Meaning here |
+|---|---|
+| **Orthogroup (OG)** | Genes descended from one gene in the last common ancestor of the species analysed. eggNOG Metazoa OGs are precomputed (each gene assigned by its best database hit); OrthoFinder OGs are inferred de novo from our four proteomes. |
+| **HOG** (hierarchical orthogroup) | An OrthoFinder orthogroup defined at one node of the species tree (N0 = root, N1, N2 …), using gene trees. |
+| **Grouping** | Any partition of genes: an orthology reference or a set of macrogenes. Six here (@tbl-groupings). |
+| **SATURN genes** | The 31,702 genes present in all four macrogene runs (8,000 highly variable genes per species, minus a few absent from some runs). All comparisons use these genes. |
+| **Species span** | The number of species (1–4) with at least one SATURN gene in a group. |
+| **Cross-species pair** | Two SATURN genes from different species placed in the same group. |
+| **match / OGs merged / OG subdivided / cross-cutting** | For a gene in a reference orthogroup of ≥ 2 genes: its OG is kept whole in a group of its own / kept whole but shares the group with other OGs / split, with each piece in a group of its own / both. As on Oct 9. |
+
+: Terms used in this entry. {#tbl-terms}
+
+| Grouping | What it is |
+|---|---|
+| eggNOG Metazoa OGs | eggNOG-mapper 2.1.13, DB 5.0.2, Metazoa level; primary OG per gene. 21,674 of the SATURN genes have one |
+| OrthoFinder orthogroups | This entry; every gene has a group (singletons included) |
+| Canonical 5sp ESM-1b | Macrogenes from the canonical 5-species run (urchin genes dropped) |
+| ESM-1b 4sp | Macrogene-only run, 4 species, ESM-1b |
+| ESMC raw 4sp | Same, ESMC-600M `layer_0` (pre-norm) vectors |
+| ESMC rescaled 4sp | Same, ESMC vectors rescaled to ESM-1b's scale |
+
+: The six groupings (all macrogene sets: K = 3,000). {#tbl-groupings}
+
+# 1. The OrthoFinder run and its outputs
+
+OrthoFinder 3.1.0 on the four proteomes (longest protein per gene, same protein → gene bridges as the SATURN embeddings; `06a`), with MSA gene trees (`-M msa -A mafft -T fasttree`) and the fixed species tree `(Mlei,(Cgig,(Crob,Drer)))`. 70 min on 16 cores, 15.9 GB peak memory (Pegasus, `normal` queue; environment rebuilt the same day, see [that entry](2026-10-15-rebuilding-the-orthofinder-environment-on-pegasus-with-micromamba.qmd)).
+
+| Statistic | Value |
+|---|---|
+| Genes (proteins) | 91,104 (*Mnemiopsis* 15,545; oyster 31,371; *Ciona* 18,788; zebrafish 25,400) |
+| Genes in orthogroups | 75,861 (83.3%) |
+| Unassigned genes | 15,243 (16.7%) |
+| Orthogroups | 12,254 (mean 6.2 genes, median 4) |
+| Species-specific orthogroups | 3,561, holding 22,576 genes (24.8%) |
+| Orthogroups with all 4 species | 4,987, of which 2,577 single-copy in every species |
+| G50 / O50 | 5 genes / 3,263 orthogroups |
+
+: OrthoFinder overall statistics (`Comparative_Genomics_Statistics/Statistics_Overall.tsv`). {#tbl-ofstats}
+
+| Statistic | *Mnemiopsis* | oyster | *Ciona* | zebrafish |
+|---|---|---|---|---|
+| Genes | 15,545 | 31,371 | 18,788 | 25,400 |
+| % of genes in orthogroups | 75.8 | 88.1 | 75.1 | 88.0 |
+| Unassigned genes | 3,765 | 3,748 | 4,685 | 3,045 |
+| Orthogroups containing the species (% of all) | 6,660 (54.3) | 9,682 (79.0) | 7,938 (64.8) | 8,800 (71.8) |
+| Species-specific orthogroups | 642 | 1,530 | 504 | 885 |
+| % of genes in species-specific orthogroups | 21.9 | 34.9 | 17.6 | 19.3 |
+
+: OrthoFinder per-species statistics (`Statistics_PerSpecies.tsv`). {#tbl-ofspecies}
+
+| Species pair | 1:1 orthologs | Genes of the first species with several orthologs in the second (one-to-many) | Genes of the first species sharing one ortholog in the second (many-to-one) |
+|---|---|---|---|
+| oyster – *Ciona* | 5,737 | 388 | 4,366 |
+| *Mnemiopsis* – *Ciona* | 4,454 | 417 | 1,118 |
+| oyster – zebrafish | 4,393 | 2,327 | 2,628 |
+| *Mnemiopsis* – oyster | 4,322 | 827 | 1,206 |
+| *Ciona* – zebrafish | 4,270 | 2,463 | 1,215 |
+| *Mnemiopsis* – zebrafish | 3,237 | 1,756 | 710 |
+| zebrafish – *Ciona* | 4,270 | 267 | 8,141 |
+
+: Pairwise orthologs from OrthoFinder (`OrthologuesStats_*.tsv`; genes counted in the first species of each pair). All 12 directions in `D0_orthofinder_orthologues.csv`. {#tbl-oforthologs}
+
+- **Oyster has the most lineage-specific genes**: 35% of its genes are in oyster-only orthogroups, consistent with its many lineage-specific gene-family expansions. *Mnemiopsis* and *Ciona* have the most genes with no orthogroup at all (~24–25%).
+- **Zebrafish genes usually come in pairs relative to the other species.** 8,141 zebrafish genes share a single *Ciona* ortholog with another zebrafish gene (many-to-one), and 2,463 *Ciona* genes have several zebrafish orthologs, as expected after the teleost genome duplication. As a result, zebrafish has fewer 1:1 orthologs with *Ciona* (4,270) than oyster does (5,737), and the fewest of all with *Mnemiopsis* (3,237). This duplication may also contribute to the zebrafish-only macrogenes in section 3 (paralog pairs grouped together); not tested here.
+
+What the results folder contains, and what we use:
+
+| Folder / file | Contents | Used here |
+|---|---|---|
+| `Orthogroups/Orthogroups.tsv` (+ `_UnassignedGenes.tsv`, `.GeneCount.tsv`) | Orthogroup membership per species | Yes (`06c` → `ALL4_gene_orthofinder_OG.csv`) |
+| `Phylogenetic_Hierarchical_Orthogroups/N1.tsv`, `N2.tsv` | HOGs for oyster + *Ciona* + zebrafish (N1) and *Ciona* + zebrafish (N2) | No: no root (N0) file |
+| `Orthologues/` | Pairwise orthologs per species pair (1:1, 1:many …) | Not yet |
+| `Resolved_Gene_Trees/`, `Gene_Duplication_Events/` | Rooted gene trees; duplications mapped to species-tree nodes | Not yet |
+| `Species_Tree/` | The fixed tree with node labels (N0 root, N1, N2) | Interpreting HOG files |
+| `Comparative_Genomics_Statistics/` | Overall and per-species statistics | @tbl-ofstats |
+
+: The OrthoFinder results folder. {#tbl-offiles}
+
+**No Metazoa-level HOGs.** OrthoFinder wrote HOGs only for N1 and N2, not for the root, the only node that includes *Mnemiopsis*; a 3-species test behaved the same way. The comparisons below therefore use OrthoFinder orthogroups. Adding a choanoflagellate outgroup in the planned 6-species run should make the animal node a non-root node.
+
+**Coverage of SATURN genes.** Every SATURN gene is in the OrthoFinder tables (the gene bridges work). Genome-wide, the share of SATURN genes whose orthogroup includes another species follows the divergence gradient: *Mnemiopsis* 43.9%, oyster 46.6%, *Ciona* 53.2%, zebrafish 78.0%. Within the SATURN gene set (only other species' SATURN genes counted), the shares are lower (@tbl-perspecies).
+
+# 2. Species span: how many species share each group
+
+| Grouping | Genes | Groups | Median size | Effective no. of groups | % of genes in groups spanning 1 / 2 / 3 / 4 species | 4-species groups |
+|---|---|---|---|---|---|---|
+| eggNOG Metazoa OGs | 21,674 | 10,443 | 1 | 7,155 | 42 / 31 / 18 / 10 | 220 |
+| OrthoFinder orthogroups | 31,702 | 15,944 | 1 | 9,756 | 59 / 21 / 13 / 7 | 251 |
+| Canonical 5sp ESM-1b | 31,702 | 2,963 | 8 | 2,138 | 15 / 22 / 34 / 30 | 581 |
+| ESM-1b 4sp | 31,702 | 2,997 | 7 | 2,167 | 15 / 21 / 36 / 28 | 552 |
+| ESMC raw 4sp | 31,702 | 2,994 | 8 | 2,106 | 22 / 20 / 34 / 25 | 412 |
+| ESMC rescaled 4sp | 31,702 | 2,989 | 7 | 1,936 | 21 / 19 / 34 / 27 | 391 |
+
+: Species span of each grouping on the SATURN genes (eggNOG: its 21,674 assigned genes). Effective number of groups = exp(entropy of group sizes). {#tbl-span}
+
+![Genes by the number of species in their group. Left: all SATURN genes (eggNOG on its assigned genes); right: the 21,674 eggNOG-annotated genes, where all six groupings are defined on the same genes.](/images/20261015_SATURN_species_span.png){#fig-span}
+
+- **Orthogroups are small and mostly single-species within the SATURN genes**: 42% (eggNOG) and 59% (OrthoFinder) of genes have no other species' SATURN gene in their group. OrthoFinder's higher share comes from the ~10,000 genes eggNOG cannot annotate; on the same genes it is 49% (@fig-span, right).
+- **Macrogenes are the reverse**: 78–85% of genes sit in groups spanning ≥ 2 species, and 25–30% in groups with all four. ESMC leaves more genes in single-species macrogenes (21–22% vs 15%), as on Oct 8.
+
+# 3. Which species end up together
+
+| Grouping | *Mnemiopsis* | oyster | *Ciona* | zebrafish |
+|---|---|---|---|---|
+| eggNOG Metazoa OGs (as % of all SATURN genes) | 33.3 | 40.1 | 43.2 | 43.4 |
+| OrthoFinder orthogroups | 33.6 | 39.5 | 41.7 | 47.8 |
+| Canonical 5sp ESM-1b | 92.0 | 88.1 | 90.1 | 70.9 |
+| ESM-1b 4sp | 92.4 | 89.6 | 89.1 | 68.3 |
+| ESMC raw 4sp | 87.6 | 84.3 | 84.1 | 56.7 |
+| ESMC rescaled 4sp | 90.6 | 84.3 | 89.9 | 50.8 |
+
+: % of each species' SATURN genes in a group with at least one other species' SATURN gene. eggNOG values are converted to % of all SATURN genes (assigned-gene shares 66.3 / 64.1 / 68.8 / 44.0 × the share of genes with an OG). {#tbl-perspecies}
+
+![% of each species' genes in a multi-species group. Left: all SATURN genes (eggNOG as % of its assigned genes); right: eggNOG-annotated genes.](/images/20261015_SATURN_per_species_multispecies.png){#fig-perspecies}
+
+- **The two orthology references give nearly the same per-species picture** once eggNOG's unannotated genes are counted: a third of *Mnemiopsis* genes, and under half for every species, have a SATURN-gene ortholog in another species.
+- **Zebrafish is the exception for macrogenes**: it is the species most often in a multi-species orthogroup (OrthoFinder) but the least often in a multi-species macrogene, especially with ESMC (51–57%).
+
+| % of species A's genes whose group contains species B | eggNOG* | OrthoFinder | ESM-1b 4sp | ESMC raw | ESMC rescaled |
+|---|---|---|---|---|---|
+| *Mnemiopsis* → oyster | 33.8 | 16.2 | 76.0 | 72.9 | 78.1 |
+| *Mnemiopsis* → *Ciona* | 40.9 | 18.8 | 79.8 | 74.2 | 80.5 |
+| *Mnemiopsis* → zebrafish | 41.3 | 20.8 | 42.1 | 30.8 | 37.5 |
+| oyster → *Ciona* | 42.9 | 23.9 | 75.5 | 72.2 | 71.6 |
+| *Ciona* → zebrafish | 42.4 | 27.4 | 48.5 | 36.9 | 41.5 |
+| zebrafish → *Ciona* | 27.5 | 30.8 | 49.2 | 39.0 | 35.5 |
+
+: Selected species pairs (all SATURN genes; \*eggNOG as % of its assigned genes). Full 4 × 4 matrices for all six groupings in `D3_species_pair_cooccurrence.csv`. {#tbl-pairs}
+
+![% of genes in groups with each exact species combination, on the 21,674 eggNOG-annotated genes.](/images/20261015_SATURN_species_combinations.png){#fig-combos}
+
+- **By orthology, *Ciona*'s most frequent partner is zebrafish** (OrthoFinder: 27% of *Ciona* genes; *Ciona* + zebrafish groups hold 8.5–8.7% of genes), as expected for two chordates.
+- **Macrogenes instead group *Ciona* with *Mnemiopsis* and oyster** (70–80% of *Ciona* or *Mnemiopsis* genes share a macrogene with the other), and *Mnemiopsis* + oyster + *Ciona* groups hold 12–17% of genes vs 3.6–5.3% in orthogroups (@fig-combos). Groups pairing zebrafish with one other species are under-represented (*Mnemiopsis* + zebrafish: 0.8–0.9% with ESMC vs 5% in orthogroups).
+- **Reading:** in embedding space, zebrafish genes sit apart from the other three species. This fits the species signal seen in the embeddings on Oct 6, and is strongest for ESMC. Whether it reflects real divergence, uneven training data (vertebrates are better sampled) or an embedding artefact is open; a fifth species (human or fly) will help separate these.
+
+# 4. Agreement on gene pairs
+
+![Agreement on cross-species gene pairs (eggNOG-annotated genes): % of the row grouping's pairs also placed together by the column grouping.](/images/20261015_SATURN_pair_agreement.png){#fig-agree}
+
+| Grouping | Cross-species pairs (annotated genes) | % recovered of eggNOG pairs | % recovered of OrthoFinder pairs | % of own pairs that are eggNOG / OrthoFinder pairs |
+|---|---|---|---|---|
+| eggNOG Metazoa OGs | 26,985 | — | 49.0 | — / 32.5 |
+| OrthoFinder orthogroups | 17,917 | 32.5 | — | 49.0 / — |
+| Canonical 5sp ESM-1b | 59,881 | 29.1 | 40.2 | 13.1 / 12.0 |
+| ESM-1b 4sp | 61,412 | 30.2 | 42.9 | 13.3 / 12.5 |
+| ESMC raw 4sp | 75,563 | 15.1 | 19.7 | 5.4 / 4.7 |
+| ESMC rescaled 4sp | 74,519 | 15.9 | 20.6 | 5.7 / 5.0 |
+
+: Cross-species pairs and agreement with each orthology reference (eggNOG-annotated genes). {#tbl-agree}
+
+- **The references themselves agree only partly**: half of OrthoFinder's pairs are eggNOG pairs, but only a third of eggNOG's are OrthoFinder pairs (eggNOG groups more genes together).
+- **Macrogenes make 2–4× more cross-species pairs than orthogroups**, and 87–95% of them are not orthology pairs (or involve genes whose orthologs are not among the SATURN genes).
+- **Macrogene sets agree poorly with each other.** The two ESM-1b runs, same model with a different species set and training run, share ~42% of pairs; ESMC raw vs rescaled ~21%; ESM-1b vs ESMC 12–16%. This matches Oct 9: aggregate scores are reproducible, individual macrogene memberships are not.
+
+# 5. How orthogroups split and merge across groupings
+
+![How reference orthogroups relate to each grouping (eggNOG-annotated genes). Each bar: % of genes in reference orthogroups of ≥ 2 genes.](/images/20261015_SATURN_nesting_categories.png){#fig-nest}
+
+| Grouping | Reference | Homogeneity | Completeness | ARI | match | OGs merged | OG subdivided | cross-cutting |
+|---|---|---|---|---|---|---|---|---|
+| OrthoFinder orthogroups | eggNOG | 0.96 | 0.95 | 0.41 | 34.1 | 14.9 | 29.8 | 21.2 |
+| ESM-1b 4sp | eggNOG | 0.81 | 0.94 | 0.21 | 4.3 | 28.4 | 4.2 | 63.1 |
+| ESMC raw 4sp | eggNOG | 0.76 | 0.91 | 0.11 | 1.6 | 12.0 | 4.4 | 82.0 |
+| ESMC rescaled 4sp | eggNOG | 0.77 | 0.91 | 0.12 | 2.7 | 12.8 | 6.1 | 78.3 |
+| ESM-1b 4sp | OrthoFinder | 0.82 | 0.95 | 0.25 | 5.0 | 32.9 | 5.3 | 56.7 |
+| ESMC raw 4sp | OrthoFinder | 0.76 | 0.92 | 0.13 | 2.2 | 14.7 | 5.9 | 77.2 |
+| ESMC rescaled 4sp | OrthoFinder | 0.78 | 0.92 | 0.14 | 3.6 | 15.8 | 8.4 | 72.3 |
+
+: Nesting of reference orthogroups within each grouping (eggNOG-annotated genes; categories as % of genes in reference OGs with ≥ 2 genes). Canonical 5sp ESM-1b is within 1 point of ESM-1b 4sp throughout (`D5_nesting_vs_reference.csv`). {#tbl-nest}
+
+- **eggNOG and OrthoFinder have similar granularity but cut genes differently**: a third of genes are in identical groups, and OrthoFinder splits eggNOG OGs about twice as often as it merges them.
+- **Macrogenes relate to both references the same way.** ESM-1b keeps orthogroups whole (match + merged) for 33–38% of genes; ESMC for 14–19%. Nearly all the rest are cross-cutting: their orthogroup is split across macrogenes that also contain other orthogroups.
+
+# Interpretation
+
+1. **Orthology and embeddings disagree about how much is shared between species.** By sequence orthology, at most half of the SATURN genes have a cross-species partner among the other species' SATURN genes; macrogenes give a partner to 84–92% of non-vertebrate genes. The difference is the set where embeddings are expected to add something (remote homologs), and also where they can add noise.
+2. **The pattern of who groups with whom is not phylogenetic.** Macrogenes join *Ciona* with the ctenophore and oyster more than with zebrafish. Together with the species signal in the embeddings, this suggests a zebrafish (vertebrate) offset in embedding space rather than a biological grouping, and argues for checking species offsets before reading cross-species macrogenes as homology.
+3. **The two orthology references are interchangeable for these questions**, which makes the ESM-1b vs ESMC conclusions robust to the choice of reference (as in Oct 9 section 6).
+
+# Caveats
+
+- **Everything is counted within the SATURN gene set.** A gene can look single-species because its ortholog was not a highly variable gene in the other species; "1:1" means 1:1 among SATURN genes.
+- **eggNOG is defined only on 68% of genes**, so its numbers come from a different (better-conserved) gene set unless the annotated-genes universe is used.
+- **No Metazoa-level HOGs**: OrthoFinder orthogroups lump all duplications since the last common ancestor; HOGs would separate older from newer paralogs.
+- **One macrogene run per model** at K = 3,000; Oct 9 shows the same model ranking at every K.
+
+# Possible next steps
+
+- [ ] Copy `Comparative_Genomics_Statistics/` to the Mac, rerun `06d`, and add per-species and ortholog-type statistics (D0) to section 1.
+- [ ] Check whether zebrafish-only macrogenes are enriched for zebrafish paralog pairs (genes sharing one ortholog in *Ciona*; OrthoFinder `Orthologues/`).
+- [ ] Test the zebrafish offset directly: per-species centring of embeddings before KMeans, and whether *Ciona* then moves towards zebrafish.
+- [ ] 6-species OrthoFinder (+ human, fly, choanoflagellate outgroup) for Metazoa-level HOGs.
+- [ ] Use OrthoFinder `Orthologues/` (pairwise 1:1) as a stricter ortholog set for recall.
+
+# Scripts
+
+All in [`pipelines/scripts/saturn_embedding_comparison/`](../pipelines/scripts/saturn_embedding_comparison/).
+
+| Script | Where | What it does |
+|---|---|---|
+| [`06a_orthofinder_prep.py`](../pipelines/scripts/saturn_embedding_comparison/06a_orthofinder_prep.py) | Pegasus | longest protein per gene, same bridges as SATURN; fixed species tree |
+| [`06b_orthofinder_4sp.sh`](../pipelines/scripts/saturn_embedding_comparison/06b_orthofinder_4sp.sh) | Pegasus | OrthoFinder 3.1.0 (micromamba env, FastTree preflight) |
+| [`06c_orthofinder_to_reference.py`](../pipelines/scripts/saturn_embedding_comparison/06c_orthofinder_to_reference.py) | Pegasus | orthogroups → gene-level reference table + coverage of SATURN genes |
+| [`06d_grouping_species_overlap.py`](../pipelines/scripts/saturn_embedding_comparison/06d_grouping_species_overlap.py) | Mac | six groupings: species span, species pairs and combinations, pair agreement, nesting vs each reference (D0–D5) |
+
+: Scripts used in this entry. {#tbl-scripts}
+
+# References
+
+- Emms D.M., Kelly S. (2019) OrthoFinder: phylogenetic orthology inference for comparative genomics. *Genome Biology* 20:238. <https://doi.org/10.1186/s13059-019-1832-y>
+- Emms D.M., Liu Y., Belcher L., Holmes J., Kelly S. (2025) OrthoFinder 3 (bioRxiv; cited by the program).
+- Huerta-Cepas J. et al. (2019) eggNOG 5.0. *Nucleic Acids Research* 47:D309–D314. <https://doi.org/10.1093/nar/gky1085>
+- Cantalapiedra C.P. et al. (2021) eggNOG-mapper v2. *Molecular Biology and Evolution* 38:5825–5829.
+- Rosen Y. et al. (2024) SATURN. *Nature Methods* 21:1492–1500. <https://doi.org/10.1038/s41592-024-02191-z>
+- Rosenberg A., Hirschberg J. (2007) V-measure. *EMNLP-CoNLL 2007*.
+- Hubert L., Arabie P. (1985) Comparing partitions. *Journal of Classification* 2:193–218.

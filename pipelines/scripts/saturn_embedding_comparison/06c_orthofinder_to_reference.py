@@ -20,7 +20,7 @@ import pandas as pd
 BASE = Path("/scratch/dark_genes/SATURN_Mnemi")
 ap = argparse.ArgumentParser()
 ap.add_argument("--of_dir", default=str(BASE / "06_orthofinder"))
-ap.add_argument("--results", default="", help="OrthoFinder results folder (default: newest under 06_orthofinder/Results_20261009)")
+ap.add_argument("--results", default="", help="OrthoFinder results folder (default: newest under 06_orthofinder/Results_20261015)")
 ap.add_argument("--saturn_run", default=str(BASE / "04_saturn_runs/20261002_Mlei_Cgig_Crob_Drer_K3000_ESM1b_macrogene"))
 args = ap.parse_args()
 OF = Path(args.of_dir)
@@ -34,7 +34,7 @@ def find_one(root, name):
     return hits[-1]
 
 
-root = Path(args.results) if args.results else OF / "Results_20261009"
+root = Path(args.results) if args.results else OF / "Results_20261015"
 og_tsv = find_one(root, "Orthogroups.tsv")
 res = og_tsv.parent.parent  # .../Results_<date>/
 log = [f"OrthoFinder results: {res}"]
@@ -69,16 +69,26 @@ if un.exists():
     og = pd.concat([og, melt(un, "Orthogroup")])
 OG = finish(og, "OG")
 OG.to_csv(OF / "ALL4_gene_orthofinder_OG.csv", index=False)
-n0 = find_one(res, "N0.tsv")
-HOG = finish(melt(n0, "HOG"), "HOG")
-HOG.to_csv(OF / "ALL4_gene_orthofinder_N0HOG.csv", index=False)
+# N0 (root-level) HOGs: OrthoFinder 3.1 did not write N0.tsv for our runs (only N1/N2 = non-root nodes),
+# so the HOG reference is built only when N0.tsv exists; otherwise only the OG table is written.
+TABLES = [("OG", OG)]
+n0_hits = sorted(Path(res).rglob("N0.tsv"))
+if n0_hits:
+    HOG = finish(melt(n0_hits[-1], "HOG"), "HOG")
+    HOG.to_csv(OF / "ALL4_gene_orthofinder_N0HOG.csv", index=False)
+    TABLES.append(("N0HOG", HOG))
+else:
+    hog_files = sorted(p.name for p in (res / "Phylogenetic_Hierarchical_Orthogroups").glob("N*.tsv"))
+    log.append(f"N0.tsv not found (HOG files present: {', '.join(hog_files) or 'none'}): "
+               "skipping ALL4_gene_orthofinder_N0HOG.csv; use --reference of_og only. "
+               "Node meanings: Species_Tree/SpeciesTree_rooted_node_labels.txt")
 
 # coverage of SATURN genes
 pk = sorted((Path(args.saturn_run) / "saturn_results").glob("*genes_to_macrogenes*.pkl"))
 keys = list(pickle.load(open(pk[0], "rb")).keys())
 sat = pd.DataFrame({"species": [k.split("_", 1)[0] for k in keys], "gene_id": [k.split("_", 1)[1] for k in keys]})
 cov = []
-for lab, T in [("OG", OG), ("N0HOG", HOG)]:
+for lab, T in TABLES:
     nsp = T.groupby("group")["species"].nunique()
     T = T.assign(multi=T["group"].map(nsp) >= 2)
     t_low = T.assign(gl=T["gene_id"].str.lower())

@@ -1,0 +1,160 @@
+---
+title: "SATURN: preparing the human and fly immune datasets for the pLM benchmark"
+date: 2026-10-15
+type: "Analysis"
+project: "Mnemiopsis Phagocytes"
+categories: ["Analysis", "scRNA-seq", "Comparative genomics", "HPC & computing"]
+tools: ["SATURN", "ESM-1b", "scanpy", "anndata", "Ensembl 113", "CELLxGENE", "LSF"]
+protocols: []
+---
+
+::: {.callout-important}
+## Summary
+
+- **Why:** the protein language model (pLM) benchmark panel is now *Mnemiopsis*, oyster, *Ciona* and zebrafish (urchin dropped). Two well-annotated reference species, **human** and ***Drosophila***, are being added as immune datasets.
+- **Fly:** circulating hemocytes from healthy, not-infested late-L3 larvae (Cattenoz et al. 2020, 10x 3'). **7,517 cells**, author cluster labels.
+- **Human:** the CellTypist cross-tissue immune atlas (Domínguez Conde et al. 2022), **10x 3' v3 donors only**, myeloid compartment plus mast cells, T/B/NK cells, and (revised the same day) progenitors and erythroid cells, so that every zebrafish cell type in the earlier SATURN run has a human counterpart. **10,541 cells** in the first build; the revised build adds 1,000 progenitors and 78 erythroid cells, for **11,619 cells** (job 599517).
+- **Proteomes:** Ensembl release 113 for both (same release as zebrafish). Links in [Proteomes](#proteomes) (also what Ingrid needs for ESMC).
+- **Status:** SATURN inputs built; ESM-1b embeddings running on Pegasus (jobs 599440 Dmel, 599441 Hsap). The human h5ad will be rebuilt with the revised composition; the embeddings are unaffected because the gene list does not change.
+:::
+
+# Key terms
+
+| Term | Meaning here |
+|---|---|
+| **Hemocytes / plasmatocytes** | Fly blood cells. Plasmatocytes are the phagocytic, macrophage-like majority; crystal cells (CC) and lamellocytes (LM) are minor types. |
+| **L3 / wandering L3** | Third (last) larval stage; "wandering" larvae have left the food, shortly before pupation. |
+| **10x 3' v3 / 5' v1–v2** | 10x Chromium library chemistries. 3' and 5' kits capture different ends of each transcript, so they are not mixed within a species here. |
+| **`raw.X`** | Where CELLxGENE h5ad files keep the raw integer counts (`X` holds normalised values). |
+| **Isoform** | One protein product of a gene. Ensembl `pep.all` lists every isoform; SATURN combines isoform embeddings into one gene embedding. |
+
+: Terms used in this entry. {#tbl-terms}
+
+# 1. Datasets used
+
+| Species | Dataset | What | Chemistry | Accession |
+|---|---|---|---|---|
+| *Drosophila melanogaster* (Dmel) | Cattenoz et al. 2020, *EMBO J* | circulating hemocytes, not-infested (NI) wandering L3 larvae, OregonR, pool of 20 females | 10x 3' | ArrayExpress [E-MTAB-8698](https://www.ebi.ac.uk/biostudies/arrayexpress/studies/E-MTAB-8698) (library RRCZ22; Cell Ranger matrices + author labels `NI_cell_cluster_ID.txt`) |
+| *Homo sapiens* (Hsap) | Domínguez Conde et al. 2022, *Science* (CellTypist) | immune cells isolated from 16 tissues of organ donors; myeloid compartment + global object | 10x 3' v3 subset (also 5' v1/v2 in the full atlas) | CELLxGENE collection [62ef75e4](https://cellxgene.cziscience.com/collections/62ef75e4-cbea-454e-a0ce-998ec40223d3): Myeloid compartment (51,552 cells), Global (329,762 cells) |
+
+: Datasets used for the two new species. {#tbl-datasets}
+
+**Why these.** Both are whole-cell 10x data from healthy animals or donors, matching the other species. Cattenoz uses late (wandering) L3 larvae: in a cross-species comparison, late-larval plasmatocytes were the hemocytes most similar to vertebrate macrophages (Yoon et al. 2023), which gives SATURN an expected answer to check. CellTypist covers tissue-resident macrophages (lung, gut, spleen), not just blood monocytes, with expert-curated labels.
+
+# 2. Download and inspection (`07b`, `07c`)
+
+`07b` downloads both datasets on the `transfers` queue (md5 checks pass for both Cattenoz archives). `07c` is a read-only diagnostic.
+
+**Fly.** 7,606 cells × 13,926 genes, all FlyBase `FBgn` IDs, integer counts. Median 2,930 UMIs, 959 genes and 4.9% mitochondrial reads per cell. 7,517 barcodes have an author label; the 89 unlabelled cells have a median of only 352 genes (vs 961) and were dropped as low-quality.
+
+**Human.** Raw integer counts are in `raw.X` for both files, and labels agree 100% between the Myeloid and Global objects. **Only 2 of the 12 donors (D496, D503) were sequenced with 3' v3**; the other 10 are 5'. Restricting to 3' v3 leaves 34,863 myeloid cells, dominated by classical monocytes (16,047) and alveolar macrophages (13,869, almost all lung). Smaller macrophage types: intestinal 484, intermediate 321, erythrophagocytic 77. No liver (Kupffer) cells and no neutrophils on 3' v3. Mast cells (3,110) are in the Global object, not the Myeloid one.
+
+# 3. Building the SATURN inputs (`07d`)
+
+Same format as `01_prepare_h5ads.sh`: raw counts in `X` (CSR), `obs['cell_type']` and `obs['species']`, written to `02_processed_h5ad/{Dmel,Hsap}_saturn.h5ad`. Cell names are prefixed `Dmel_` / `Hsap_` so barcodes cannot collide across species. Extra `obs` columns (`tissue`, `donor_id`, `sample_group`) are kept for interpretation; SATURN reads only `cell_type`.
+
+- **Fly:** the 7,517 labelled cells; `cell_type` = author cluster.
+- **Human:** `cell_type` = `Manually_curated_celltype`; subsampled (seed 42) so the rare macrophage types are not swamped:
+  - kept in full: nonclassical monocytes, intestinal / intermediate / erythrophagocytic macrophages, DC1, DC2, migDC, cycling;
+  - classical monocytes: 600 each from blood, spleen, bone marrow and lung;
+  - alveolar macrophages: 2,400;
+  - mast cells: 500, the only granule-storing (granulocyte-like) human cells available, as a comparison for granular invertebrate cells (e.g. the eosinophil-like Mlei_16). Treated as supporting evidence only;
+  - lymphocyte slice: ~286 each of CD4 T, CD8 T, γδ T, MAIT, NK, B and plasma cells, as counterparts of the zebrafish T and B cells (first planned as a negative control);
+  - **added in the revision:** all 3' v3 progenitors and erythroid cells, each capped at 1,000 (counterparts of zebrafish HPC / myeloid progenitors and erythroid cells);
+  - dropped: doublets, megakaryocytes and other minor lymphoid states.
+
+**Why mirror the zebrafish cell types (revision).** In the earlier zebrafish / *Ciona* / *Mnemiopsis* SATURN run, the zebrafish input included macrophages, neutrophils, eosinophils, HPC, myeloid progenitors, T cells, B cells and erythroid cells. Zebrafish and human are the closest pair in the panel, so each zebrafish type should have a human counterpart to land with; if they do not co-cluster, the more distant matches cannot be trusted. Erythroid cells also serve as a check: in that run, zebrafish erythroid cells merged with a *Ciona* progenitor-like population (cLRP-1), which cannot be a homologous cell type. The new cells are sampled after all earlier picks (same seed), so the original 10,541 cells are unchanged. Remaining gap: no human neutrophils or eosinophils on 3' v3 (mast cells are the nearest granulocyte-like cells), and only 78 erythroid cells.
+
+| Species | Group | Cell types (n cells) | Total |
+|---|---|---|---|
+| Dmel | hemocytes | PL-0 1,472; PL-1 1,327; PL-2 1,322; PL-Rel 946; PL-3 685; PL-robo2 489; PL-Pcd 351; PL-vir1 336; PL-Inos 234; PL-Lsp 196; CC 45; PL-prolif 44; PL-AMP 41; PL-ImpL2 21; LM-1 6; LM-2 2 | **7,517** |
+| Hsap | myeloid, kept in full | nonclassical monocytes 909; cycling 804; intestinal macrophages 484; DC2 432; intermediate macrophages 321; DC1 133; migDC 79; erythrophagocytic macrophages 77 | 3,239 |
+| Hsap | myeloid, subsampled | classical monocytes 2,400; alveolar macrophages 2,400 | 4,800 |
+| Hsap | mast cells | mast cells 500 | 500 |
+| Hsap | lymphocytes | CD4 T 286; CD8 T 286; γδ T 286; MAIT 286; NK 286; B 286; plasma 286 | 2,002 |
+| Hsap | progenitors, erythroid (revision) | Progenitor 1,000 (of 1,136 on 3' v3); Erythroid 78 | 1,078 |
+| | | | **Hsap 11,619** (10,541 in the first build + 1,078) |
+
+: SATURN input composition (`02_processed_h5ad/Dmel_Hsap_prep_composition.csv`); the progenitor and erythroid row is added by the revised `07d`. {#tbl-composition}
+
+# 4. Proteomes and embeddings (`07e`, `02_embed.sh`) {#proteomes}
+
+Ensembl release 113 for both species, the same release as the zebrafish proteome:
+
+| Species | Protein FASTA (Ensembl 113) | GTF | Proteins / genes | Pegasus copy |
+|---|---|---|---|---|
+| Hsap | [Homo_sapiens.GRCh38.pep.all.fa.gz](https://ftp.ensembl.org/pub/release-113/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz) | [Homo_sapiens.GRCh38.113.gtf.gz](https://ftp.ensembl.org/pub/release-113/gtf/homo_sapiens/Homo_sapiens.GRCh38.113.gtf.gz) | 123,845 / 23,864 | `/scratch/dark_genes/SATURN_Mnemi/01_proteomes/Hsap/` |
+| Dmel | [Drosophila_melanogaster.BDGP6.46.pep.all.fa.gz](https://ftp.ensembl.org/pub/release-113/fasta/drosophila_melanogaster/pep/Drosophila_melanogaster.BDGP6.46.pep.all.fa.gz) | [Drosophila_melanogaster.BDGP6.46.113.gtf.gz](https://ftp.ensembl.org/pub/release-113/gtf/drosophila_melanogaster/Drosophila_melanogaster.BDGP6.46.113.gtf.gz) | 30,799 / 13,986 | `/scratch/dark_genes/SATURN_Mnemi/01_proteomes/Dmel/` |
+
+: Proteomes for the two new species. {#tbl-proteomes}
+
+**Gene → protein mapping.** The h5ad gene IDs are Ensembl IDs (`ENSG…`, `FBgn…`), so a new `ensembl_gene_id` strategy in `02_embed.sh` reads the `gene:` field of each protein header (version suffix stripped) and maps each gene to **all** of its isoforms, the same as zebrafish. Only proteins of genes present in the h5ad are embedded; these are written to `03_embeddings/{Dmel,Hsap}/{SP}_filtered.faa`, which is the exact protein set to use for any other model.
+
+::: {.callout-note}
+## For Ingrid (ESMC-600M)
+
+The filtered FASTAs (`/scratch/dark_genes/SATURN_Mnemi/03_embeddings/Dmel/Dmel_filtered.faa` and `.../Hsap/Hsap_filtered.faa`, written by step 1 of `02_embed.sh`) contain exactly the proteins embedded with ESM-1b. If those are not convenient, the full Ensembl 113 `pep.all` files above work too: the gene ID is in the `gene:` field of each header.
+:::
+
+ESM-1b settings are unchanged (`esm1b_t33_650M_UR50S`, layer 33, mean pooling, truncation 1,022). Both jobs run on the `normal` queue with 8 cores on one host and 4 GB per core.
+
+# 5. Troubleshooting on Pegasus
+
+- **Batch jobs don't read `~/.bashrc`.** `source ~/.bashrc; conda activate` made the inspection job exit in 0.1 s with empty logs. Fix: `source ~/anaconda3/bin/activate` then `conda activate saturn_protein`, wrapped in `set +u` / `set -u` (conda's scripts reference unset variables). `02_embed.sh` now has the same wrapper.
+- **`grep -q` + `pipefail`.** `conda env list | grep -q saturn_protein` can return false even when the env exists (grep closes the pipe early). Test for the env folder instead.
+- **Bigmem affinity error.** `-n 4 -R "rusage[mem=96000]"` pended with "not enough processor units to satisfy the job affinity request". Memory appears to be charged per core (4 × 96 GB). Fix: request total memory ÷ cores and add `span[hosts=1]`; light jobs go to `normal`.
+- **Empty `.out` files.** With `#BSUB -N`, the LSF job summary (exit code, reason) is emailed instead of written to the `.out` file; use `bjobs -a -l <id>` or `bhist -l <id>`.
+- **Ensembl blocks recursive `wget`.** `ftp.ensembl.org/robots.txt` is `Disallow: /`, so `wget -r -A <pattern>` downloads only the directory listing and exits "successfully". Fix: explicit file URLs, and a check that each FASTA is non-empty. (The older `07a` used the recursive pattern too.)
+
+# Caveats
+
+- **Human = 2 donors**, about 52% / 48% of cells; donor and tissue effects cannot be separated from each other within human.
+- **Fly = one library, one strain** (OregonR, pooled females). The Yoon et al. 2023 w1118 10x data (GEO GSE184781, ~2.2k cells, with labels) is a possible robustness check.
+- **No human neutrophils**; mast cells are the only granulocyte-like human cells, and a mapping to them should be read as "granular secretory cell", not "eosinophil".
+- **Considered, not used: a dedicated human bone marrow dataset** (HCA immune census, 8 donors), which would better match the zebrafish input (kidney marrow cell types: HPC, myeloid progenitors, erythroid, neutrophils, eosinophils). Not used because it is older 10x chemistry, the released matrices have no cell calling or expert labels, and 10x bone marrow data generally contain few or no neutrophils and eosinophils (low RNA content; density separation), so it would not fill the granulocyte gap. A sorted neutrophil dataset (Montaldo et al. 2022, 10x 3' v3, FASTQ only) remains the option if granulocytes become important.
+- **Check the zebrafish source.** Project notes cite Jiao et al. (GSE186158), but that study profiled spleen with 10x v2, whereas the zebrafish input has kidney-marrow cell types and non-10x, `_Dr_kidney` barcodes.
+- **Progenitor and erythroid matches may reflect cell state** (proliferation, ribosomal/translation programs) rather than homology; check the macrogenes driving any cluster they join before interpreting it.
+- **Methods wording:** the methods draft says "the longest protein isoform per gene was embedded", but `02_embed.sh` maps genes to all isoforms (zebrafish, and now fly and human). Check the other species and correct the text.
+
+# Next steps
+
+- [ ] Check step 1 of each embedding log (`Genes mapped`, `Proteins mapped`) and the human ESM runtime.
+- [x] Rerun the revised `07d` (job 599517): 1,000 progenitors (of 1,136; all from the Global file) and 78 erythroid cells added; gene list unchanged (35,469 genes).
+- [ ] ESMC-600M embeddings for Dmel and Hsap (send the filtered FASTAs to Ingrid).
+- [ ] Add Dmel and Hsap to the SATURN input CSV and run the 6-species ESM-1b and ESMC comparisons.
+- [ ] 6-species OrthoFinder reference (with a choanoflagellate outgroup).
+- [ ] Optional: Yoon 2023 fly robustness run.
+
+# Scripts
+
+All in [`pipelines/scripts/saturn_embedding_comparison/`](../pipelines/scripts/saturn_embedding_comparison/).
+
+| Script | Where | What it does |
+|---|---|---|
+| [`07b_download_Cattenoz_CellTypist.sh`](../pipelines/scripts/saturn_embedding_comparison/07b_download_Cattenoz_CellTypist.sh) | Pegasus (`transfers`) | downloads Cattenoz NI matrices + labels and the CellTypist Myeloid / Global h5ads; md5 and HDF5 checks |
+| [`07c_inspect_Cattenoz_CellTypist.sh`](../pipelines/scripts/saturn_embedding_comparison/07c_inspect_Cattenoz_CellTypist.sh) | Pegasus | read-only diagnostic: QC, label matching, assay × donor × tissue tables, raw-count checks |
+| [`07d_prepare_Dmel_Hsap.sh`](../pipelines/scripts/saturn_embedding_comparison/07d_prepare_Dmel_Hsap.sh) | Pegasus | builds `Dmel_saturn.h5ad` and `Hsap_saturn.h5ad` (filtering, subsampling, composition table); revised to add human progenitors and erythroid cells |
+| [`07e_download_proteomes_Ens113.sh`](../pipelines/scripts/saturn_embedding_comparison/07e_download_proteomes_Ens113.sh) | Pegasus (`transfers`) | Ensembl 113 protein FASTAs + GTFs for human and fly |
+| [`run_config.sh`](../pipelines/scripts/saturn_embedding_comparison/run_config.sh) | Pegasus | adds `Dmel` and `Hsap` species blocks |
+| [`02_embed.sh`](../pipelines/scripts/saturn_embedding_comparison/02_embed.sh) | Pegasus | adds the `ensembl_gene_id` mapping strategy and safe conda activation |
+
+: Scripts used in this entry. {#tbl-scripts}
+
+```bash
+cd /scratch/dark_genes/SATURN_Mnemi
+bsub < scripts/07b_download_Cattenoz_CellTypist.sh
+bsub -q normal -n 1 -W 2:00 -R "rusage[mem=24000] span[hosts=1]" < scripts/07c_inspect_Cattenoz_CellTypist.sh
+bsub < scripts/07d_prepare_Dmel_Hsap.sh
+bsub < scripts/07e_download_proteomes_Ens113.sh
+SPECIES=Dmel bsub -q normal -n 8 -R "rusage[mem=4000] span[hosts=1]" < scripts/02_embed.sh
+SPECIES=Hsap bsub -q normal -n 8 -R "rusage[mem=4000] span[hosts=1]" < scripts/02_embed.sh
+```
+
+# References
+
+- Cattenoz P.B. et al. (2020) Temporal specificity and heterogeneity of *Drosophila* immune cells. *EMBO J* 39:e104486. <https://doi.org/10.15252/embj.2019104486>
+- Domínguez Conde C. et al. (2022) Cross-tissue immune cell analysis reveals tissue-specific features in humans. *Science* 376:eabl5197. <https://doi.org/10.1126/science.abl5197>
+- Yoon S.-H., Cho B. et al. (2023) Molecular traces of *Drosophila* hemocytes reveal transcriptomic conservation with vertebrate myeloid cells. *PLoS Genet* 19:e1011077. <https://doi.org/10.1371/journal.pgen.1011077>
+- Rives A. et al. (2021) Biological structure and function emerge from scaling unsupervised learning to 250 million protein sequences. *PNAS* 118:e2016239118.
+- Rosen Y. et al. (2024) Toward universal cell embeddings: integrating single-cell RNA-seq datasets across species with SATURN. *Nat Methods* 21:1492–1500.
+- Ensembl release 113 (Oct 2024). <https://ftp.ensembl.org/pub/release-113/>

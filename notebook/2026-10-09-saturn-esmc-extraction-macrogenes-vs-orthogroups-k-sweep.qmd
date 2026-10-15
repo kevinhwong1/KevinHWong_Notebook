@@ -16,7 +16,7 @@ tools: ["SATURN", "ESM-1b", "ESMC-600M (FANTASIA v4)", "eggNOG-mapper", "OrthoFi
 - **Low ortholog recall is partly driven by a few giant gene families**; even so, only ~50% of clean 1:1 ortholog sets are grouped with ESM-1b, vs ~25% with ESMC (@tbl-ogsize).
 - **On the SATURN paper's own homology test**, 57–75% of ESM-1b macrogenes contain a cross-species pair sharing a protein domain, following the divergence gradient; ESMC is lower for every species pair (@tbl-fig2d).
 - **K sweep:** ESM-1b recovers more orthologs with fewer wrong pairs than ESMC **at every number of macrogenes** from 500 to 10,000; the model comparison does not depend on K (@fig-ksweep-pr).
-- **OrthoFinder** as a second orthology reference: running (section 6).
+- **OrthoFinder (de novo orthogroups) gives the same answer as eggNOG** (added Oct 15): ESM-1b recovers about twice as many orthologs as ESMC at every K, and macrogenes are still ~3.5× coarser than orthogroups on the same genes (@tbl-ofref). Absolute recall is higher against OrthoFinder, mainly because fewer giant gene families dominate the pair counts.
 :::
 
 This entry follows [Oct 6](2026-10-06-saturn-4-species-esm1b-vs-esmc-600m-macrogene-comparison.qmd) and [Oct 8](2026-10-08-saturn-esm1b-vs-esmc-600m-ortholog-benchmark-and-macrogene-composition.qmd). It covers: background on the ESM models; a code-level check of how each set of embeddings was produced and how SATURN uses them; how macrogenes relate to orthogroups; what the number of macrogenes (K) does, compared with the SATURN paper; a K sweep; and the setup for an OrthoFinder comparison.
@@ -252,7 +252,7 @@ Our granularity is in the range the authors used. What differs is divergence tim
 
 ![Metrics vs K. Dotted: shuffled labels; stars: SATURN K = 3,000 runs. Bottom middle: dashed = zebrafish. Bottom right: solid = OGs merged, dashed = OG subdivided.](/images/20261009_SATURN_Ksweep_metrics.png){#fig-ksweep}
 
-# 6. A second orthology reference: OrthoFinder (in progress)
+# 6. A second orthology reference: OrthoFinder
 
 eggNOG assigns each gene to precomputed OGs by its best database hit, so genes without a good hit get no OG. Coverage is uneven (*Mnemiopsis* 50%, zebrafish 99%), and the genes that drop out are the lineage-specific and fast-evolving ones. OrthoFinder (Emms & Kelly 2019) builds orthogroups de novo from our own four proteomes, so every gene can be placed. It is still sequence-based, so it shares eggNOG's blind spot at deep divergence; the question is whether the conclusions above hold with both references. (Broccoli, Derelle et al. 2020, is a further option.)
 
@@ -260,10 +260,28 @@ Setup (`06a`–`06c`):
 
 - One protein per gene (the longest), from the same proteome FASTAs and protein → gene bridges as the SATURN embeddings; stop characters removed. *Mnemiopsis* 15,545 genes; oyster 31,371; *Ciona* 18,788; zebrafish 25,400.
 - Zebrafish: 6,029 proteins from unnamed genes on GRCz11 alternate-haplotype contigs (`ALT_CTG`) dropped as duplicates of primary loci; 7,946 proteins from unnamed primary-assembly genes kept under their ENSDARG IDs (not SATURN genes, but part of the proteome).
-- OrthoFinder 3.1.0 (`-M msa -A mafft -T fasttree`) with a fixed species tree `(Mlei,(Cgig,(Crob,Drer)))`. With these four species the root is the same under ctenophore-first and sponge-first hypotheses, so the N0 hierarchical orthogroups correspond to the Metazoa level.
+- OrthoFinder 3.1.0 (`-M msa -A mafft -T fasttree`) with a fixed species tree `(Mlei,(Cgig,(Crob,Drer)))`. With these four species the root is the same under ctenophore-first and sponge-first hypotheses, so the root (N0) hierarchical orthogroups would correspond to the Metazoa level. Run on Oct 15 (after rebuilding the environment; see [that entry](2026-10-15-rebuilding-the-orthofinder-environment-on-pegasus-with-micromamba.qmd)): 70 min on 16 cores.
 - `05n` and `05p` take `--reference of_og | of_hog` and `--eggnog_genes_only` (to separate a different gene set from a different group definition).
 
-**Results: to be added.**
+**Results (Oct 15).**
+
+OrthoFinder placed 83.3% of the 91,104 proteins in 12,254 orthogroups; 4,987 contain all four species and 2,577 of those are single-copy in each. Every SATURN gene was found in the tables (the gene bridges work). The share of SATURN genes in an orthogroup with at least one other species follows the divergence gradient: *Mnemiopsis* 43.9%, oyster 46.6%, *Ciona* 53.2%, zebrafish 78.0%. So even de novo, more than half of the *Mnemiopsis* genes have no sequence-detectable relative in the other three species, which caps any orthology-based score for that species.
+
+**No Metazoa-level hierarchical orthogroups.** OrthoFinder 3.1 wrote HOGs only for N1 (oyster + *Ciona* + zebrafish) and N2 (*Ciona* + zebrafish), not for the root, the only level that includes *Mnemiopsis*. The same happened in a 3-species test, so it seems to skip the root node. `of_hog` is therefore not used here; the planned 6-species run (adding human and fly) will include a choanoflagellate outgroup so that the animal node is no longer the root. All results below use OrthoFinder orthogroups (`of_og`).
+
+| Reference (genes scored) | Effective no. of groups | Macrogenes coarser by | Pair recall, ESM-1b / ESMC | 1:1 recall, ESM-1b / ESMC | Pairs from groups ≥ 33 genes | Genes in merged / cross-cutting OGs (ESM-1b) |
+|---|---|---|---|---|---|---|
+| eggNOG Metazoa OGs (21,674 annotated) | 7,155 | 3.4× | 0.30 / 0.15–0.16 | 0.51 / 0.24–0.27 | 34% | 28% / 63% |
+| OrthoFinder, same genes (21,674) | 7,381 | 3.5× | 0.43 / 0.20–0.21 | 0.60 / 0.29–0.33 | 11% | 33% / 57% |
+| OrthoFinder, all genes (31,692) | 9,754 | 4.5× | 0.39 / 0.17–0.18 | 0.59 / 0.28–0.32 | 19% | 29% / 63% |
+
+: Macrogenes (SATURN K = 3,000 runs) scored against eggNOG and OrthoFinder orthogroups. ESMC values are raw–rescaled. "Macrogenes coarser by" = effective number of OGs / effective number of ESM-1b macrogenes on the same genes. {#tbl-ofref}
+
+- **The model comparison does not depend on the reference.** With OrthoFinder, ESM-1b again recovers about twice the ortholog pairs and 1:1 ortholog sets of either ESMC version, keeps at least twice as many small OGs whole, and scores 8–23 points higher on the Fig. 2d analogue (same-OG pairs) for every species pair.
+- **The K sweep gives the same picture.** Against OrthoFinder, ESM-1b has higher recall *and* higher precision than ESMC at every K from 500 to 10,000 (e.g. K = 3,000: recall 0.38 vs 0.20, precision 0.069 vs 0.031, 1:1 recall 0.59 vs 0.33), with or without restricting to eggNOG-annotated genes. The curves never cross.
+- **Macrogenes are still ~3.5× coarser than orthogroups on the same genes**, and the merge/cut-across pattern is unchanged.
+- **Recall is higher against OrthoFinder (0.30 → 0.43 on the same genes)** mainly because of giant families: with eggNOG, 17 OGs of ≥ 33 genes supply 34% of all cross-species pairs and are almost never kept together; with OrthoFinder, groups that large supply only 11%. Clean 1:1 sets are also recovered more often (0.51 → 0.60), possibly because OrthoFinder's tree-based 1:1 sets are truer orthologs.
+- **Precision drops when all genes are scored** (ESM-1b, K = 3,000: 0.14 with eggNOG, 0.13 with OrthoFinder on the same genes, 0.07 on all genes). The ~10,000 genes without an eggNOG OG are mostly OrthoFinder singletons or single-species groups, so any cross-species macrogene partner they get counts as wrong. This is the lineage-specific gene set that sequence orthology cannot confirm either way: some of these pairings may be remote homologs, which only a structural comparison could tell.
 
 # Interpretation
 
@@ -282,7 +300,8 @@ Setup (`06a`–`06c`):
 
 # Possible next steps and troubleshooting
 
-- [ ] Add OrthoFinder results (section 6): `06c`, then `05n` / `05p` with `--reference of_hog` (± `--eggnog_genes_only`).
+- [x] Add OrthoFinder results (section 6): `06c`, then `05n` / `05p` with `--reference of_og` (± `--eggnog_genes_only`). Done Oct 15.
+- [ ] Metazoa-level HOGs (`of_hog`): add a choanoflagellate outgroup in the 6-species OrthoFinder run.
 - [ ] Share this entry with Ingrid. Remaining questions from Oct 6: 5 (truncation setting), 6 (exact config / checkpoint), 7 (input proteomes and isoforms). Request: a re-export of the same proteins from the post-norm `embeddings` output (and one middle layer), mean-pooled without special tokens, in fp32.
 - [ ] If a re-export arrives: `05f`, `05i`, the K sweep (`05o` / `05p`); full macrogene-only run only if it beats ESM-1b.
 - [ ] Final run: standard ESM-1b, full training (pin to `gpu1`); decide K (3,000 for continuity, or 2,000).
