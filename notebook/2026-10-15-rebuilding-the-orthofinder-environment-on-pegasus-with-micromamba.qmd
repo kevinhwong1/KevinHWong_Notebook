@@ -1,0 +1,251 @@
+---
+title: "Rebuilding the OrthoFinder environment on Pegasus with micromamba"
+date: 2026-10-15
+type: "Troubleshooting"
+project: "Dark Genes"
+categories: ["Troubleshooting", "Comparative genomics", "HPC & computing"]
+tools: ["OrthoFinder 3.1.0", "micromamba 2.9.0", "conda 4.10.1", "DIAMOND", "MCL", "MAFFT", "FastTree", "LSF"]
+protocols: []
+---
+
+::: {.callout-important}
+## Summary
+
+- **Why:** my conda environments on Pegasus were deleted in early October 2026, so `orthofinder_env` had to be rebuilt before the SATURN benchmarking work.
+- **The old conda (4.10.1, from 2021) can no longer build environments from conda-forge:** it fails while downloading the channel index. I switched to **micromamba**, a small stand-alone conda replacement.
+- **The bigger problem was the `/nethome` limit**, not the tool. Installs failed with `No space left on device` even after freeing 180 GB, which points to a limit on the **number of files** rather than their size.
+- **Fix:** keep the package cache on `/scratch`, and install a **lean environment**: OrthoFinder plus only the tools it actually runs, skipping the ~150-package plotting/GUI stack.
+- **Result:** OrthoFinder 3.1.0 runs end to end in an LSF job (3-species test). The working recipe and job-script header are in [How to use it later](#how-to-use-it-later).
+:::
+
+# Key terms
+
+| Term | Meaning here |
+|---|---|
+| **Environment (env)** | A folder holding one set of installed tools and their dependencies, kept separate from other projects. |
+| **conda / micromamba** | Two programs that build envs from the same channels. micromamba is a single binary, much faster, and handles today's very large channel index well. |
+| **Channel index** | The catalogue of available packages a channel publishes (conda-forge's is now very large). |
+| **Package cache** | Where downloaded packages are unpacked before being copied into an env. Normally inside the conda/micromamba folder on `/nethome`. |
+| **File-count (inode) limit** | A cap on how many files a user can store, separate from the cap on total size. An env is tens of thousands of small files. |
+| `--no-deps` | Install one package without pulling in its dependencies. |
+| **LSF project / queue** | Pegasus job settings: `-P` (which allocation to charge) and `-q` (which group of nodes). |
+
+: Terms used in this entry. {#tbl-terms}
+
+# 1. What went wrong, in order
+
+Each problem only appeared once the one before it was fixed. Exact error messages are kept so this page turns up in a search next time.
+
+## 1.1 conda 4.10.1 cannot download the conda-forge index
+
+```
+Collecting package metadata (repodata.json): failed
+requests.exceptions.ChunkedEncodingError: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", ...)
+```
+
+**Cause.** Old conda downloads each channel's full index as one huge file. conda-forge's index has grown enormously since 2021, and the connection drops partway through. It failed the same way on a second try with longer timeouts, so this is not a one-off. micromamba fetches the index in small pieces and had no trouble.
+
+**Fix.** Use micromamba for new envs; leave the old Anaconda base in place for `saturn_protein`.
+
+## 1.2 Pasting into the micromamba installer
+
+The official installer (`"${SHELL}" <(curl -L micro.mamba.pm/install.sh)`) asks questions. I pasted it together with the next few commands, and those lines were read as answers. The result was a binary inside a folder literally named `source ~` and a broken `micromamba initialize` block in `~/.bashrc`.
+
+**Fix.** Rename the folder before touching it (`mv -- "$HOME/source ~" "$HOME/junk_paste"`), move the binary to `~/.local/bin/`, delete the `.bashrc` block and run `micromamba shell init --shell bash --root-prefix ~/micromamba`.
+
+::: {.callout-warning}
+Never run `rm -rf source ~` on a folder with that name: unquoted, the shell reads it as "delete `source` and my whole home directory". Rename first, then delete. And never paste a multi-line block into an interactive installer.
+:::
+
+The installer can be skipped entirely; see [Install micromamba](#install-micromamba).
+
+## 1.3 `No space left on device` while unpacking
+
+```
+critical libmamba filesystem error: cannot create directories: No space left on device [/nethome/kxw755/micromamba/pkgs/...]
+critical libmamba Found incorrect downloads. Aborting
+```
+
+All 752 MB downloaded, then unpacking ~200 packages failed. `df` showed 21 TB free on `/nethome`, so this is my personal limit, not a full disk.
+
+- Freeing **180 GB** (two leftover GeneExt `merge.bam` files) did **not** help.
+- A 2 GB test write and 2,000 small test files both succeeded.
+- `mmlsquota` is not available to users on Pegasus, so I could not read the limits directly.
+
+**Most likely cause (not confirmed):** a per-user **file-count** limit. My home holds ~245,000 files, ~205,000 of them in the 2021 Anaconda base (Spyder, Jupyter, Navigator…), and a full OrthoFinder env adds tens of thousands more. `conda clean --all` only removed ~660 files, because nearly all of those files belong to the base install itself.
+
+## 1.4 Moving the cache to `/scratch` helped, but not enough
+
+With `CONDA_PKGS_DIRS`/`MAMBA_PKGS_DIRS` pointing at `/scratch`, every package unpacked fine. It then failed while copying files into the env on `/nethome`:
+
+```
+error libmamba Unexpected error while linking package 'qt-main': filesystem error: cannot copy: No space left on device
+```
+
+**Cause.** `qt-main` is a GUI toolkit with a very large number of small files. OrthoFinder does not need it to run; it comes in through optional tree-plotting dependencies.
+
+**Fix: a lean env.** Install the run-time tools first, then OrthoFinder with `--no-deps`. This skipped 151 packages (Qt, X11, fonts, IQ-TREE, RAxML, BLAST, MMseqs2, FAMSA…), none of which my settings use:
+
+| Skipped | Matters for my runs? |
+|---|---|
+| FAMSA (OrthoFinder 3's default aligner) | No, I use `-A mafft` |
+| IQ-TREE, RAxML | No, I use `-T fasttree` |
+| BLAST, MMseqs2 | No, DIAMOND is the default search |
+| Qt, PyQt, X11, fonts | No, only for drawing trees |
+| Biopython, ete3 | **Yes**, added back by hand (next section) |
+
+: What the lean install leaves out. {#tbl-skipped}
+
+## 1.5 Two Python modules added back
+
+```
+ModuleNotFoundError: No module named 'Bio'
+ModuleNotFoundError: No module named 'ete3'
+```
+
+Biopython installs normally. ete3 was installed with `pip install --no-deps` (plus `six`) so it does not pull Qt back in. OrthoFinder only uses ete3 to read and write tree files.
+
+## 1.6 LSF and job-script problems
+
+```
+Error: kxw755 account has multiple projects: dark_genes transcriptomics.
+general: Queue has been closed. Job not submitted.
+micromamba: command not found
+```
+
+- Every job now needs `#BSUB -P dark_genes` (or `transcriptomics`).
+- The `general` queue is closed (as of Oct 2026). `normal` had the shortest wait; `bigmem` is still open. **Old scripts that use `-q general` will fail.**
+- Batch jobs do not read `~/.bashrc`, so micromamba must be called by its full path inside job scripts (see the [job-script header](#job-header)).
+
+## 1.7 Test runs: two species is not enough
+
+A 2-species test (500 Pdam + 500 Acer proteins) built orthogroups and orthologues, then stopped at the last step:
+
+```
+ERROR in parallel process, exiting.
+```
+
+with an empty `Phylogenetic_Hierarchical_Orthogroups/N0.tsv`. OrthoFinder cannot root a species tree with only two species, so it has nothing to build hierarchical orthogroups from. Adding 500 *N. vectensis* proteins gave a clean run:
+
+| Measure | 3-species test |
+|---|---|
+| Species / genes | 3 / 1,500 |
+| Genes in orthogroups | 701 |
+| Hierarchical orthogroups (`N1.tsv`) | 115 |
+| Run time (4 cores, `normal` queue) | 68 s |
+| stderr | empty |
+
+: Final test run. {#tbl-test}
+
+With three species the root node file is `N1.tsv` rather than `N0.tsv`; real runs with more species produce `N0.tsv` as usual.
+
+# 2. The working recipe
+
+## Install micromamba (once) {#install-micromamba}
+
+Skips the interactive installer:
+
+```bash
+cd ~
+curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
+mkdir -p ~/.local/bin && mv ~/bin/micromamba ~/.local/bin/ && rmdir ~/bin 2>/dev/null
+~/.local/bin/micromamba shell init --shell bash --root-prefix ~/micromamba
+source ~/.bashrc
+```
+
+## Build `orthofinder_env`
+
+```bash
+# package cache on scratch (keeps half the files off /nethome); unpack one package at a time
+export CONDA_PKGS_DIRS=/scratch/dark_genes/mamba_pkgs
+export MAMBA_PKGS_DIRS=/scratch/dark_genes/mamba_pkgs
+export MAMBA_EXTRACT_THREADS=1    # micromamba 2.x dropped the --extract-threads flag
+
+# 1. run-time tools only
+micromamba create -y -n orthofinder_env -c conda-forge -c bioconda --strict-channel-priority \
+  python=3.11 numpy scipy scikit-learn rich diamond mcl fasttree mafft
+
+# 2. OrthoFinder itself, without its optional dependency stack
+micromamba install -y -n orthofinder_env -c conda-forge -c bioconda --no-deps orthofinder=3.1.0
+
+# 3. the two Python modules it needs
+micromamba install -y -n orthofinder_env -c conda-forge --strict-channel-priority biopython
+micromamba run -n orthofinder_env pip install --no-deps ete3 six
+
+# 4. check
+micromamba activate orthofinder_env
+orthofinder -h | head -3
+which diamond mcl mafft FastTree
+
+unset CONDA_PKGS_DIRS MAMBA_PKGS_DIRS MAMBA_EXTRACT_THREADS
+```
+
+Installed versions: OrthoFinder 3.1.0, DIAMOND 2.2.8, MCL 22.282, MAFFT 7.526, FastTree 2.2.0, Python 3.11.17, ete3 3.1.3.
+
+# 3. How to use it later {#how-to-use-it-later}
+
+## Job-script header {#job-header}
+
+Use this in every OrthoFinder job; change only the name, cores, wall time and input folder:
+
+```bash
+#!/bin/bash
+#BSUB -J of_run
+#BSUB -P dark_genes
+#BSUB -q normal                 # or bigmem; general is closed
+#BSUB -n 16
+#BSUB -W 120:00
+#BSUB -o /scratch/dark_genes/<run>/of.%J.out
+#BSUB -e /scratch/dark_genes/<run>/of.%J.err
+
+# batch jobs don't read .bashrc: call micromamba by full path
+export MAMBA_ROOT_PREFIX=/nethome/kxw755/micromamba
+eval "$(/nethome/kxw755/.local/bin/micromamba shell hook --shell bash)"
+micromamba activate orthofinder_env
+which orthofinder diamond mcl mafft FastTree   # logs the tool paths
+
+orthofinder -f <dir_with_only_protein_fastas> -t 16 -a 16 -M msa -A mafft -T fasttree
+```
+
+Rules of thumb:
+
+- The input folder should hold **only** protein FASTAs. Job scripts and logs in it trigger `Files have been ignored as they don't appear to be FASTA files`, and results land inside it (`<input>/OrthoFinder/Results_<date>/`).
+- Test with **at least three species**.
+- The [multi-species OrthoFinder pipeline](../pipelines/orthofinder-multispecies.qmd) still activates the env with `conda activate`; its job block needs the micromamba lines above before it will run again.
+
+## Back up the recipe
+
+```bash
+mkdir -p ~/env_backups
+micromamba env export -n orthofinder_env > ~/env_backups/orthofinder_env.yml
+echo "pip install --no-deps ete3==3.1.3 six==1.17.0" > ~/env_backups/orthofinder_env_pip.txt
+conda env export -n saturn_protein > ~/env_backups/saturn_protein.yml
+```
+
+`env export` does not record the pip packages, hence the separate note. Copy `~/env_backups` off Pegasus: `/nethome` is not backed up, and a future wipe could take these files too.
+
+## If it breaks again
+
+| Symptom | First thing to try |
+|---|---|
+| `micromamba: command not found` in a job | Use the full-path activation block above |
+| `No space left on device` during a create | Cache on `/scratch` (`CONDA_PKGS_DIRS`/`MAMBA_PKGS_DIRS`) and the lean install; if it still fails, ask HPC support for my `/nethome` usage and limits |
+| `ModuleNotFoundError: No module named 'X'` | `micromamba install -n orthofinder_env -c conda-forge X` (or `pip install --no-deps X` if it would pull in Qt) |
+| `ERROR in parallel process` with empty `N0.tsv` | Probably a 2-species run; add a third species |
+| FastTree `Illegal instruction` | Old node without AVX2; request newer nodes (seen during the Dark Genes runs) |
+| `Queue has been closed` / `multiple projects` | Use `-q normal` or `bigmem`, and add `-P dark_genes` |
+
+: Quick fixes. {#tbl-fixes}
+
+# 4. Housekeeping and open items
+
+- Deleted the two GeneExt `merge.bam` files (Pdam 110 GB, Acer 70 GB); they can be rebuilt from the per-library BAMs. Home went from ~825 GB to 645 GB.
+- The four `possorted_genome_bam.bam` files (180 GB) are still in the GeneExt folders. Before deleting them: confirm where the GeneExt-extended GTFs were written, and that the raw FASTQs are backed up off Pegasus.
+- The 2021 Anaconda base is ~205,000 files. Replacing it with micromamba alone would free most of the file allowance, but only after `saturn_protein` is exported and can be rebuilt.
+- `~/.condarc` lists `defaults` and `nodefaults` as channels; they produce harmless warnings and can be removed.
+- Next: run OrthoFinder on the SATURN benchmark proteomes.
+
+# Related
+
+- Pipeline: [Multi-species orthology with OrthoFinder](../pipelines/orthofinder-multispecies.qmd)
+- Previous SATURN entry: [ESMC extraction, macrogenes vs orthogroups, K sweep](2026-10-09-saturn-esmc-extraction-macrogenes-vs-orthogroups-k-sweep.qmd)
