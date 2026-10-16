@@ -16,6 +16,7 @@ protocols: []
 - **Human:** the CellTypist cross-tissue immune atlas (Domínguez Conde et al. 2022), **10x 3' v3 donors only**, myeloid compartment plus mast cells, T/B/NK cells, and (revised the same day) progenitors and erythroid cells, so that every zebrafish cell type in the earlier SATURN run has a human counterpart. **10,541 cells** in the first build; the revised build adds 1,000 progenitors and 78 erythroid cells, for **11,619 cells** (job 599517).
 - **Proteomes:** Ensembl release 113 for both (same release as zebrafish). Links in [Proteomes](#proteomes) (also what Ingrid needs for ESMC).
 - **Status:** SATURN inputs built; ESM-1b embeddings running on Pegasus (jobs 599440 Dmel, 599441 Hsap). The human h5ad will be rebuilt with the revised composition; the embeddings are unaffected because the gene list does not change.
+- **Update 2026-10-16 (QC, `07f`):** both inputs are clean and the author labels match canonical markers; no cells removed. Human is ~3× deeper than the other species, and donor is confounded with cell type for several human groups. Three decisions open (human label granularity, human depth, small fly groups). See [Section 5](#qc-update).
 :::
 
 # Key terms
@@ -98,7 +99,61 @@ The filtered FASTAs (`/scratch/dark_genes/SATURN_Mnemi/03_embeddings/Dmel/Dmel_f
 
 ESM-1b settings are unchanged (`esm1b_t33_650M_UR50S`, layer 33, mean pooling, truncation 1,022). Both jobs run on the `normal` queue with 8 cores on one host and 4 GB per core.
 
-# 5. Troubleshooting on Pegasus
+# 5. Update 2026-10-16: QC and per-species UMAPs (`07f`) {#qc-update}
+
+While the embeddings run, `07f_QC_UMAP_Dmel_Hsap.sh` checks the quality of the two SATURN inputs and draws a UMAP for each species with the author labels. It only reads the `*_saturn.h5ad` files and changes nothing in them. Each species is processed on its own, with no integration and no filtering: normalise to 10,000 counts, log1p, 2,000 highly variable genes (`seurat_v3`), 50 PCs, 15 neighbours on 30 PCs, UMAP, and Leiden clusters at resolution 1.0 for reference only. Cells are **flagged, not removed**, if they lie more than 5 median absolute deviations (MADs) from the median on log UMI count or log gene count, or if their mitochondrial share is more than 3 MADs above the median.
+
+**Result: both datasets are clean, and the author labels agree with canonical markers in both species. No cells need removing.**
+
+| Species | Cells | Labels | Median UMIs | Median genes | Median % mito | Flagged |
+|---|---|---|---|---|---|---|
+| Mlei | 10,239 | 20 | 2,239 | 860 | – | – |
+| Cgig | 37,668 | 13 | 1,947 | 757 | – | – |
+| Crob | 15,575 | 33 | 6,138 | 1,494 | – | – |
+| Drer | 6,532 | 9 | 3,141 | 872 | – | – |
+| **Dmel** | 7,517 | 16 | 2,942 | 961 | 4.9 | 550 (7.3%) |
+| **Hsap** | 11,619 | 31 | 9,604 | 2,657 | 7.4 | 962 (8.3%) |
+
+: Per-cell depth of all six SATURN inputs (raw counts, as SATURN sees them). Mito share and QC flags were computed for the new species only. {#tbl-qc-xsp}
+
+![UMIs (left) and genes (right) per cell for the six SATURN inputs; the new species are in orange. Human is about three times deeper than the others.](/images/20261016_crossspecies_qc_violin.png){#fig-qc-xsp}
+
+## Fly
+
+- **Quality is tight:** mito reads are about 5% with no low-quality tail, as expected after the authors' 500-gene cutoff. Ribosomal reads are about 37%, normal for fly.
+- **Markers match the labels** (@fig-dmel-dot): crystal cells (CC) express *PPO1*, *PPO2* and *lz*; lamellocytes *atilla*, *Itgbn* and *mys*; PL-prolif *stg* and *polo*; PL-Lsp *Lsp2*; PL-Rel *Rel*; PL-Inos *Inos*; plasmatocytes *NimC1*, *eater*, *Pxn* and *crq*.
+- **Flags reflect biology:** 40% of crystal cells are flagged, but only because they carry more UMIs (median 7,887). They are kept.
+- **Very small groups:** lamellocytes are only 8 cells (LM-1 6, LM-2 2), as expected in uninfected larvae. **PL-ImpL2** (21 cells) sits far from all other cells on the UMAP, has low depth (median 1,373 UMIs) and weak *srp*, *Hml* and *NimC1*; it may not be hemocytes and should be checked before it is treated as a plasmatocyte subtype.
+- **The main plasmatocyte groups grade into one another:** PL-0, PL-1 and PL-2 form a continuum and are split across several Leiden clusters, consistent with the original paper.
+
+![Fly hemocytes (Cattenoz NI), coloured by author cluster.](/images/20261016_Dmel_umap_celltype_ondata.png){#fig-dmel-umap}
+
+![Canonical fly hemocyte markers by author cluster (colour scaled per gene).](/images/20261016_Dmel_dotplot_markers_by_celltype.png){#fig-dmel-dot}
+
+![Fly QC by author cluster: log10 UMIs, genes, % mitochondrial and % ribosomal reads (medians marked).](/images/20261016_Dmel_violin_qc_by_celltype.png){#fig-dmel-qc}
+
+## Human
+
+- **Markers match the labels** (@fig-hsap-dot): *CLEC9A*/*XCR1* in DC1, *CD1C*/*FCER1A* in DC2, *CCR7*/*LAMP3* in migDC, *MARCO*/*FABP4* in alveolar macrophages, *KIT*/*TPSAB1*/*CPA3* in mast cells, *CD34*/*PRSS57* in progenitors, and the expected T, NK and B cell markers.
+- **Mito flags follow tissue:** all 962 flagged cells are above the 14.2% mito cutoff (none on depth), and intestinal macrophages have the highest share (22.7%), consistent with gut dissociation. The atlas was already filtered by its authors, so all cells are kept.
+- **Erythroid cells look like progenitors:** the 78 erythroid cells express *MKI67*, *TOP2A* and *PRSS57* and cluster with the progenitors (one Leiden cluster holds 202 progenitors and 78 erythroid cells), so they are erythroid progenitors rather than mature red cells. Keep this in mind if the zebrafish erythroid cells are mature.
+- **Donor and cell type are tied together:** 96% of alveolar macrophages come from D496, while progenitors (94%), nonclassical monocytes (93%) and DCs come mostly from D503. This reflects which tissues each donor gave, so donor effects cannot be separated from cell type for these groups. Classical monocytes, sampled evenly across four tissues, are the only well-mixed group (@fig-hsap-meta). No correction is planned, but it is listed in the caveats.
+
+![Human CellTypist 3' v3 subset, coloured by curated cell type.](/images/20261016_Hsap_umap_celltype_ondata.png){#fig-hsap-umap}
+
+![Canonical human immune markers by curated cell type (colour scaled per gene).](/images/20261016_Hsap_dotplot_markers_by_celltype.png){#fig-hsap-dot}
+
+![Human UMAP coloured by QC flag, Leiden cluster, tissue, donor and sampling group.](/images/20261016_Hsap_umap_meta.png){#fig-hsap-meta}
+
+## Open decisions
+
+1. **Human label granularity.** SATURN uses each species' labels to guide training. Human now has 31 fine labels, against 16 for fly and 9 for zebrafish. Options: keep them; collapse the 18 lymphocyte subtypes to the 7 groups in `sample_group` (CD4 T, CD8 T, γδ T, MAIT, NK, B, plasma); or use Leiden clusters, as for the other species.
+2. **Human depth.** Downsample human counts towards the depth of the other species, or leave them. This matters for a benchmark, but it would be a new step and needs agreeing first.
+3. **Small fly groups.** Keep LM-1/LM-2 (perhaps merged as "LM") and PL-ImpL2 as they are, or merge or drop them.
+
+Outputs: `/scratch/dark_genes/SATURN_Mnemi/07_new_species_QC/20261016_Dmel_Hsap_QC/` on Pegasus (`summary.txt`, per-cell-type QC tables, per-cell UMAP + QC CSVs, figures), synced locally to `output/SATURN/20261016_Dmel_Hsap_QC/` without the h5ad files.
+
+# 6. Troubleshooting on Pegasus
 
 - **Batch jobs don't read `~/.bashrc`.** `source ~/.bashrc; conda activate` made the inspection job exit in 0.1 s with empty logs. Fix: `source ~/anaconda3/bin/activate` then `conda activate saturn_protein`, wrapped in `set +u` / `set -u` (conda's scripts reference unset variables). `02_embed.sh` now has the same wrapper.
 - **`grep -q` + `pipefail`.** `conda env list | grep -q saturn_protein` can return false even when the env exists (grep closes the pipe early). Test for the env folder instead.
@@ -108,7 +163,8 @@ ESM-1b settings are unchanged (`esm1b_t33_650M_UR50S`, layer 33, mean pooling, t
 
 # Caveats
 
-- **Human = 2 donors**, about 52% / 48% of cells; donor and tissue effects cannot be separated from each other within human.
+- **Human = 2 donors**, about 52% / 48% of cells; donor and tissue effects cannot be separated from each other within human. The QC update shows donor is also tied to cell type: alveolar macrophages are 96% D496, progenitors and nonclassical monocytes ~93% D503.
+- **Human depth:** median 9,604 UMIs per cell, against 1,947–6,138 for the other five species (@tbl-qc-xsp).
 - **Fly = one library, one strain** (OregonR, pooled females). The Yoon et al. 2023 w1118 10x data (GEO GSE184781, ~2.2k cells, with labels) is a possible robustness check.
 - **No human neutrophils**; mast cells are the only granulocyte-like human cells, and a mapping to them should be read as "granular secretory cell", not "eosinophil".
 - **Considered, not used: a dedicated human bone marrow dataset** (HCA immune census, 8 donors), which would better match the zebrafish input (kidney marrow cell types: HPC, myeloid progenitors, erythroid, neutrophils, eosinophils). Not used because it is older 10x chemistry, the released matrices have no cell calling or expert labels, and 10x bone marrow data generally contain few or no neutrophils and eosinophils (low RNA content; density separation), so it would not fill the granulocyte gap. A sorted neutrophil dataset (Montaldo et al. 2022, 10x 3' v3, FASTQ only) remains the option if granulocytes become important.
@@ -120,6 +176,8 @@ ESM-1b settings are unchanged (`esm1b_t33_650M_UR50S`, layer 33, mean pooling, t
 
 - [ ] Check step 1 of each embedding log (`Genes mapped`, `Proteins mapped`) and the human ESM runtime.
 - [x] Rerun the revised `07d` (job 599517): 1,000 progenitors (of 1,136; all from the Global file) and 78 erythroid cells added; gene list unchanged (35,469 genes).
+- [x] QC and per-species UMAPs of the Dmel and Hsap inputs (`07f`, 2026-10-16): clean, labels confirmed by markers.
+- [ ] Decide human label granularity, human depth downsampling and the small fly groups (LM-1/LM-2, PL-ImpL2) before the 6-species run.
 - [ ] ESMC-600M embeddings for Dmel and Hsap (send the filtered FASTAs to Ingrid).
 - [ ] Add Dmel and Hsap to the SATURN input CSV and run the 6-species ESM-1b and ESMC comparisons.
 - [ ] 6-species OrthoFinder reference (with a choanoflagellate outgroup).
@@ -134,6 +192,7 @@ All in [`pipelines/scripts/saturn_embedding_comparison/`](../pipelines/scripts/s
 | [`07b_download_Cattenoz_CellTypist.sh`](../pipelines/scripts/saturn_embedding_comparison/07b_download_Cattenoz_CellTypist.sh) | Pegasus (`transfers`) | downloads Cattenoz NI matrices + labels and the CellTypist Myeloid / Global h5ads; md5 and HDF5 checks |
 | [`07c_inspect_Cattenoz_CellTypist.sh`](../pipelines/scripts/saturn_embedding_comparison/07c_inspect_Cattenoz_CellTypist.sh) | Pegasus | read-only diagnostic: QC, label matching, assay × donor × tissue tables, raw-count checks |
 | [`07d_prepare_Dmel_Hsap.sh`](../pipelines/scripts/saturn_embedding_comparison/07d_prepare_Dmel_Hsap.sh) | Pegasus | builds `Dmel_saturn.h5ad` and `Hsap_saturn.h5ad` (filtering, subsampling, composition table); revised to add human progenitors and erythroid cells |
+| [`07f_QC_UMAP_Dmel_Hsap.sh`](../pipelines/scripts/saturn_embedding_comparison/07f_QC_UMAP_Dmel_Hsap.sh) | Pegasus (`bigmem`) | read-only QC of both SATURN inputs: per-cell-type QC tables, MAD outlier flags, per-species UMAPs, marker dot plots, six-species depth comparison (added 2026-10-16) |
 | [`07e_download_proteomes_Ens113.sh`](../pipelines/scripts/saturn_embedding_comparison/07e_download_proteomes_Ens113.sh) | Pegasus (`transfers`) | Ensembl 113 protein FASTAs + GTFs for human and fly |
 | [`run_config.sh`](../pipelines/scripts/saturn_embedding_comparison/run_config.sh) | Pegasus | adds `Dmel` and `Hsap` species blocks |
 | [`02_embed.sh`](../pipelines/scripts/saturn_embedding_comparison/02_embed.sh) | Pegasus | adds the `ensembl_gene_id` mapping strategy and safe conda activation |
@@ -146,6 +205,7 @@ bsub < scripts/07b_download_Cattenoz_CellTypist.sh
 bsub -q normal -n 1 -W 2:00 -R "rusage[mem=24000] span[hosts=1]" < scripts/07c_inspect_Cattenoz_CellTypist.sh
 bsub < scripts/07d_prepare_Dmel_Hsap.sh
 bsub < scripts/07e_download_proteomes_Ens113.sh
+bsub < scripts/07f_QC_UMAP_Dmel_Hsap.sh   # 2026-10-16 update
 SPECIES=Dmel bsub -q normal -n 8 -R "rusage[mem=4000] span[hosts=1]" < scripts/02_embed.sh
 SPECIES=Hsap bsub -q normal -n 8 -R "rusage[mem=4000] span[hosts=1]" < scripts/02_embed.sh
 ```
