@@ -17,6 +17,7 @@ protocols: []
 - **Proteomes:** Ensembl release 113 for both (same release as zebrafish). Links in [Proteomes](#proteomes) (also what Ingrid needs for ESMC).
 - **Status:** SATURN inputs built; ESM-1b embeddings running on Pegasus (jobs 599440 Dmel, 599441 Hsap). The human h5ad will be rebuilt with the revised composition; the embeddings are unaffected because the gene list does not change.
 - **Update 2026-10-16 (QC, `07f`):** both inputs are clean and the author labels match canonical markers; no cells removed. Human is ~3× deeper than the other species, and donor is confounded with cell type for several human groups. Three decisions open (human label granularity, human depth, small fly groups). See [Section 5](#qc-update).
+- **Update 2026-10-19 (decisions):** human lymphocytes collapsed to 7 groups (31 → 20 labels); fly LM-1 + LM-2 merged to LM (16 → 15); PL-ImpL2 kept but flagged; no human downsampling. Applied by `07g`; no cells or genes change. See [Decisions](#decisions).
 :::
 
 # Key terms
@@ -147,9 +148,25 @@ While the embeddings run, `07f_QC_UMAP_Dmel_Hsap.sh` checks the quality of the t
 
 ## Open decisions
 
+*Decided 2026-10-19; see [Decisions](#decisions) below.*
+
 1. **Human label granularity.** SATURN uses each species' labels to guide training. Human now has 31 fine labels, against 16 for fly and 9 for zebrafish. Options: keep them; collapse the 18 lymphocyte subtypes to the 7 groups in `sample_group` (CD4 T, CD8 T, γδ T, MAIT, NK, B, plasma); or use Leiden clusters, as for the other species.
 2. **Human depth.** Downsample human counts towards the depth of the other species, or leave them. This matters for a benchmark, but it would be a new step and needs agreeing first.
 3. **Small fly groups.** Keep LM-1/LM-2 (perhaps merged as "LM") and PL-ImpL2 as they are, or merge or drop them.
+
+## Decisions (2026-10-19) {#decisions}
+
+**Which decisions matter when.** SATURN fixes macrogene membership during pretraining, which uses expression only, not the cell-type labels; labels enter in the metric-learning stage. So relabelling does not change macrogenes, whereas removing cells or downsampling counts would.
+
+| Decision | Choice | Reason |
+|---|---|---|
+| Human label granularity | Collapse the 18 lymphocyte subtypes to the 7 groups used for sampling (CD4 T, CD8 T, γδ T, MAIT, NK, B, plasma). Myeloid, mast, progenitor and erythroid labels unchanged. **31 → 20 labels.** | Matches zebrafish lymphocyte resolution (T, B); the lymphocytes are counterparts, not the focus. The expert-curated myeloid labels are the reason human is in the panel, so they stay fine (Leiden clusters would discard them). Ciona already has 33 labels. |
+| Human depth | **Not downsampled.** | SATURN reconstructs expression per species, so depth differences mostly stay within species; downsampling would be a new step for every species to justify. Optional sensitivity run later: human downsampled to ~3,000 UMIs per cell, check that macrogenes and ortholog recovery do not move. |
+| Small fly groups | **LM-1 (6) + LM-2 (2) → LM (8).** **PL-ImpL2 (21) kept**, flagged. | Lamellocytes are a real, distinct type, but 6- and 2-cell labels cannot be learned. PL-ImpL2 is an author-defined plasmatocyte subtype; the QC doubts (low depth, weak *srp*/*Hml*/*NimC1*, isolated on the UMAP) are not strong enough to remove it, and 21 of 7,517 cells cannot shape the macrogenes. Do not interpret what it clusters with. |
+
+: Label decisions for the 6-species SATURN runs. {#tbl-decisions}
+
+`07g_relabel_Dmel_Hsap.sh` applies these to `02_processed_h5ad/{Dmel,Hsap}_saturn.h5ad`: only `obs['cell_type']` changes, the author label is kept in `obs['cell_type_author']`, the originals are backed up as `*_saturn.pre07g.h5ad`, and the mapping is written to `Dmel_Hsap_relabel_07g.csv`. Counts, cells and genes are unchanged, so the embeddings are unaffected.
 
 Outputs: `/scratch/dark_genes/SATURN_Mnemi/07_new_species_QC/20261016_Dmel_Hsap_QC/` on Pegasus (`summary.txt`, per-cell-type QC tables, per-cell UMAP + QC CSVs, figures), synced locally to `output/SATURN/20261016_Dmel_Hsap_QC/` without the h5ad files.
 
@@ -177,7 +194,8 @@ Outputs: `/scratch/dark_genes/SATURN_Mnemi/07_new_species_QC/20261016_Dmel_Hsap_
 - [ ] Check step 1 of each embedding log (`Genes mapped`, `Proteins mapped`) and the human ESM runtime.
 - [x] Rerun the revised `07d` (job 599517): 1,000 progenitors (of 1,136; all from the Global file) and 78 erythroid cells added; gene list unchanged (35,469 genes).
 - [x] QC and per-species UMAPs of the Dmel and Hsap inputs (`07f`, 2026-10-16): clean, labels confirmed by markers.
-- [ ] Decide human label granularity, human depth downsampling and the small fly groups (LM-1/LM-2, PL-ImpL2) before the 6-species run.
+- [x] Decide human label granularity, human depth downsampling and the small fly groups (2026-10-19, [Decisions](#decisions); applied by `07g`).
+- [ ] Optional: human depth sensitivity run (downsampled to ~3,000 UMIs per cell).
 - [ ] ESMC-600M embeddings for Dmel and Hsap (send the filtered FASTAs to Ingrid).
 - [ ] Add Dmel and Hsap to the SATURN input CSV and run the 6-species ESM-1b and ESMC comparisons.
 - [ ] 6-species OrthoFinder reference (with a choanoflagellate outgroup).
@@ -193,6 +211,7 @@ All in [`pipelines/scripts/saturn_embedding_comparison/`](../pipelines/scripts/s
 | [`07c_inspect_Cattenoz_CellTypist.sh`](../pipelines/scripts/saturn_embedding_comparison/07c_inspect_Cattenoz_CellTypist.sh) | Pegasus | read-only diagnostic: QC, label matching, assay × donor × tissue tables, raw-count checks |
 | [`07d_prepare_Dmel_Hsap.sh`](../pipelines/scripts/saturn_embedding_comparison/07d_prepare_Dmel_Hsap.sh) | Pegasus | builds `Dmel_saturn.h5ad` and `Hsap_saturn.h5ad` (filtering, subsampling, composition table); revised to add human progenitors and erythroid cells |
 | [`07f_QC_UMAP_Dmel_Hsap.sh`](../pipelines/scripts/saturn_embedding_comparison/07f_QC_UMAP_Dmel_Hsap.sh) | Pegasus (`bigmem`) | read-only QC of both SATURN inputs: per-cell-type QC tables, MAD outlier flags, per-species UMAPs, marker dot plots, six-species depth comparison (added 2026-10-16) |
+| [`07g_relabel_Dmel_Hsap.sh`](../pipelines/scripts/saturn_embedding_comparison/07g_relabel_Dmel_Hsap.sh) | Pegasus (`normal`) | applies the 2026-10-19 label decisions (human lymphocytes → 7 groups, fly LM-1/LM-2 → LM); keeps author labels in `cell_type_author` (added 2026-10-19) |
 | [`07e_download_proteomes_Ens113.sh`](../pipelines/scripts/saturn_embedding_comparison/07e_download_proteomes_Ens113.sh) | Pegasus (`transfers`) | Ensembl 113 protein FASTAs + GTFs for human and fly |
 | [`run_config.sh`](../pipelines/scripts/saturn_embedding_comparison/run_config.sh) | Pegasus | adds `Dmel` and `Hsap` species blocks |
 | [`02_embed.sh`](../pipelines/scripts/saturn_embedding_comparison/02_embed.sh) | Pegasus | adds the `ensembl_gene_id` mapping strategy and safe conda activation |
@@ -206,6 +225,7 @@ bsub -q normal -n 1 -W 2:00 -R "rusage[mem=24000] span[hosts=1]" < scripts/07c_i
 bsub < scripts/07d_prepare_Dmel_Hsap.sh
 bsub < scripts/07e_download_proteomes_Ens113.sh
 bsub < scripts/07f_QC_UMAP_Dmel_Hsap.sh   # 2026-10-16 update
+bsub < scripts/07g_relabel_Dmel_Hsap.sh   # 2026-10-19 label decisions
 SPECIES=Dmel bsub -q normal -n 8 -R "rusage[mem=4000] span[hosts=1]" < scripts/02_embed.sh
 SPECIES=Hsap bsub -q normal -n 8 -R "rusage[mem=4000] span[hosts=1]" < scripts/02_embed.sh
 ```

@@ -21,6 +21,13 @@ Metrics per model x transform x metric (euclidean = what SATURN's KMeans sees; c
 
 --write_pt TRANSFORM writes ESMC embeddings transformed that way (all genes) to
 03_embeddings_ESMC600M_<TRANSFORM>/ so a SATURN macrogene run can use them if it wins.
+
+2026-10-19 additions (defaults reproduce the 2026-10-08 run exactly):
+  --esmc_dir / --esmc_label  which ESMC export to test, e.g. 03_embeddings_ESMC600M_postnorm (from 05q)
+  --reference CSV            orthology reference: eggNOG slim table (column metazoa_OG; default) or an
+                             OrthoFinder table from 06c (column group, e.g. 06_orthofinder/ALL4_gene_orthofinder_OG.csv);
+                             OrthoFinder singletons cannot produce a hit and drop out of the query sets
+  --write_model ESM1b        write the transformed ESM-1b embeddings instead (--write_pt abtt2 -> 03_embeddings_ESM1b_abtt2/)
 """
 import argparse
 import pickle
@@ -41,7 +48,11 @@ ap.add_argument("--hv_run_b", default=str(RUNS / "20261002_Mlei_Cgig_Crob_Drer_K
 ap.add_argument("--eggnog", default=str(BASE / "01_proteomes/eggnog_merged/ALL4_gene_protein_metazoaOG_slim.csv"))
 ap.add_argument("--species", default="Mlei,Cgig,Crob,Drer")
 ap.add_argument("--knn_k", type=int, default=10)
-ap.add_argument("--write_pt", default="", help="ESMC transform to write as SATURN .pt files (e.g. zscore)")
+ap.add_argument("--write_pt", default="", help="transform to write as SATURN .pt files (e.g. zscore, abtt2)")
+ap.add_argument("--write_model", default="", help="model to write with --write_pt (default: the ESMC model)")
+ap.add_argument("--esmc_dir", default="03_embeddings_ESMC600M", help="ESMC embedding folder under BASE")
+ap.add_argument("--esmc_label", default="ESMC600M", help="model label in tables/figures")
+ap.add_argument("--reference", default="", help="orthology CSV (species, gene_id, metazoa_OG or group); default --eggnog")
 ap.add_argument("--out_dir", default=str(RUNS / "20261008_embedding_standardization_check"))
 args = ap.parse_args()
 
@@ -49,8 +60,9 @@ SPECIES = args.species.split(",")
 FOLDER = {"Mlei": "Mnemi"}
 MODELS = {
     "ESM1b": lambda sp: BASE / "03_embeddings" / sp / f"{sp}_gene_embeddings.pt",
-    "ESMC600M": lambda sp: BASE / "03_embeddings_ESMC600M" / FOLDER.get(sp, sp) / f"{FOLDER.get(sp, sp)}_gene_embeddings.pt",
+    args.esmc_label: lambda sp: BASE / args.esmc_dir / FOLDER.get(sp, sp) / f"{FOLDER.get(sp, sp)}_gene_embeddings.pt",
 }
+ESMC = args.esmc_label
 TRANSFORMS = ["raw", "unit", "center", "zscore", "zscore_unit", "abtt1", "abtt2", "abtt3"]
 K = args.knn_k
 OUT = Path(args.out_dir)
@@ -152,8 +164,13 @@ def part_ratio(X):
     return ev.sum() ** 2 / (ev ** 2).sum()
 
 
-# ── eggNOG OG sets ──
-egg = pd.read_csv(args.eggnog).dropna(subset=["metazoa_OG"])
+# ── orthology sets (eggNOG Metazoa OGs by default; or an OrthoFinder table from 06c) ──
+REF = args.reference or args.eggnog
+egg = pd.read_csv(REF)
+if "metazoa_OG" not in egg.columns:
+    egg = egg.rename(columns={"group": "metazoa_OG"})
+log(f"Orthology reference: {REF} ({len(egg)} rows)")
+egg = egg.dropna(subset=["metazoa_OG"])
 egg = egg[egg.species.isin(SPECIES)].drop_duplicates(["species", "gene_id", "metazoa_OG"])
 og_of = egg.groupby(["species", "gene_id"])["metazoa_OG"].apply(set)
 og_sets = [og_of.get((s, gname), set()) for s, gname in zip(hv.species, hv.gene)]
@@ -233,7 +250,7 @@ log(res[res.metric == "euclidean"].pivot(index="transform", columns="model", val
 # ── figure ──
 plt.rcParams.update({"font.size": 10, "axes.spines.top": False, "axes.spines.right": False,
                      "axes.edgecolor": "#8a8a85", "axes.titleweight": "bold", "axes.titlesize": 10})
-MC = {"ESM1b": "#eb6834", "ESMC600M": "#1baf7a"}
+MC = {"ESM1b": "#eb6834", ESMC: "#1baf7a"}
 fig, axes = plt.subplots(1, 2, figsize=(12, 3.9), sharey=True)
 x = np.arange(len(TRANSFORMS))
 for ax, metric in zip(axes, ["euclidean", "cosine"]):
@@ -248,11 +265,13 @@ fig.tight_layout(); fig.savefig(OUT / "figures" / "FigI1_standardization_hit1.pn
 # ── optional: write transformed ESMC for SATURN ──
 if args.write_pt:
     import torch
-    X = transform(ALL["ESMC600M"], args.write_pt, HVIDX["ESMC600M"])
-    keys = KEYS["ESMC600M"]
+    wm = args.write_model or ESMC
+    X = transform(ALL[wm], args.write_pt, HVIDX[wm])
+    keys = KEYS[wm]
+    root = (BASE / f"03_embeddings_ESM1b_{args.write_pt}") if wm == "ESM1b" else (BASE / f"{args.esmc_dir}_{args.write_pt}")
     for s in SPECIES:
-        f = FOLDER.get(s, s)
-        dst = BASE / f"03_embeddings_ESMC600M_{args.write_pt}" / f / f"{f}_gene_embeddings.pt"
+        f = s if wm == "ESM1b" else FOLDER.get(s, s)
+        dst = root / f / f"{f}_gene_embeddings.pt"
         dst.parent.mkdir(parents=True, exist_ok=True)
         d = {k: torch.tensor(X[i]) for i, (sp_, k) in enumerate(keys) if sp_ == s}
         torch.save(d, dst)

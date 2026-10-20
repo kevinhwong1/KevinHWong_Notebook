@@ -10,6 +10,9 @@ Models (each skipped with a warning if its files are missing):
   ESMC600M_raw       03_embeddings_ESMC600M/{F}/{F}_gene_embeddings.pt     (FANTASIA v4, as converted by 05)
   ESMC600M_rescaled  03_embeddings_ESMC600M_rescaled/{F}/...               (05e: unit length x mean ESM-1b norm)
   ({F} = "Mnemi" for Mlei, otherwise the species code)
+  extra models (2026-10-19): --extra_model LABEL=DIR (repeatable), e.g.
+                     ESMC600M_postnorm=03_embeddings_ESMC600M_postnorm   (Ingrid's 2nd export, via 05q)
+  --models picks a subset by label (default: all that exist)
 
 Gene sets
   all_in_file : every gene in that model's embedding file (differs by model)
@@ -51,6 +54,8 @@ ap.add_argument("--eggnog", default=str(BASE / "01_proteomes/eggnog_merged/ALL4_
 ap.add_argument("--species", default="Mlei,Cgig,Crob,Drer")
 ap.add_argument("--knn_k", type=int, default=10)
 ap.add_argument("--out_dir", default=str(RUNS / "20261005_embedding_descriptives"))
+ap.add_argument("--extra_model", action="append", default=[], help="LABEL=DIR under BASE ({F}/{F}_gene_embeddings.pt)")
+ap.add_argument("--models", default="", help="comma-separated labels to keep (default: all)")
 args = ap.parse_args()
 
 SPECIES = args.species.split(",")
@@ -64,9 +69,16 @@ MODELS = {
     "ESMC600M_raw": lambda sp: BASE / "03_embeddings_ESMC600M" / FOLDER.get(sp, sp) / f"{FOLDER.get(sp, sp)}_gene_embeddings.pt",
     "ESMC600M_rescaled": lambda sp: BASE / "03_embeddings_ESMC600M_rescaled" / FOLDER.get(sp, sp) / f"{FOLDER.get(sp, sp)}_gene_embeddings.pt",
 }
+for em in args.extra_model:
+    lab, d = em.split("=", 1)
+    MODELS[lab] = (lambda dd: (lambda sp: BASE / dd / FOLDER.get(sp, sp) / f"{FOLDER.get(sp, sp)}_gene_embeddings.pt"))(d)
+if args.models:
+    MODELS = {k: v for k, v in MODELS.items() if k in args.models.split(",")}
 # categorical palette: models keep the colours used for their SATURN runs in 05g
 MCOL = {"ESM1b": "#eb6834", "ESMC600M_raw": "#1baf7a", "ESMC600M_rescaled": "#eda100"}
-SCOL = dict(zip(SPECIES, ["#e87ba4", "#008300", "#4a3aa7", "#e34948"]))
+for k, c in zip([m for m in MODELS if m not in MCOL], ["#3a7bd5", "#8e44ad", "#7f8c8d"]):
+    MCOL[k] = c
+SCOL = dict(zip(SPECIES, ["#e87ba4", "#008300", "#4a3aa7", "#e34948", "#eda100", "#2a78d6"]))  # 6 sp (2026-10-19)
 INK, MUTED = "#222222", "#8a8a85"
 K = args.knn_k
 OUT = Path(args.out_dir)

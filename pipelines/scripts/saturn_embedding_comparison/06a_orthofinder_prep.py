@@ -13,6 +13,15 @@ the same protein -> gene bridges as the SATURN embeddings (check_proteome_overla
                                  but part of the proteome OrthoFinder should see), EXCEPT unnamed genes on GRCz11
                                  alternate-haplotype contigs (ALT_CTG), which duplicate primary loci and are dropped
                                  (named ALT genes collapse with their primary copy by symbol)
+    Dmel  ensembl_gene_id        Ensembl pep.all header 'gene:FBgn...' (version stripped) = h5ad var_names
+    Hsap  ensembl_gene_id        Ensembl pep.all header 'gene:ENSG...'  (version stripped) = h5ad var_names;
+                                 proteins on non-primary scaffolds are dropped: alternate haplotypes (HSCHR*) and
+                                 fix/novel patches (HG*). In Ensembl r113 pep.all that is 11,512 proteins from
+                                 3,337 genes, 98% of whose proteins share a symbol with a primary-assembly gene (they would
+                                 otherwise look like paralogs). Unplaced/unlocalised primary scaffolds (KI*, GL*) are kept.
+    Sros  gff_cds_locus          outgroup (choanoflagellate Salpingoeca rosetta, NCBI; 06a0_download_outgroup.sh):
+                                 protein_id -> locus_tag (or gene=) from GFF3 CDS lines; not a SATURN species, it
+                                 only roots the tree so OrthoFinder writes root-level HOGs
 The bridged-fraction check counts dropped ALT proteins as intentionally excluded.
 All genes in the proteome are kept (not only HV genes): orthogroups are better inferred from whole proteomes;
 the benchmarks restrict to the SATURN genes afterwards.
@@ -20,10 +29,17 @@ the benchmarks restrict to the SATURN genes afterwards.
 Sequence clean-up: trailing '*' removed; internal '*' -> 'X' (OrthoFinder/DIAMOND do not accept stops).
 FASTA headers are short neutral IDs (Mlei_000001 ...); id_map.tsv maps them back.
 
-Outputs (06_orthofinder/):
+Species sets (--species; default = the original 4, so the 2026-10-15 run is reproducible):
+    Mlei,Cgig,Crob,Drer                      tree (Mlei,(Cgig,(Crob,Drer)));
+    Mlei,Cgig,Crob,Drer,Dmel,Hsap,Sros       tree (Sros,(Mlei,((Cgig,Dmel),(Crob,(Drer,Hsap)))));
+        With the outgroup, N0 = Choanozoa (root) and the Metazoa-level HOGs are the node joining Mlei and the
+        bilaterians (check the label in SpeciesTree_rooted_node_labels.txt; expected N1).
+        Ctenophore-first is assumed; with one ctenophore and no sponge, sponge-first gives the same Metazoa node.
+
+Outputs (--out_dir, default 06_orthofinder/):
   input/<sp>.faa            one longest protein per gene
   id_map.tsv                species, of_id, gene_id, protein_id, length, n_proteins_for_gene
-  species_tree.nwk          (Mlei,(Cgig,(Crob,Drer)));  fixed tree for OrthoFinder -s
+  species_tree.nwk          fixed tree for OrthoFinder -s (see above)
   prep_summary.txt          proteins read, bridged, genes written, per species
 """
 import argparse
@@ -35,6 +51,8 @@ BASE = Path("/scratch/dark_genes/SATURN_Mnemi")
 ap = argparse.ArgumentParser()
 ap.add_argument("--base", default=str(BASE))
 ap.add_argument("--out_dir", default="")
+ap.add_argument("--species", default="Mlei,Cgig,Crob,Drer",
+                help="comma-separated; 6-species run: Mlei,Cgig,Crob,Drer,Dmel,Hsap,Sros")
 ap.add_argument("--min_bridged_frac", type=float, default=0.8,
                 help="stop with an error if fewer proteins than this are bridged to a gene")
 args = ap.parse_args()
@@ -43,15 +61,33 @@ P = BASE / "01_proteomes"
 OUT = Path(args.out_dir) if args.out_dir else BASE / "06_orthofinder"
 (OUT / "input").mkdir(parents=True, exist_ok=True)
 
-CFG = {
+ALL_CFG = {
     "Mlei": {"fasta": P / "Mlei/Mlei.protein.faa", "gtf": None, "strategy": "direct"},
     "Cgig": {"fasta": P / "Cgig/Cgig.protein.faa", "gtf": P / "Cgig/Cgig.genomic.gtf", "strategy": "gtf_loc_to_xp"},
     "Crob": {"fasta": P / "Crob/Crob_KY21_ghost.faa", "gtf": None, "strategy": "direct_strip_suffix"},
     "Drer": {"fasta": P / "Drer/Drer.protein.faa", "gtf": P / "Drer/Drer.genomic.gtf", "strategy": "gtf_symbol_to_ensdarg"},
+    "Dmel": {"fasta": P / "Dmel/Drosophila_melanogaster.BDGP6.46.pep.all.fa", "gtf": None, "strategy": "ensembl_gene_id"},
+    "Hsap": {"fasta": P / "Hsap/Homo_sapiens.GRCh38.pep.all.fa", "gtf": None, "strategy": "ensembl_gene_id"},
+    "Sros": {"fasta": P / "Sros/Sros.protein.faa", "gtf": P / "Sros/Sros.genomic.gff", "strategy": "gff_cds_locus"},
 }
+TREES = {
+    ("Cgig", "Crob", "Drer", "Mlei"): "(Mlei,(Cgig,(Crob,Drer)));",
+    ("Cgig", "Crob", "Dmel", "Drer", "Hsap", "Mlei", "Sros"): "(Sros,(Mlei,((Cgig,Dmel),(Crob,(Drer,Hsap)))));",
+}
+SEL = [x.strip() for x in args.species.split(",") if x.strip()]
+unknown = [x for x in SEL if x not in ALL_CFG]
+if unknown:
+    raise SystemExit(f"Unknown species {unknown}; known: {list(ALL_CFG)}")
+if tuple(sorted(SEL)) not in TREES:
+    raise SystemExit(f"No species tree defined for {sorted(SEL)}; add one to TREES")
+CFG = {sp: ALL_CFG[sp] for sp in SEL}
+for sp, c in CFG.items():
+    for k in ("fasta", "gtf"):
+        if c[k] is not None and not Path(c[k]).exists():
+            raise SystemExit(f"{sp}: {k} not found: {c[k]}")
 LOG = []
 ALT_PIDS = set()  # Drer proteins on ALT_CTG contigs (a primary-assembly protein is preferred when a gene has one)
-EXCLUDED = {}   # species -> proteins intentionally left out (Drer unnamed ALT_CTG duplicates)
+EXCLUDED = {}   # species -> proteins intentionally left out (Drer unnamed ALT_CTG duplicates; Hsap non-primary scaffolds)
 
 
 def log(m=""):
@@ -137,6 +173,47 @@ def bridge(sp, recs):
         EXCLUDED[sp] = n_alt_dropped
         log(f"  Drer: {n_fallback:,} proteins from unnamed primary-assembly genes kept under their ENSDARG id")
         return out
+    if s == "ensembl_gene_id":
+        gre = re.compile(r"gene:([^ .]+)")          # same regex as 02_embed.sh step1_ensembl_gene_id.py
+        loc = re.compile(r"^\S+\s+pep\s+(\S+)")   # e.g. chromosome:GRCh38:14:..., scaffold:GRCh38:HSCHR7_2_CTG6:...
+        out, n_nonprim, nonprim_genes = {}, 0, set()
+        for pid, (head, _) in recs.items():
+            m = gre.search(head)
+            if not m:
+                continue
+            lm = loc.search(head)
+            parts = lm.group(1).split(":") if lm else []
+            if len(parts) > 2 and parts[0] == "scaffold" and (parts[2].startswith("HSCHR") or parts[2].startswith("HG")):
+                n_nonprim += 1; nonprim_genes.add(m.group(1))
+                continue
+            out[pid] = m.group(1)
+        EXCLUDED[sp] = n_nonprim
+        log(f"  {sp}: {n_nonprim:,} proteins ({len(nonprim_genes):,} genes) on alternate-haplotype / patch scaffolds "
+            f"(HSCHR*, HG*) dropped")
+        return out
+    if s == "gff_cds_locus":
+        pid_re = re.compile(r"protein_id=([^;]+)")
+        key_res = [re.compile(r"locus_tag=([^;]+)"), re.compile(r"gene=([^;]+)")]
+        p2g = {}
+        with open(CFG[sp]["gtf"]) as f:
+            for line in f:
+                if line.startswith("#"):
+                    continue
+                p = line.rstrip("\n").split("\t")
+                if len(p) < 9 or p[2] != "CDS":
+                    continue
+                m = pid_re.search(p[8])
+                if not m:
+                    continue
+                for kr in key_res:
+                    k = kr.search(p[8])
+                    if k:
+                        p2g[m.group(1)] = k.group(1); break
+        out = {pid: p2g.get(pid, pid) for pid in recs}
+        n_self = sum(1 for pid in recs if pid not in p2g)
+        log(f"  {sp}: {len(recs) - n_self:,} proteins bridged to a locus via GFF CDS lines; "
+            f"{n_self:,} kept as their own gene (no CDS record)")
+        return out
     raise ValueError(s)
 
 
@@ -169,6 +246,6 @@ for sp, cfg in CFG.items():
                 fo.write(seq[j:j + 80] + "\n")
             rows.append(f"{sp}\t{of_id}\t{gene}\t{best}\t{len(seq)}\t{len(pids)}")
 (OUT / "id_map.tsv").write_text("\n".join(rows) + "\n")
-(OUT / "species_tree.nwk").write_text("(Mlei,(Cgig,(Crob,Drer)));\n")
+(OUT / "species_tree.nwk").write_text(TREES[tuple(sorted(SEL))] + "\n")
 (OUT / "prep_summary.txt").write_text("\n".join(LOG) + "\n")
 log("Wrote " + str(OUT / "input") + ", id_map.tsv, species_tree.nwk")

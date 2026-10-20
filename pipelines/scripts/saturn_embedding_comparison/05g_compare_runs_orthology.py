@@ -30,6 +30,14 @@ Sections
                            OG recovery = multi-species OGs with >=1 cross-species
                                        pair co-assigned / multi-species OGs
 Outputs: --out_dir (CSV tables, PNG figures, summary.txt)
+
+2026-10-19 (6-species panel; defaults reproduce the 2026-10-05 run):
+  --reference CSV   orthology table to score against instead of eggNOG: an OrthoFinder table from 06c
+                    (column 'group', e.g. 06_orthofinder_6sp/ALL6_gene_orthofinder_OG.csv). eggNOG has no fly/human.
+                    With OrthoFinder every gene has a group (singletons included), so precision counts a singleton
+                    co-assigned with another species' gene as a false pair (as in 05n/05p --reference of_og).
+  extra pooled scopes when the species are present: Drer_Hsap (vertebrate positive control),
+  invertebrate_pairs (Mlei/Cgig/Dmel pairs; non_Mlei_pairs = bilaterian pairs).
 """
 import argparse
 import pickle
@@ -55,6 +63,7 @@ DEFAULT_RUNS = ",".join([
 ap = argparse.ArgumentParser()
 ap.add_argument("--runs", default=DEFAULT_RUNS, help="comma-separated label=run_dir")
 ap.add_argument("--eggnog", default=str(BASE / "01_proteomes/eggnog_merged/ALL4_gene_protein_metazoaOG_slim.csv"))
+ap.add_argument("--reference", default="", help="orthology CSV with species, gene_id, group (06c); default: --eggnog")
 ap.add_argument("--species", default="Mlei,Cgig,Crob,Drer")
 ap.add_argument("--n_perm", type=int, default=20)
 ap.add_argument("--out_dir", default=str(RUNS / "20261005_run_comparison_orthology"))
@@ -103,7 +112,8 @@ def load_run(run_dir):
 
 t0 = time.time()
 log("=" * 70)
-log("SATURN run comparison + eggNOG ortholog benchmark")
+REFNAME = ("OrthoFinder (" + Path(args.reference).name + ")") if args.reference else "eggNOG Metazoa OGs"
+log("SATURN run comparison + ortholog benchmark vs " + REFNAME)
 log("=" * 70)
 RUNSD = {}
 for item in args.runs.split(","):
@@ -123,8 +133,10 @@ for l in KNOWN:
 for l in LABS:
     if l not in RCOL:
         RCOL[l] = next(c for c in ["#e87ba4", "#008300", "#4a3aa7", "#e34948"] if c not in RCOL.values())
+if len(LABS) < 1:
+    raise SystemExit("No run could be loaded")
 if len(LABS) < 2:
-    raise SystemExit("Need at least two runs")
+    log("Only one run: R2 (run agreement) and FigR3 are skipped")
 
 common = sorted(set.intersection(*[set(RUNSD[l][0]["key"]) for l in LABS]))
 cg = pd.DataFrame({"key": common, "species": [k.split("_", 1)[0] for k in common],
@@ -181,14 +193,17 @@ for scope in ["ALL"] + SPECIES:
             rows.append({"scope": scope, "run_a": a, "run_b": b,
                          "ARI": adjusted_rand_score(LAB[a][msk], LAB[b][msk]),
                          "AMI": adjusted_mutual_info_score(LAB[a][msk], LAB[b][msk])})
-r2 = pd.DataFrame(rows); save(r2, "R2_pairwise_agreement.csv")
+r2 = pd.DataFrame(rows, columns=["scope", "run_a", "run_b", "ARI", "AMI"]); save(r2, "R2_pairwise_agreement.csv")
 log(r2[r2["scope"] == "ALL"].round(3).to_string(index=False))
 
 # ════════════════════════════════════════════════════════════
 # R3. Ortholog benchmark
 # ════════════════════════════════════════════════════════════
-log("\n── R3. eggNOG Metazoa-OG benchmark ──")
-egg = pd.read_csv(args.eggnog).dropna(subset=["metazoa_OG"])
+log("\n── R3. Ortholog benchmark vs " + REFNAME + " ──")
+egg = pd.read_csv(args.reference or args.eggnog)
+if "metazoa_OG" not in egg.columns:
+    egg = egg.rename(columns={"group": "metazoa_OG"})
+egg = egg.dropna(subset=["metazoa_OG"])
 egg = egg[egg["species"].isin(SPECIES)].drop_duplicates(["species", "gene_id", "metazoa_OG"])
 idx = pd.Series(np.arange(N), index=pd.MultiIndex.from_arrays([cg["species"], cg["gene"]]))
 mi = pd.MultiIndex.from_arrays([egg["species"], egg["gene_id"]])
@@ -265,9 +280,16 @@ log(r3[show].round(4).to_string(index=False))
 # pooled over species pairs, and Mlei-involving pairs only
 summ = []
 for l in LABS:
-    for scope, msk in [("all_pairs", np.ones(len(r3), bool)),
-                       ("Mlei_pairs", (r3["species_1"] == "Mlei") | (r3["species_2"] == "Mlei")),
-                       ("non_Mlei_pairs", (r3["species_1"] != "Mlei") & (r3["species_2"] != "Mlei"))]:
+    s1, s2 = r3["species_1"], r3["species_2"]
+    INV = ["Mlei", "Cgig", "Dmel"]
+    scopes = [("all_pairs", np.ones(len(r3), bool)),
+              ("Mlei_pairs", (s1 == "Mlei") | (s2 == "Mlei")),
+              ("non_Mlei_pairs", (s1 != "Mlei") & (s2 != "Mlei"))]
+    if {"Drer", "Hsap"} <= set(SPECIES):
+        scopes.append(("Drer_Hsap", ((s1 == "Drer") & (s2 == "Hsap")) | ((s1 == "Hsap") & (s2 == "Drer"))))
+    if "Dmel" in SPECIES:
+        scopes.append(("invertebrate_pairs", s1.isin(INV) & s2.isin(INV)))
+    for scope, msk in scopes:
         d = r3[(r3["run"] == l) & msk]
         if d.empty:
             continue
@@ -314,24 +336,25 @@ ax.set_title("Macrogene size distribution"); ax.legend(frameon=False, fontsize=8
 fig.tight_layout(); fig.savefig(FIG / "FigR2_macrogene_size_ecdf.png", dpi=200); plt.close(fig)
 
 # FigR3: ARI heatmap (pooled)
-from matplotlib.colors import LinearSegmentedColormap
-cmap = LinearSegmentedColormap.from_list("seq_blue", SEQ)
-M = np.eye(nl)
-for _, r in r2[r2["scope"] == "ALL"].iterrows():
-    i, j = LABS.index(r["run_a"]), LABS.index(r["run_b"])
-    M[i, j] = M[j, i] = r["ARI"]
-fig, ax = plt.subplots(figsize=(4.8, 4.2))
-im = ax.imshow(M, cmap=cmap, vmin=0, vmax=1)
-for i in range(nl):
-    for j in range(nl):
-        ax.text(j, i, f"{M[i, j]:.2f}", ha="center", va="center", fontsize=9,
-                color="white" if M[i, j] > 0.55 else INK)
-ax.set_xticks(range(nl), LABS, rotation=35, ha="right"); ax.set_yticks(range(nl), LABS)
-ax.set_title("Macrogene agreement between runs (ARI)")
-for sp in ax.spines.values():
-    sp.set_visible(False)
-fig.colorbar(im, ax=ax, fraction=0.046)
-fig.tight_layout(); fig.savefig(FIG / "FigR3_run_agreement_ARI.png", dpi=200); plt.close(fig)
+if len(LABS) >= 2:
+    from matplotlib.colors import LinearSegmentedColormap
+    cmap = LinearSegmentedColormap.from_list("seq_blue", SEQ)
+    M = np.eye(nl)
+    for _, r in r2[r2["scope"] == "ALL"].iterrows():
+        i, j = LABS.index(r["run_a"]), LABS.index(r["run_b"])
+        M[i, j] = M[j, i] = r["ARI"]
+    fig, ax = plt.subplots(figsize=(4.8, 4.2))
+    im = ax.imshow(M, cmap=cmap, vmin=0, vmax=1)
+    for i in range(nl):
+        for j in range(nl):
+            ax.text(j, i, f"{M[i, j]:.2f}", ha="center", va="center", fontsize=9,
+                    color="white" if M[i, j] > 0.55 else INK)
+    ax.set_xticks(range(nl), LABS, rotation=35, ha="right"); ax.set_yticks(range(nl), LABS)
+    ax.set_title("Macrogene agreement between runs (ARI)")
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+    fig.colorbar(im, ax=ax, fraction=0.046)
+    fig.tight_layout(); fig.savefig(FIG / "FigR3_run_agreement_ARI.png", dpi=200); plt.close(fig)
 
 # FigR4: ortholog recall / precision / OG recovery per species pair
 pl = [s + " - " + t for s, t in PAIRS]
