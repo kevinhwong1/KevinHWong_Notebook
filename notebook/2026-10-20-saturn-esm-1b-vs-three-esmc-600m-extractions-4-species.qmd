@@ -27,7 +27,7 @@ tools: ["SATURN", "ESM-1b", "ESMC-600M (FANTASIA v4)", "eggNOG-mapper", "OrthoFi
   - with the best standard fix it reaches 46–47%, still below unprocessed ESM-1b (@tbl-fixes).
 - **The post-norm vectors are more collapsed and more species-specific:** about 3 effective dimensions vs 10 for ESM-1b, and more variance explained by species (@tbl-geometry).
 - **Rescaling the first export changed vector lengths but not directions,** and helped little: 34% → 36% here; macrogene recall 0.15 → 0.16 on Oct 8.
-- **So both ways of reading ESMC's last layer, before and after its final normalization, fall below ESM-1b.** Intermediate layers have not been tested.
+- **So both ways of reading ESMC's last layer, before and after its final normalization, fall below ESM-1b.** Intermediate layers have not been tested. The ESMC paper (Candido et al. 2026) finds functional information peaks in intermediate layers, not the last one, so this is the obvious next test.
 :::
 
 This entry pulls together the ESM-1b vs ESMC comparisons of [Oct 6](2026-10-06-saturn-4-species-esm1b-vs-esmc-600m-macrogene-comparison.qmd), [Oct 8](2026-10-08-saturn-esm1b-vs-esmc-600m-ortholog-benchmark-and-macrogene-composition.qmd) and [Oct 9](2026-10-09-saturn-esmc-extraction-macrogenes-vs-orthogroups-k-sweep.qmd), and adds the second ESMC export. Everything here uses the four original species (*Mnemiopsis*, oyster, *Ciona*, zebrafish).
@@ -39,7 +39,7 @@ This entry pulls together the ESM-1b vs ESMC comparisons of [Oct 6](2026-10-06-s
 | **Protein language model (pLM)** | A neural network trained to predict masked amino acids. On the way it learns a numerical description of each residue. |
 | **Embedding** | One vector per protein, the average of the per-residue vectors from one layer of the pLM (*mean pooling*). SATURN uses one per gene, averaging the gene's isoforms. |
 | **Extraction** | The choices made when pulling an embedding out of a model: which layer, whether before or after the final normalization step, how residues are averaged, how long proteins are cut. Same model + different extraction = different embeddings. |
-| **LayerNorm** | A normalization step inside transformer models. For *each residue separately*, it shifts and scales that residue's vector to mean 0 and standard deviation 1 across its 1,152 numbers, then multiplies each dimension by a learned weight and adds a learned offset. ESMC ends with one, just before its output (section 1.1). |
+| **LayerNorm** | A normalization step inside transformer models. For *each residue separately*, it shifts and scales that residue's vector to mean 0 and standard deviation 1 across its 1,152 numbers, then multiplies each dimension by a learned weight and adds a learned offset. ESMC ends with one, just before its output (section 1.1; Candido et al. 2026, Appendix A.1.1). |
 | **Hidden states / residual stream** | The per-residue vectors passed from one transformer block to the next. The last block's output, before the final LayerNorm, is what the first ESMC export used. |
 | **Vector length (L2 norm)** | √(sum of squared values). For similarity, the *direction* of a vector carries the protein information; length mostly reflects the extraction. |
 | **Most-similar-gene test (hit@1)** | For each gene in species A, take the most similar gene in species B and check whether both are in the same orthologous group. hit@10 = a true ortholog among the 10 most similar. Averaged over all 12 directed species pairs. No SATURN involved. |
@@ -59,11 +59,11 @@ This entry pulls together the ESM-1b vs ESMC comparisons of [Oct 6](2026-10-06-s
   - 650 million parameters, 33 layers, 1,280 numbers per protein.
   - Trained on UniRef50.
   - Reads up to 1,022 residues.
-- **ESM C 600M** (EvolutionaryScale 2024) is a newer model of similar size.
-  - 36 layers, 1,152 numbers per protein.
-  - Trained on a larger and more diverse sequence set that includes metagenomic proteins.
-  - Updated architecture.
-  - Collaborators proposed it as the stronger model.
+- **ESM C 600M** (EvolutionaryScale 2024; described in full in Candido et al. 2026) is a newer model of similar size.
+  - 36 layers, 1,152 numbers per protein (Candido et al. 2026, Table S1).
+  - Trained on ~2.8 billion sequences vs ~50 million for ESM2, mostly metagenomic (JGI, MGnify) plus UniRef. Training ran in two stages: first 512-token context weighted to metagenomes, then 2,048-token context weighted to UniRef (Table S2–S3).
+  - Updated architecture: pre-norm transformer blocks, rotary position embeddings, and a final LayerNorm after the last block (Appendix A.1.1).
+  - Collaborators proposed it as the stronger model. On contact prediction, ESMC 600M matches ESM2-3B (Candido et al. 2026, Fig. 1C). The paper does not compare it with ESM-1b, nor test cross-species ortholog retrieval from mean-pooled final-layer vectors, which is what SATURN uses.
 
 **The three ESMC sets: one model, three extractions.**
 
@@ -82,11 +82,11 @@ This entry pulls together the ESM-1b vs ESMC comparisons of [Oct 6](2026-10-06-s
 
 - **Rescaled is raw with the length removed.** Its directions are identical to raw, so every cosine (direction-only) result is the same for the two.
 - **Post-norm is not just raw rescaled.** Its directions differ: cosine results drop from 36% to 29% (@tbl-nn). Section 1.1 explains why.
-- **Truncation is the same for all three ESMC sets** (2,000 residues; 1–4% of proteins are longer). It differs from ESM-1b (1,022), but can't explain differences *between* the ESMC sets.
+- **Truncation is the same for all three ESMC sets** (2,000 residues, inside ESMC's 2,048-token training context; Candido et al. 2026, Table S3; 1–4% of proteins are longer). It differs from ESM-1b (1,022), but can't explain differences *between* the ESMC sets.
 
 ## 1.1 What "post-norm" means
 
-ESMC, like ESM-1b, processes a protein as a stack of transformer blocks. Each block updates one 1,152-number vector per residue. After the last block comes one more step, a final **LayerNorm**, and its output is what the model's own prediction head uses. A protein embedding is made by averaging the per-residue vectors over the protein. The question is *which* per-residue vectors are averaged.
+ESMC, like ESM-1b, processes a protein as a stack of transformer blocks. Each block updates one 1,152-number vector per residue. After the last block comes one more step, a final **LayerNorm**, and its output is what the model's own prediction head uses (Candido et al. 2026, Appendix A.1.1: each block normalizes its *input* and adds its output back to the residual stream, so the stream itself is never normalized until this final step). A protein embedding is made by averaging the per-residue vectors over the protein. The question is *which* per-residue vectors are averaged.
 
 | | Per-residue vectors averaged | In words |
 |---|---|---|
@@ -105,7 +105,7 @@ ESMC, like ESM-1b, processes a protein as a stack of transformer blocks. Each bl
 - **Learned weights.** The weights in step 2 reweight the dimensions: some are amplified and others shrunk.
 
 **Why the lengths differ:**
-- **Raw vectors are long (~1,700–8,900)** because the residual stream before the final normalization is unnormalized.
+- **Raw vectors are long (~1,700–8,900)** because the residual stream before the final normalization is unnormalized: in ESMC's pre-norm blocks, normalization is applied only to each block's input, never to the stream (Candido et al. 2026, Appendix A.1.1).
 - **Post-norm vectors are short (~1).** Each residue's vector is normalized before averaging, and the length after averaging also depends on the learned weights and on how much residue directions cancel.
 - **ESM-1b (~16–20)** is read after its own final LayerNorm, so post-norm is the ESMC extraction that matches our ESM-1b convention.
 
@@ -173,7 +173,7 @@ All comparisons use the same genes: the **31,808 highly variable genes** that en
 ![First two principal components of each embedding set, coloured by species (pink *Mnemiopsis*, green oyster, purple *Ciona*, red zebrafish).](/images/20261020_esm_four_sets_pca.png){#fig-pca}
 
 - **Post-norm vectors are the most collapsed.** More than half the variance sits on one direction, and about 3 directions do most of the work. That one direction still tracks vector length, as in raw.
-- **All three ESMC sets separate species more than ESM-1b does** (species R² 0.12–0.15 vs 0.075). In the PCA, a block of *Ciona* genes forms a separate arm in raw and rescaled ESMC.
+- **All three ESMC sets separate species more than ESM-1b does** (species R² 0.12–0.15 vs 0.075). The ESMC authors expect some of this: the model encodes features correlated with the source organism, and in mean-pooled vectors this broad taxonomic signal can drown out local functional features (Candido et al. 2026, Appendix A.4.5.4, citing Ding & Steinhardt 2024). In the PCA, a block of *Ciona* genes forms a separate arm in raw and rescaled ESMC.
 - **Fewer cross-species neighbours, especially for zebrafish:**
   - Of each zebrafish gene's 10 most similar genes, 35% come from other species with ESM-1b, vs 24–25% with any ESMC set (random expectation ≈ 75%).
   - For the invertebrates the sets are closer: 39–49% for all.
@@ -245,18 +245,24 @@ The embedding-level ranking (@tbl-nn) matched the macrogene ranking for the thre
    - The extraction is now fully documented: final block, before (raw) or after (post-norm) the final LayerNorm, mean over residues, start/end tokens excluded, 2,000-residue limit.
    - Reading after the LayerNorm, the convention that matches ESM-1b, made the results *worse*, not better.
    - Still untested: intermediate layers, which for several protein language models carry more transferable information than the last layer. Those would settle whether the gap is about ESMC itself or about where it is read.
-3. **One property is shared by every ESMC export: more species signal and fewer cross-species neighbours, especially for zebrafish.** In SATURN this shows up as zebrafish genes set apart in their own macrogenes (Oct 8).
+   - The ESMC paper supports this directly:
+     - in ESMC 6B, functional organization (enzyme class by nearest neighbours) peaks at layers 50–60 of 80, while structure peaks in the final layers (Candido et al. 2026, Fig. 1D);
+     - for stability probes, the second-to-last layer beat the final layer, which "is projected to final sequence logits" (Appendix A.1.4).
+   - Those analyses are within one model and not cross-species, and the 600M layer profile isn't shown, so they suggest where to look but don't predict our result.
+3. **One property is shared by every ESMC export: more species signal and fewer cross-species neighbours, especially for zebrafish.** In SATURN this shows up as zebrafish genes set apart in their own macrogenes (Oct 8). This matches the taxonomic bias the ESMC authors describe for mean-pooled embeddings (Candido et al. 2026, Appendix A.4.5.4; Ding & Steinhardt 2024). Because ESMC's training data are mostly metagenomic (largely microbial), animal lineages may be sampled unevenly, but we haven't tested that.
 
 # Caveats
 
 - **Both references are sequence-based** (eggNOG and OrthoFinder) and could favour a model whose similarity tracks sequence. A gap present before SATURN and surviving every fix is hard to explain this way.
 - **All ESMC sets keep residues 1–2,000; ESM-1b keeps residues 1–1,022.** This affects 1–4% of proteins per species and can't explain gaps of this size.
 - **Only the final layer has been extracted for ESMC.** The FANTASIA files contain no other layers.
+- **All four sets use mean pooling.** The ESMC paper shows that, with mean pooling, one broadly active feature can dominate cosine similarity between distant homologs (71% of it in their human vs *Candida* ATP8 example; max pooling reduced this). That example is in sparse-autoencoder feature space, not the dense vectors used here (Candido et al. 2026, Appendix A.4.5.1). Pooling choice is untested here.
+- **ESMC was trained in bf16 mixed precision** (Candido et al. 2026, Table S3); both ESMC exports were run in fp32. This is a standard setup and isn't expected to matter.
 
 # Next steps
 
 - [x] Extraction details confirmed by Ingrid (section 1.1).
-- [ ] Ask whether an intermediate-layer export (e.g. two-thirds of the way through the 36 blocks) is feasible for one species, to test layer choice.
+- [ ] Ask whether an intermediate-layer export (e.g. two-thirds of the way through the 36 blocks, around block 24, by analogy with the layer 50–60 of 80 function peak in ESMC 6B; Candido et al. 2026, Fig. 1D) is feasible for one species, to test layer choice. The second-to-last block is a cheap second option (Appendix A.1.4).
 - [ ] Score the 6-species post-norm macrogene run when it finishes.
 
 # Scripts
@@ -282,7 +288,9 @@ bsub -q normal -P dark_genes -R "rusage[mem=32000]" < scripts/05r_esmc_postnorm_
 # References
 
 - Rives A. et al. (2021) Biological structure and function emerge from scaling unsupervised learning to 250 million protein sequences. *PNAS* 118:e2016239118.
+- **Candido S., Hayes T., Derry A., Rao R., Lin Z., Verkuil R., … Rives A. (2026) Language modeling materializes a world model of protein biology. *bioRxiv*, posted June 4, 2026. doi:[10.64898/2026.06.03.729735](https://doi.org/10.64898/2026.06.03.729735).** The primary ESMC paper: architecture (Appendix A.1.1, Table S1), training data and context (Tables S2–S3), layerwise analyses (Fig. 1D, Appendix A.1.4), pooling and taxonomic bias (Appendix A.4.5.1, A.4.5.4).
 - EvolutionaryScale (2024) ESM Cambrian. <https://evolutionaryscale.ai/blog/esm-cambrian>
+- Ding F., Steinhardt J. (2024) Protein language models are biased by unequal sequence sampling across the tree of life. *bioRxiv*.
 - Miranda Perez I. (2026) Extraction details of the FANTASIA v4.1.1 and post-norm ESMC-600M exports (personal communication, Oct 2026).
 - Rosen Y. et al. (2024) Toward universal cell embeddings: integrating single-cell RNA-seq datasets across species with SATURN. *Nature Methods* 21:1492–1500.
 - Mu J., Viswanath P. (2018) All-but-the-top: simple and effective postprocessing for word representations. *ICLR 2018*. <https://arxiv.org/abs/1702.01417>
