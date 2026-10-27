@@ -52,6 +52,7 @@ ap.add_argument("--write_pt", default="", help="transform to write as SATURN .pt
 ap.add_argument("--write_model", default="", help="model to write with --write_pt (default: the ESMC model)")
 ap.add_argument("--esmc_dir", default="03_embeddings_ESMC600M", help="ESMC embedding folder under BASE")
 ap.add_argument("--esmc_label", default="ESMC600M", help="model label in tables/figures")
+ap.add_argument("--esm1b_dir", default="03_embeddings", help="ESM-1b embedding folder under BASE (e.g. 03_embeddings_ESM1b_longest; Mlei under Mnemi/ there)")
 ap.add_argument("--reference", default="", help="orthology CSV (species, gene_id, metazoa_OG or group); default --eggnog")
 ap.add_argument("--out_dir", default=str(RUNS / "20261008_embedding_standardization_check"))
 args = ap.parse_args()
@@ -59,7 +60,8 @@ args = ap.parse_args()
 SPECIES = args.species.split(",")
 FOLDER = {"Mlei": "Mnemi"}
 MODELS = {
-    "ESM1b": lambda sp: BASE / "03_embeddings" / sp / f"{sp}_gene_embeddings.pt",
+    "ESM1b": (lambda sp: BASE / "03_embeddings" / sp / f"{sp}_gene_embeddings.pt") if args.esm1b_dir == "03_embeddings"
+             else (lambda sp: BASE / args.esm1b_dir / FOLDER.get(sp, sp) / f"{FOLDER.get(sp, sp)}_gene_embeddings.pt"),
     args.esmc_label: lambda sp: BASE / args.esmc_dir / FOLDER.get(sp, sp) / f"{FOLDER.get(sp, sp)}_gene_embeddings.pt",
 }
 ESMC = args.esmc_label

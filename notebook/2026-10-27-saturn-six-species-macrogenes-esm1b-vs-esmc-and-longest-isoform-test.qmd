@@ -23,6 +23,7 @@ tools: ["SATURN", "ESM-1b", "ESMC-600M", "OrthoFinder 3.1.0", "Python", "LSF"]
   - Using the **longest isoform** instead raised human → zebrafish from 0.67 to **0.82**, and zebrafish → human from 0.70 to **0.81** (@fig-isoform). Zebrafish–human is now the best pair, as expected for the closest species.
   - Pairs without human barely changed (0.625 → 0.629).
   - When an invertebrate gene looks for its most similar *human* gene, the result did not improve (@tbl-isoform-pairs). That is the remaining open problem.
+  - **The same fix works for ESMC:** human → zebrafish 0.36 → 0.59 and zebrafish → human 0.40 → 0.61 (@tbl-esmc-longest). The gap between the models is unchanged (mean over all pairs: ESMC 0.30, ESM-1b 0.61).
 - **These are ortholog-recovery scores, not integration quality.** Recovering orthology is one property of a gene embedding. Whether ESMC's different similarity structure gives a better or worse *cell-type* integration is a separate question, and is tested next with full SATURN runs for both models (see Interpretation).
 :::
 
@@ -199,6 +200,28 @@ The reference is the six-species OrthoFinder run with the choanoflagellate outgr
   - human-specific immune gene families.
 - **The two macrogene runs above used averaged isoforms.** Their human results are therefore partly an isoform effect.
 
+## 5.1 The same test for ESMC post-norm
+
+Ingrid's export also has one vector per protein, so ESMC gene vectors were rebuilt the same way. Each gene uses **the same protein as ESM-1b**: wherever ESM-1b chose between isoforms, the identical protein was found in the ESMC export (100% in every species).
+
+| hit@1 (cosine, as delivered) | ESMC, averaged | ESMC, longest | ESM-1b, longest |
+|---|---|---|---|
+| mean, all pairs | 0.276 | 0.298 | 0.611 |
+| pairs without human | 0.310 | 0.310 | 0.629 |
+| pairs with human | 0.209 | 0.274 | 0.575 |
+| human → zebrafish | 0.36 | **0.59** | 0.82 |
+| zebrafish → human | 0.40 | **0.61** | 0.81 |
+| human → oyster / *Ciona* / fly / *Mnemiopsis* | 0.22 / 0.16 / 0.19 / 0.13 | 0.27 / 0.20 / 0.24 / 0.14 | 0.67 / 0.58 / 0.64 / 0.47 |
+| oyster / *Ciona* / fly / *Mnemiopsis* → human | 0.17 / 0.16 / 0.18 / 0.12 | 0.20 / 0.17 / 0.22 / 0.11 | 0.43 / 0.44 / 0.56 / 0.33 |
+
+: Most-similar-gene test for ESMC post-norm, averaged vs longest isoform, with ESM-1b longest for comparison (48,000 HV genes of the six-species ESM-1b run; six-species OrthoFinder orthogroups). {#tbl-esmc-longest}
+
+![Most-similar-gene test per species pair for ESMC post-norm, all isoforms averaged (grey) vs longest isoform (orange). Labels mark changes of 0.05 or more. Compare @fig-isoform for ESM-1b.](/images/20261027_esmc_isoform_hit1_by_pair.png){#fig-esmc-isoform}
+
+- **The isoform effect is not specific to one model.** For ESMC, too, the gain is almost entirely in pairs with human (@fig-esmc-isoform), and zebrafish–human becomes its best pair.
+- **The gap between the models stays at about 2×,** with or without the fix.
+- **Both models share the same weak spot:** an invertebrate gene looking for its most similar human gene (ESMC 0.11–0.22, ESM-1b 0.33–0.56). Since it appears with both models, the cause is more likely on the human side (gene families, hubs) than in either model.
+
 # Interpretation
 
 1. **On ortholog recovery, ESM-1b is ahead at every level:** embeddings alone, after any standard fix, and in SATURN's macrogenes. This now holds with six species and two orthology references.
@@ -206,23 +229,24 @@ The reference is the six-species OrthoFinder run with the choanoflagellate outgr
    - **In favour of looking:** some ESMC-only macrogene links in the four-species run grouped protein superfamilies with shared domains across species (GPCRs, C-type lectins, TRIM/NLRC5, PARP14; Oct 8).
    - **Against:** most ESMC-only links did not share even a Pfam domain (12%, vs 49% for links found only by ESM-1b, and 0.5% for random pairs; Oct 8). ESMC's extra structure here is mostly *species* structure (more single-species macrogenes, fewer cross-species neighbours), which would push cells apart by species rather than together by function.
    - **What would decide it:** cell-level criteria that don't come from sequence similarity. Do known corresponding cell types co-cluster (human and zebrafish macrophages; fly plasmatocytes and vertebrate macrophages)? Do paired clusters co-express orthologs of lineage transcription factors (Spi/PU.1, C/EBP, GATA, Runx) more than chance? How much do species mix within shared cell types, and do species-specific types stay separate?
-3. **One protein per gene works better than averaging isoforms,** most clearly for human. This becomes the standard for every model before the full runs.
+3. **One protein per gene works better than averaging isoforms,** for both models and most clearly for human. This becomes the standard for every model, starting with the full runs.
 
 # Caveats
 
 - **One seed per model.** Macrogenes vary between runs (ARI ~0.4 across earlier runs with different seeds and species sets), so small differences between models would need several seeds. A 3× difference in recall, consistent across all 15 pairs, is unlikely to be seed noise.
 - **Both references are sequence-based** (OrthoFinder), and could favour a model whose similarity follows sequence. See Interpretation 2.
-- **The zebrafish HV genes differ slightly between runs** (7,808 of 8,000 shared). Comparisons use the shared genes. Future runs will use one fixed gene set for all models.
+- **The zebrafish HV genes differ slightly between the two macrogene runs** (7,808 of 8,000 shared), because the ESMC zebrafish file covered more genes (19,937 vs 14,179). Comparisons use the shared genes. For the full runs, the ESMC files were restricted to the ESM-1b gene set (zebrafish, and one oyster gene, *Cg_lysoz3*), so both runs now use identical genes in all six species.
 - **ESMC keeps the first 2,000 residues, ESM-1b the first 1,022.** With longest isoforms, 2,174 human genes have a protein longer than 1,022 residues, so the truncation rule needs to be settled too.
-- **The isoform test was run on ESM-1b only, at the embedding level.** Its effect on macrogenes is not yet measured.
+- **The isoform test was run at the embedding level only.** Its effect on macrogenes and on the integration will show in the full runs.
 
 # Next steps
 
-- [ ] Full SATURN runs (pretraining + metric learning) for **both ESM-1b and ESMC post-norm**, with longest isoforms for both, then clustering and comparison of the integrated cell embeddings:
+- [ ] Full SATURN runs (pretraining + metric learning) for **both ESM-1b and ESMC post-norm**, longest isoform (same protein per gene) and identical genes for both, then clustering and comparison of the integrated cell embeddings:
   - co-clustering of known corresponding cell types;
   - mixing of species within shared cell types;
   - lineage transcription-factor co-expression in paired clusters.
-- [ ] Rebuild ESMC post-norm gene vectors from the longest isoform (Ingrid's export has one vector per protein, so no new embedding is needed).
+- [x] Rebuild ESMC post-norm gene vectors from the longest isoform (section 5.1).
+- [ ] Check why *Cg_lysoz3* (an oyster lysozyme) has no ESM-1b embedding, and whether other named (non-LOC) oyster genes were missed the same way.
 - [ ] Settle truncation (cut at 1,022 vs split long proteins into windows) before the full runs.
 - [ ] Hub check: for invertebrate genes searching human, how concentrated are the most-similar human genes, and which ones are they?
 - [ ] Ask Ingrid about an intermediate-layer ESMC export ([Oct 20](2026-10-20-saturn-esm-1b-vs-three-esmc-600m-extractions-4-species.qmd)).
@@ -240,6 +264,9 @@ All in [`pipelines/scripts/saturn_embedding_comparison/`](../pipelines/scripts/s
 | [`06e_benchmark_6sp.sh`](../pipelines/scripts/saturn_embedding_comparison/06e_benchmark_6sp.sh) | Pegasus job: 06c → 05g (both references) → 05i |
 | [`05t_esm1b_longest_isoform.py`](../pipelines/scripts/saturn_embedding_comparison/05t_esm1b_longest_isoform.py) | rebuilds ESM-1b gene vectors from the longest isoform, using the per-protein embeddings; checks against the averaged file |
 | [`05u_isoform_longest_test.sh`](../pipelines/scripts/saturn_embedding_comparison/05u_isoform_longest_test.sh) | Pegasus job: 05t → 05i (averaged vs longest) → per-pair table |
+| [`05q_convert_esmc_postnorm.py`](../pipelines/scripts/saturn_embedding_comparison/05q_convert_esmc_postnorm.py) | ESMC export → SATURN gene vectors; `--longest` uses the same protein per gene as ESM-1b |
+| [`05w_esmc_longest_rebuild.sh`](../pipelines/scripts/saturn_embedding_comparison/05w_esmc_longest_rebuild.sh) | Pegasus job: 05q `--longest` → 05i (ESM-1b longest vs ESMC longest) → per-pair table |
+| [`05x_full_saturn_6sp_longest.sh`](../pipelines/scripts/saturn_embedding_comparison/05x_full_saturn_6sp_longest.sh) | full six-species SATURN run with longest-isoform embeddings (`MODEL=ESM1b` or `ESMCpostnorm`); saves the pretrained model |
 
 : Scripts used in this entry. {#tbl-scripts}
 
@@ -251,6 +278,7 @@ MODEL=ESMCpostnorm bsub -q parallel -n 16 -J mg6_ESMCpn -R "rusage[mem=48000] sp
   -o logs/mg6_ESMCpn.%J.out -e logs/mg6_ESMCpn.%J.err < scripts/05s_macrogene_only_6sp.sh        # 603399
 bsub < scripts/06e_benchmark_6sp.sh            # 611697
 bsub < scripts/05u_isoform_longest_test.sh     # 614089
+bsub < scripts/05w_esmc_longest_rebuild.sh     # 614246
 ```
 
 # References

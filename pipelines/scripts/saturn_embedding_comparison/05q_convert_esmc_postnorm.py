@@ -25,6 +25,12 @@ New:
     21 Hsap proteins / 18 genes, 0 Dmel). Ingrid embedded all of pep.all (Hsap 123,845, Dmel 30,799), so
     without this the two models would average different isoform sets. --no_restrict turns it off.
   * --compare_esm1b reports, per species, how the gene set compares with the ESM-1b .pt file.
+  * --longest (added 2026-10-27): ONE protein per gene instead of averaging isoforms. For each gene the
+    protein is the one ESM-1b's longest-isoform rebuild used (05t_esm1b_longest_isoform.py: longest in
+    03_embeddings/{SP}/{SP}_filtered.faa, ties -> alphabetically first ID), matched to Ingrid's protein IDs
+    (exact, version-stripped, or '.'/'_'-insensitive). Genes without that match: longest ESMC protein by
+    length from {SP}_filtered.faa / 01_proteomes FASTA; if no length is known, isoforms are averaged and
+    counted. Default output 03_embeddings_ESMC600M_postnorm_longest/. Writes esmc_longest_choice_{SP}.tsv.
 
 Truncation differs between models and is NOT harmonised here: ESMC postnorm = first 2,000 aa,
 ESM-1b = first 1,022 aa (1-4% of proteins are > 2,000 aa; more are > 1,022). Note it in Methods.
@@ -38,10 +44,12 @@ Usage (saturn_protein env; minutes, login node is fine for the 4 species, use bi
   python 05q_convert_esmc_postnorm.py                              # Mlei Cgig Crob Drer (4-species check)
   python 05q_convert_esmc_postnorm.py --species Dmel Hsap --compare_esm1b
   python 05q_convert_esmc_postnorm.py --species all --compare_esm1b
+  python 05q_convert_esmc_postnorm.py --species all --longest --compare_esm1b   # one protein per gene
 """
 import argparse
 import csv
 import importlib.util
+import json
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -59,11 +67,14 @@ ap.add_argument("--no_restrict", action="store_true",
                 help="Dmel/Hsap: use every pep.all protein instead of only those in {SP}_filtered.faa")
 ap.add_argument("--compare_esm1b", action="store_true",
                 help="report overlap with 03_embeddings/{SP}/{SP}_gene_embeddings.pt")
+ap.add_argument("--longest", action="store_true",
+                help="one protein per gene (the one ESM-1b's longest-isoform rebuild used) instead of averaging")
 args = ap.parse_args()
 
 BASE = Path(args.base)
 RAW = Path(args.raw) if args.raw else BASE / "raw_embeddings" / "ESMC600M_postnorm"
-OUT = Path(args.out) if args.out else BASE / "03_embeddings_ESMC600M_postnorm"
+OUT = Path(args.out) if args.out else BASE / ("03_embeddings_ESMC600M_postnorm_longest" if args.longest
+                                              else "03_embeddings_ESMC600M_postnorm")
 ALL_SP = ["Mlei", "Cgig", "Crob", "Drer", "Dmel", "Hsap"]
 SPECIES = ALL_SP if args.species == ["all"] else args.species
 bad = [s for s in SPECIES if s not in ALL_SP]
@@ -138,14 +149,119 @@ def rows_ensembl(sp):
     return out, n
 
 
+PROTEOME_FASTA = {  # extra length sources for proteins outside {SP}_filtered.faa (same files as run_config.sh)
+    "Cgig": BASE / "01_proteomes" / "Cgig" / "Cgig.protein.faa",
+    "Crob": BASE / "01_proteomes" / "Crob" / "Crob_KY21_ghost.faa",
+    "Drer": BASE / "01_proteomes" / "Drer" / "Drer.protein.faa",
+}
+
+
+def id_keys(pid):
+    """Match keys for one protein ID, strictest first: exact; version stripped; '.'/'_' removed."""
+    k1 = pid
+    k2 = re.sub(r"\.\d+$", "", pid)
+    k3 = re.sub(r"[._]", "", k2).lower()
+    return [k1, k2, k3]
+
+
+def fasta_lengths(path, lens):
+    if not Path(path).exists():
+        return
+    cur, n = None, 0
+    with open(path) as f:
+        for line in f:
+            if line.startswith(">"):
+                if cur is not None:
+                    for k in id_keys(cur):
+                        lens.setdefault(k, n)
+                cur, n = line[1:].split()[0].strip(), 0
+            else:
+                n += len(line.strip().rstrip("*"))
+    if cur is not None:
+        for k in id_keys(cur):
+            lens.setdefault(k, n)
+
+
+def esm1b_choice(sp, lens_esm):
+    """gene -> protein ESM-1b's longest-isoform rebuild used (same rule as 05t)."""
+    ed = BASE / "03_embeddings" / sp
+    gmap = json.load(open(ed / f"{sp}_gene_to_protein.filtered.json"))
+    return {g: sorted(ps, key=lambda p: (-lens_esm.get(p, -1), p))[0] for g, ps in gmap.items() if ps}
+
+
+def pick_longest(sp, by_gene):
+    """by_gene: gene -> [(pid, grp)]  ->  gene -> [(pid, grp)] with one entry (or all, if averaging is the fallback)."""
+    lens_esm = {}
+    with open(BASE / "03_embeddings" / sp / f"{sp}_filtered.faa") as f:
+        cur, n = None, 0
+        for line in f:
+            if line.startswith(">"):
+                if cur is not None:
+                    lens_esm[cur] = n
+                cur, n = line[1:].split()[0].strip(), 0
+            else:
+                n += len(line.strip().rstrip("*"))
+        if cur is not None:
+            lens_esm[cur] = n
+    choice = esm1b_choice(sp, lens_esm)
+    lens = {}
+    for pid, n in lens_esm.items():
+        for k in id_keys(pid):
+            lens.setdefault(k, n)
+    if sp in PROTEOME_FASTA:
+        fasta_lengths(PROTEOME_FASTA[sp], lens)
+    out, rows = {}, []
+    cnt = {"single": 0, "matched_esm1b": 0, "by_length": 0, "avg_fallback": 0}
+    for g, items in by_gene.items():
+        if len(items) == 1:
+            out[g] = items; cnt["single"] += 1
+            rows.append((g, len(items), items[0][0], "single"))
+            continue
+        hit = None
+        if g in choice:
+            want = id_keys(choice[g])
+            for level in range(3):
+                cand = [it for it in items if id_keys(it[0])[level] == want[level]]
+                if len(cand) == 1:
+                    hit = cand[0]; break
+        if hit is not None:
+            out[g] = [hit]; cnt["matched_esm1b"] += 1
+            rows.append((g, len(items), hit[0], "matched_esm1b"))
+            continue
+        L = []
+        for it in items:
+            n = next((lens[k] for k in id_keys(it[0]) if k in lens), None)
+            L.append(n)
+        if all(n is not None for n in L):
+            best = sorted(zip(items, L), key=lambda x: (-x[1], x[0][0]))[0][0]
+            out[g] = [best]; cnt["by_length"] += 1
+            rows.append((g, len(items), best[0], "by_length"))
+        else:
+            out[g] = items; cnt["avg_fallback"] += 1
+            rows.append((g, len(items), "|".join(i[0] for i in items), "avg_fallback"))
+    multi = len(by_gene) - cnt["single"]
+    print(f"  longest-isoform choice: {cnt}  (multi-protein genes: {multi:,}; "
+          f"matched to ESM-1b's protein: {100 * cnt['matched_esm1b'] / max(multi, 1):.1f}%)")
+    f = FOLDER.get(sp, sp)
+    (OUT / f).mkdir(parents=True, exist_ok=True)
+    with open(OUT / f"esmc_longest_choice_{sp}.tsv", "w") as fh:
+        fh.write("gene\tn_esmc_proteins\tchosen\thow\n")
+        for r in rows:
+            fh.write("\t".join(map(str, r)) + "\n")
+    return out
+
+
 def convert(sp):
     print(f"\n{'=' * 60}\n  {sp}  ->  {H5[sp].name}\n{'=' * 60}")
     prot, n_rows = rows_ensembl(sp) if sp in ("Dmel", "Hsap") else rows_fantasia(sp)
     by_gene = defaultdict(list)
     for pid, (grp, g) in prot.items():
-        by_gene[g].append(grp)
+        by_gene[g].append((pid, grp))
     print(f"  proteins bridged      : {len(prot):,} -> {len(by_gene):,} genes "
-          f"({sum(len(v) > 1 for v in by_gene.values()):,} genes average >1 protein)")
+          f"({sum(len(v) > 1 for v in by_gene.values()):,} genes have >1 protein)")
+    if args.longest:
+        by_gene = pick_longest(sp, by_gene)
+    by_gene = {g: [grp for _, grp in items] for g, items in by_gene.items()}
     res, n_missing = {}, 0
     with h5py.File(H5[sp], "r") as h:
         for g, grps in by_gene.items():
@@ -185,7 +301,7 @@ def convert(sp):
 
 
 print(f"=== ESMC-600M postnorm -> SATURN .pt ===\nRAW {RAW}\nOUT {OUT}\nrestrict Dmel/Hsap to ESM-1b proteins: "
-      f"{not args.no_restrict}")
+      f"{not args.no_restrict}\none protein per gene (--longest): {args.longest}")
 for sp in SPECIES:
     convert(sp)
 print("\nDone.")
