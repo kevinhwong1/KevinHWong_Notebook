@@ -31,6 +31,14 @@ New:
     (exact, version-stripped, or '.'/'_'-insensitive). Genes without that match: longest ESMC protein by
     length from {SP}_filtered.faa / 01_proteomes FASTA; if no length is known, isoforms are averaged and
     counted. Default output 03_embeddings_ESMC600M_postnorm_longest/. Writes esmc_longest_choice_{SP}.tsv.
+  * --match_esm1b (added 2026-10-29): isoforms AVERAGED, but over exactly the proteins ESM-1b averaged
+    (03_embeddings/{SP}/{SP}_gene_to_protein.filtered.json), in ALL six species, and only for genes in the
+    ESM-1b .pt (keys renamed to ESM-1b's spelling when they differ only by case). Without it, the averaged
+    ESMC files differ from ESM-1b in gene set (Drer 19,937 vs 14,179 genes; Cgig extra Cg_lysoz3) and, for
+    Mlei/Cgig/Crob/Drer, possibly in isoform set. Matching per protein uses id_keys (exact, version-stripped,
+    '.'/'_'-insensitive). Default output 03_embeddings_ESMC600M_postnorm_avgmatched/. Writes
+    esmc_avgmatch_{SP}.tsv (per gene: ESM-1b proteins, ESMC proteins, matched, how). Not combinable with
+    --longest (which already uses ESM-1b's protein).
 
 Truncation differs between models and is NOT harmonised here: ESMC postnorm = first 2,000 aa,
 ESM-1b = first 1,022 aa (1-4% of proteins are > 2,000 aa; more are > 1,022). Note it in Methods.
@@ -45,13 +53,14 @@ Usage (saturn_protein env; minutes, login node is fine for the 4 species, use bi
   python 05q_convert_esmc_postnorm.py --species Dmel Hsap --compare_esm1b
   python 05q_convert_esmc_postnorm.py --species all --compare_esm1b
   python 05q_convert_esmc_postnorm.py --species all --longest --compare_esm1b   # one protein per gene
+  python 05q_convert_esmc_postnorm.py --species all --match_esm1b --compare_esm1b  # averaged, ESM-1b's isoforms
 """
 import argparse
 import csv
 import importlib.util
 import json
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 import h5py
@@ -69,11 +78,16 @@ ap.add_argument("--compare_esm1b", action="store_true",
                 help="report overlap with 03_embeddings/{SP}/{SP}_gene_embeddings.pt")
 ap.add_argument("--longest", action="store_true",
                 help="one protein per gene (the one ESM-1b's longest-isoform rebuild used) instead of averaging")
+ap.add_argument("--match_esm1b", action="store_true",
+                help="average over exactly ESM-1b's isoforms per gene, ESM-1b gene set only (all species)")
 args = ap.parse_args()
+if args.longest and args.match_esm1b:
+    raise SystemExit("--longest and --match_esm1b are exclusive (--longest already uses ESM-1b's protein)")
 
 BASE = Path(args.base)
 RAW = Path(args.raw) if args.raw else BASE / "raw_embeddings" / "ESMC600M_postnorm"
 OUT = Path(args.out) if args.out else BASE / ("03_embeddings_ESMC600M_postnorm_longest" if args.longest
+                                              else "03_embeddings_ESMC600M_postnorm_avgmatched" if args.match_esm1b
                                               else "03_embeddings_ESMC600M_postnorm")
 ALL_SP = ["Mlei", "Cgig", "Crob", "Drer", "Dmel", "Hsap"]
 SPECIES = ALL_SP if args.species == ["all"] else args.species
@@ -251,6 +265,68 @@ def pick_longest(sp, by_gene):
     return out
 
 
+def match_esm1b_isoforms(sp, by_gene):
+    """gene -> [(pid, grp)]  ->  same, restricted to ESM-1b's gene set and, per gene, to ESM-1b's isoforms."""
+    ed = BASE / "03_embeddings" / sp
+    esm_genes = list(torch.load(ed / f"{sp}_gene_embeddings.pt", map_location="cpu").keys())
+    gmap = json.load(open(ed / f"{sp}_gene_to_protein.filtered.json"))
+    esm_set = set(esm_genes)
+    lower = defaultdict(list)
+    for g in esm_genes:
+        lower[g.lower()].append(g)
+    # 1. gene keys: exact, else a unique case-insensitive ESM-1b gene that ESMC lacks under its exact name
+    renamed, n_case, dropped = {}, 0, []
+    for g, items in by_gene.items():
+        if g in esm_set:
+            key = g
+        elif len(lower.get(g.lower(), [])) == 1 and lower[g.lower()][0] not in by_gene:
+            key = lower[g.lower()][0]
+            n_case += 1
+        else:
+            dropped.append(g)
+            continue
+        renamed.setdefault(key, []).extend(items)
+    # 2. isoforms: keep the ESMC proteins that match ESM-1b's list for that gene
+    out, rows, cnt = {}, [], Counter()
+    for g, items in renamed.items():
+        want = gmap.get(g, [])
+        got = []
+        for w in want:
+            wk = id_keys(w)
+            for level in range(3):
+                cand = [it for it in items if id_keys(it[0])[level] == wk[level]]
+                if len(cand) == 1:
+                    if cand[0] not in got:
+                        got.append(cand[0])
+                    break
+        if not want:
+            got, how = items, "no_esm1b_list_kept_all"
+        elif len(got) == len(want):
+            how = "all_matched"
+        elif got:
+            how = "partial"
+        else:
+            got, how = items, "none_matched_kept_all"
+        cnt[how] += 1
+        out[g] = got
+        rows.append((g, len(want), len(items), len(got), how))
+    missing = sorted(esm_set - out.keys())
+    print(f"  match ESM-1b: genes kept {len(out):,} of ESM-1b {len(esm_set):,}; case-renamed {n_case:,}; "
+          f"ESMC genes dropped (not in ESM-1b) {len(dropped):,}; ESM-1b genes missing in ESMC {len(missing):,}")
+    if dropped:
+        print(f"    dropped e.g. {sorted(dropped)[:8]}")
+    if missing:
+        print(f"    MISSING e.g. {missing[:8]}")
+    print(f"  isoform matching      : {dict(cnt)}  (ESMC isoforms removed: "
+          f"{sum(r[2] - r[3] for r in rows):,})")
+    OUT.mkdir(parents=True, exist_ok=True)
+    with open(OUT / f"esmc_avgmatch_{sp}.tsv", "w") as fh:
+        fh.write("gene\tn_esm1b_proteins\tn_esmc_proteins\tn_used\thow\n")
+        for r in rows:
+            fh.write("\t".join(map(str, r)) + "\n")
+    return out
+
+
 def convert(sp):
     print(f"\n{'=' * 60}\n  {sp}  ->  {H5[sp].name}\n{'=' * 60}")
     prot, n_rows = rows_ensembl(sp) if sp in ("Dmel", "Hsap") else rows_fantasia(sp)
@@ -261,6 +337,8 @@ def convert(sp):
           f"({sum(len(v) > 1 for v in by_gene.values()):,} genes have >1 protein)")
     if args.longest:
         by_gene = pick_longest(sp, by_gene)
+    if args.match_esm1b:
+        by_gene = match_esm1b_isoforms(sp, by_gene)
     by_gene = {g: [grp for _, grp in items] for g, items in by_gene.items()}
     res, n_missing = {}, 0
     with h5py.File(H5[sp], "r") as h:
@@ -301,7 +379,8 @@ def convert(sp):
 
 
 print(f"=== ESMC-600M postnorm -> SATURN .pt ===\nRAW {RAW}\nOUT {OUT}\nrestrict Dmel/Hsap to ESM-1b proteins: "
-      f"{not args.no_restrict}\none protein per gene (--longest): {args.longest}")
+      f"{not args.no_restrict}\none protein per gene (--longest): {args.longest}\n"
+      f"average over ESM-1b's isoforms, ESM-1b gene set (--match_esm1b): {args.match_esm1b}")
 for sp in SPECIES:
     convert(sp)
 print("\nDone.")
